@@ -1,42 +1,58 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /* max-width: 1280px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem; */
+  height: 100%;
+  width: 100%;
+}
+
+/* Layout of application (responsible for setting flex -> navbar at left, content at right) */
+.layout {
+  display: flex;
+  height: 100vh;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.sidebar {
+  background-color: #146ca7;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-right: 1px solid #146ca7; 
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sidebar.hidden {
+  transform: translateX(-180px);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.content {
+  flex: 1;
+  background-color: #222021;
 }
 
-.card {
-  padding: 2em;
+.navigationButton {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 1.2em 1.2em;
+  margin-top: 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1690e2;
+  align-items: center;
+  display: flex;
+
+  cursor: pointer;
+  transition: border-color 0.25s;
+  color: #222021;
 }
 
-.read-the-docs {
-  color: #888;
+.navigationButton.hover {
+  color: white;
+}
+
+.navigationButton.active {
+  background-color: #222021;
+  color: white;
 }
