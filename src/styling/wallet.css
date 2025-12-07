@@ -1,0 +1,31 @@
+.assets_add_button {
+    border-radius: 10px;
+    border-color: white;
+}
+
+.assets_table {
+
+}
+
+table {
+  table-layout: fixed;
+  width: 90%;
+  margin: 10px auto;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.6em;
+  border: 2px;
+  border: 1px solid white;
+}
+
+tfoot {
+    border-top: 1px solid #999999;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #eeeeee;
+}

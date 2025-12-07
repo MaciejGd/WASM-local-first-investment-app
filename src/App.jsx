@@ -1,5 +1,5 @@
 import './App.css';
-import StockPage from './subpages/Stock.jsx';
+import StockPage from './subpages/wallet/Stock.jsx';
 import SettingsPage from './subpages/Settings.jsx';
 import CryptoPage from './subpages/Crypto.jsx';
 import ObligationsPage from './subpages/Obligations.jsx';
@@ -7,7 +7,7 @@ import SimulationsPage from './subpages/Simulations.jsx';
 import GraphsPage from './subpages/Graphs.jsx';
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { useState } from 'react';
-import { StockIcon, LeftArrowIcon, RightArrowIcon, CryptoIcon, GraphsIcon, ObligationsIcon, SimulationsIcon, SettingsIcon } from './IconLoader.jsx';
+import { WalletIcon, LeftArrowIcon, RightArrowIcon, CryptoIcon, GraphsIcon, ObligationsIcon, SimulationsIcon, SettingsIcon } from './IconLoader.jsx';
 
 
 function NavigationBar() {
@@ -25,7 +25,7 @@ function HiddenNavBar({onHideButtonClick}) {
   return (
     <nav className="sidebar">
       <button className="navigationButton" onClick={onHideButtonClick}><RightArrowIcon /></button>
-      <NavLink className="navigationButton" to="/stock"><StockIcon /> </NavLink>
+      <NavLink className="navigationButton" to="/stock"><WalletIcon /> </NavLink>
       <NavLink className="navigationButton" to="/crypto"><CryptoIcon/></NavLink>
       <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/></NavLink>
       <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/></NavLink>
@@ -39,7 +39,7 @@ function NavBar({onHideButtonClick}) {
   return (
     <nav className="sidebar">
       <button className="navigationButton" onClick={onHideButtonClick}><LeftArrowIcon /><span>Hide navbar</span></button>
-      <NavLink className="navigationButton" to="/stock"><StockIcon />Stock </NavLink>
+      <NavLink className="navigationButton" to="/stock"><WalletIcon />Stock </NavLink>
       <NavLink className="navigationButton" to="/crypto"><CryptoIcon/>Crypto</NavLink>
       <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/>Obligations</NavLink>
       <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/>Simulations</NavLink>
