@@ -3,7 +3,7 @@ import LineChart from "./LineChart.jsx";
 import { CategoryScale } from "chart.js";
 import { useState } from 'react';
 import "../../styling/graphs.css";
-import ComboBox from "../../components/Dropdown.jsx";
+import ComboBox from "../../components/Combobox.jsx";
 
 Chart.register(CategoryScale);
 
@@ -70,13 +70,6 @@ function GraphIndicatorField() {
 
   return (
     <div className="graphIndicatorField">
-      {/* <input list="fruit-options" id="fruits" name="fruits" placeholder="test..."></input>
-      <datalist id="fruit-options">
-        <option value="revenue"></option>
-        <option value="net income"></option>
-        <option value="ebidta"></option>
-        <option value="CFO"></option>
-      </datalist> */}
       <ComboBox options={options} value={""} onChange={()=>{}}></ComboBox>
     </div>
   );

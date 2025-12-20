@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import "../styling/components.css"
+import "../styling/combo.css"
 
 export default function ComboBox({
     options = [],
@@ -8,6 +8,7 @@ export default function ComboBox({
 }) {
     // text value inserted in input field
     const [inputValue, setInputValue] = useState("");
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
     // is dropbox opened
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
@@ -16,8 +17,8 @@ export default function ComboBox({
     const filteredOptions = options.filter((opt)=>
         opt.toLowerCase().startsWith(inputValue.toLowerCase())
     );
-    console.log(`Length of filtered options: ${filteredOptions.length}`);
 
+    // detect click outside of the div and close options tab
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -46,16 +47,46 @@ export default function ComboBox({
                     setIsOpen(true);
                     onChange?.(e.target.value); // execute calllback passed as arg
                 }}
-                onFocus={() => {
-                    console.log("test");    
-                    setIsOpen(true)}
-                }
+                onFocus={() => setIsOpen(true)}
+                onKeyDown= {(e) => {
+                    switch(e.key) {
+                        case "ArrowDown":
+                            e.preventDefault();
+                            // set highlighted values as one down
+                            setHighlightedIndex(
+                                (highlightedIndex >= filteredOptions.length) ? 0 : highlightedIndex+1
+                            );
+                            break;
+                        case "ArrowUp":
+                            e.preventDefault();
+                            // set highlighted tab as one upper
+                            setHighlightedIndex(
+                                (highlightedIndex < 0) ? filteredOptions.length - 1 : highlightedIndex-1
+                            );
+                            break;
+                        case "Enter":
+                            e.preventDefault();
+                            // set option as input value if it was selected
+                            setInputValue(
+                                (highlightedIndex != -1) ? filteredOptions[highlightedIndex] : inputValue
+                            );
+                            setIsOpen(false);
+                            break;
+                        case "Escape":
+                            e.preventDefault();
+                            setIsOpen(false);
+                            break;
+                        default:
+                            break;
+                    } 
+                }}
             />
             {isOpen && filteredOptions.length > 0 && (
                 <ul className="combo-options">
-                    {filteredOptions.map((option)=>(
+                    {filteredOptions.map((option, index)=>(
                         <li key={option} 
                             onClick={() => handleSelect(option)}
+                            className={index == highlightedIndex ? "active" : ""}
                         >
                             {option}
                         </li>
@@ -64,5 +95,4 @@ export default function ComboBox({
             )}
         </div>
     );
-
 };
