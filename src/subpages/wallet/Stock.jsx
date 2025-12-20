@@ -66,11 +66,9 @@ export default function StockPage() {
         console.log("set assets: " + company + " " + quantity + " " + price);
         setAssets([...assets, [company, quantity, price]]);
         // hide modal on accept as well
-        toggleModalVisibility();
+        // toggleModalVisibility(); TODO, change that
     }
 
-    
-    
     return (
         <>
             <h1>Stock subpage!</h1>

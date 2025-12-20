@@ -4,7 +4,7 @@ import SettingsPage from './subpages/Settings.jsx';
 import CryptoPage from './subpages/Crypto.jsx';
 import ObligationsPage from './subpages/Obligations.jsx';
 import SimulationsPage from './subpages/Simulations.jsx';
-import GraphsPage from './subpages/Graphs.jsx';
+import GraphsPage from './subpages/graphs/Graphs.jsx';
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { useState } from 'react';
 import { WalletIcon, LeftArrowIcon, RightArrowIcon, CryptoIcon, GraphsIcon, ObligationsIcon, SimulationsIcon, SettingsIcon } from './IconLoader.jsx';

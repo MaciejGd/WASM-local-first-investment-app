@@ -1,0 +1,46 @@
+
+.graph_page {
+  align-items: center;
+}
+
+.graph_container {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.graphChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.graphLineChart {
+  margin-bottom: 5rem;
+  width: 60%;
+  padding: 20px;
+  background-color: white;
+}
+
+.graphTickerSelector {
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+}
+
+.graphTickerSelector button {
+  background-color: white;
+  margin-left: 5px;
+}
+
+.graphIndicatorField {
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+}
+
+.graphIndicatorField button {
+  background-color: white;
+  margin-left: 5px;
+}
