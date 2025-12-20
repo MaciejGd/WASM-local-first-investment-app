@@ -3,7 +3,7 @@ import "../../styling/graphs.css"
 
 export default function LineChart({chartData}) {
     return (
-    <div className="graphLineChart">
+    <div className="graph_line_chart">
         <Line
             data={chartData}
             options={{
