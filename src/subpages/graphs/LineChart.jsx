@@ -10,7 +10,7 @@ export default function LineChart({chartData}) {
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: true,
+                        display: false,
                         position: "left",
                         align: "start",
                     }

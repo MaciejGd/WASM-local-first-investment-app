@@ -71,7 +71,7 @@ function GraphTickerSelector({onChange}) {
   // TODO add valid data for combo box
   return (
     <div className="graph_ticker_selector">
-      <ComboBox onChange={onChange}></ComboBox>
+      <ComboBox onChange={onChange} placeholder="Ticker..."></ComboBox>
     </div>
   );
 }
@@ -87,7 +87,7 @@ function GraphIndicatorField({onChange}) {
 
   return (
     <div className="graph_indicator_field">
-      <ComboBox options={options} value={""} onChange={onChange}></ComboBox>
+      <ComboBox options={options} value={""} onChange={onChange} placeholder="Indicator..."></ComboBox>
     </div>
   );
 }

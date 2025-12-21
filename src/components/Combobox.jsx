@@ -15,7 +15,7 @@ export default function ComboBox({
 
     // filter options by starting string
     const filteredOptions = options.filter((opt)=>
-        opt.toLowerCase().startsWith(inputValue.toLowerCase())
+        opt.toLowerCase().startsWith(inputValue?.toLowerCase())
     );
 
     // detect click outside of the div and close options tab

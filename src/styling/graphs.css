@@ -61,6 +61,7 @@
   margin-left: 400px;
   border: 2px white;
   align-items: center;
+  border: 1px solid #ccc;
 }
 
 .legend_entry_description {
@@ -69,6 +70,7 @@
   text-align: left;
   border-radius: 5px;
   height: 40px;
+  background-color: rgb(59, 59, 59);
 
   display: flex;
   align-items: center;
@@ -79,4 +81,5 @@
   height: 40px;
   display: flex;
   align-items: center;
+  border-radius: 0%;
 }
