@@ -13,7 +13,9 @@ class GraphAssetData {
     this.ticker = ticker;       // assets's ticker
     this.indicator = indicator; // asset's indicator
     this.color = color;         // color representing asset on graph
+    this.data = [];             // data points for graph asset
   }
+
 };
 
 // TODO remove that, as it has been added for debug only
@@ -49,6 +51,20 @@ export const Data = [
     userLost: 234
   }
 ];
+
+function generateRandomData() {
+  var data=[];
+  for (var i = 1; i <= 5; i++) {
+    var new_val = {
+      id: i,
+      year: 2016 + i,
+      userGain: Math.floor(Math.random() * 80000) + 3000,
+      userLost: 1,
+    };
+    data.push(new_val);
+  }
+  return data;
+}
 
 // input field to select stock ticker
 function GraphTickerSelector({onChange}) {
@@ -103,18 +119,18 @@ function GraphSelector({onAdd}) {
 
 
 /// Chart we want to print on the page
-function GraphChart({data_label, data}) {
-  const [chartData, setChartData] = useState({
-    labels: Data.map((data) => data.year), 
-    datasets: [
-      {
-        data: Data.map((data) => data.userGain),
-        backgroundColor: "rgba(75,192,192,1)",
-        borderColor: "black",
+function GraphChart({graphs_data}) {
+  const chartData = {
+    labels: Data.map((data) => data.year), // one unified graph label (most probably time)
+    datasets: graphs_data.map((graph)=>{
+      return {
+        data: graph.data.map((data) => data.userGain),
+        backgroundColor: graph.color,
+        borderColor: graph.color,
         borderWidth: 2
       }
-    ]
-  });
+    }),
+  };
 
   return (
       <div className="graph_chart">        
@@ -123,17 +139,18 @@ function GraphChart({data_label, data}) {
   );
 }
 
-function GraphLegend({graphData}) {
+/// Legend displaying info about graph chart, ticker, indicator and color
+function GraphLegend({graphData, onDelete}) {
   return (
     <div className="graph_legend">
       {graphData.map((data, index)=>(
-        <GraphLegendEntry entry={data} key={index}/>
+        <GraphLegendEntry entry={data} key={index} index={index} onDelete={onDelete}/>
       ))}
     </div>
   );
 }
 
-function GraphLegendEntry({entry}) {
+function GraphLegendEntry({entry, onDelete, key, index}) {
   return (
     <div className="legend_entry">
       <div className="legend_entry_description" >
@@ -142,7 +159,7 @@ function GraphLegendEntry({entry}) {
       <div className="legend_entry_description">
         Indicator: {entry.indicator}
       </div>
-      <button style={{color: "black", backgroundColor: entry.color}}>
+      <button style={{color: "black", backgroundColor: entry.color}} onClick={()=> onDelete(index)}>
         X
       </button>
     </div>
@@ -155,27 +172,32 @@ function GraphLegendEntry({entry}) {
 function GraphContainer() {
   const [graphRecords, setGraphRecords] = useState([]);
 
-  // const graph_records = [
-  //   new GraphAssetData("MSI", "Net income", "white"),
-  //   new GraphAssetData("API", "Revenue", "aqua"),
-  //   new GraphAssetData("TCO", "EBIDTA", "red"),
-  // ];
   function AddGraphRecord(graphRecord) {
     // do not add if already there
     const already_added = graphRecords.some((record) => {  
-      graphRecord.ticker === record.ticker && graphRecord.indicator === record.indicator;
+      return graphRecord.ticker == record.ticker && graphRecord.indicator == record.indicator;
     });
     if (already_added) return;
     
+    // TODO validate incoming ticker and 
+
+    // fetch data for ticker and indicator
+    graphRecord.data = generateRandomData();
     // add graph record to graph record list
     setGraphRecords([...graphRecords, graphRecord]);
+  }
+  // delete graph from the view
+  function DeleteRecord(index) {
+    var new_arr = [...graphRecords];
+    new_arr.splice(index, 1);
+    setGraphRecords(new_arr);
   }
 
   return (
     <div className="graph_container">
       <GraphSelector onAdd={AddGraphRecord}></GraphSelector>
-      <GraphChart data_label="test" data={Data}></GraphChart>
-      <GraphLegend graphData={graphRecords}></GraphLegend>
+      <GraphChart data_label="test" graphs_data={graphRecords}></GraphChart>
+      <GraphLegend graphData={graphRecords} onDelete={DeleteRecord}></GraphLegend>
     </div>
   );
 }
