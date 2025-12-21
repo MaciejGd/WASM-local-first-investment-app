@@ -3,6 +3,15 @@ import '../../styling/wallet.css';
 import { useState } from 'react';
 import AddAssetPopUp from './AddAssetPopUp';
 
+/// Represents data of a single stock asset (ex. quantity, price of purchase etc.)
+class AssetData {
+    constructor(ticker, quantity, price) {
+        this.ticker = ticker;
+        this.quantity = quantity;
+        this.price = price;
+    }
+};
+
 function AddAssetButton({onAddPress}) {
     return (<div><button className="assets_add_button" onClick={onAddPress}>Add asset</button></div>);
 }
@@ -18,7 +27,7 @@ function AssetPanel({assets}) {
 function AssetsTableHead() {
     return (
         <tr>
-            <th>Company</th>
+            <th>Ticker</th>
             <th>Quantity</th>
             <th>Price</th>
         </tr>
@@ -30,11 +39,20 @@ function AssetsTableBody({assets}) {
         <>
         {assets.map((asset, rowIdx)=> (
             <tr key={rowIdx}>
-                {asset.map((asset_data, colIdx) => (
+                <td>
+                    {asset.ticker}
+                </td>
+                <td>
+                    {asset.quantity}
+                </td>
+                <td>
+                    {asset.price}
+                </td>
+                {/* {asset.map((asset_data, colIdx) => (
                     <td key={colIdx}>
                         {asset_data}
                     </td>
-                ))}
+                ))} */}
             </tr>
         ))}
         </>
@@ -43,10 +61,10 @@ function AssetsTableBody({assets}) {
 
 function AssetsTable({ assets }) {
     return (
-        <table>
+        <table className="assets_table">
             <thead>
-            <AssetsTableHead/>
-            <AssetsTableBody assets={assets}/>
+                <AssetsTableHead/>
+                <AssetsTableBody assets={assets}/>
             </thead>
         </table>
     );
@@ -62,11 +80,49 @@ export default function StockPage() {
     }
     const Modal = modal_visible ? AddAssetPopUp : () => (<></>);
 
-    function addAsset(company, quantity, price) {
-        console.log("set assets: " + company + " " + quantity + " " + price);
-        setAssets([...assets, [company, quantity, price]]);
+    /// add asset to assets list
+    function addAsset(ticker, quantity, price) {
+        console.log("set assets: " + ticker + " " + quantity + " " + price);
+
+        if (ticker === "") {
+            console.log("Ticker should not be empty");
+            return;
+        }
+
+        // check if quantity and price is correct (number and not empty)
+        const quantityNum = Number(quantity);
+        if (Number.isNaN(quantityNum) || quantity == "") { // TODO fix that so it works
+            console.log("Quantity value is not a number!!!");
+            return;
+        }
+        const priceNum = Number(price);
+        if (Number.isNaN(priceNum) || price === "") {
+            console.log("price value should be a float!");
+            return;
+        }
+
+        var index = assets.length; // index we want to place our new share into
+        // we want to set asset at specific place (all shares of same stock should be one after another)
+        for (var i = assets.length - 1; i >= 0; i--) {
+            if (assets[i].ticker == ticker) {
+                // append share after the last one found
+                index = i;
+                break;
+            }
+        }
+        // append at the end
+        if (index == assets.length || index == assets.length - 1) {
+            setAssets([...assets, new AssetData(ticker, quantityNum, priceNum)]);
+        }
+        else {
+            // append item in the table
+            const new_arr = [...assets];
+            const sliced = new_arr.splice(index+1, assets.length - 1);
+            setAssets([...new_arr, new AssetData(ticker, quantityNum, priceNum), ...sliced]);
+        }
+        
         // hide modal on accept as well
-        // toggleModalVisibility(); TODO, change that
+        toggleModalVisibility();
     }
 
     return (
