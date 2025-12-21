@@ -67,9 +67,10 @@ export default function ComboBox({
                         case "Enter":
                             e.preventDefault();
                             // set option as input value if it was selected
-                            setInputValue(
-                                (highlightedIndex != -1) ? filteredOptions[highlightedIndex] : inputValue
-                            );
+                            console.log("index: ", highlightedIndex);
+                            const new_input_val = (highlightedIndex != -1) ? filteredOptions[highlightedIndex] : inputValue;
+                            setInputValue(new_input_val);
+                            onChange?.(new_input_val);
                             setIsOpen(false);
                             break;
                         case "Escape":

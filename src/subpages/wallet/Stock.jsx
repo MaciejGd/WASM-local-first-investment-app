@@ -35,9 +35,18 @@ function AssetsTableHead() {
 }
 
 function AssetsTableBody({assets}) {
+    // create list of elements from a assets map
+    var assets_array = [];
+    console.log("Input map ", assets);
+    assets.forEach((value) => {
+        console.log("Map iteration ", value);
+        assets_array.push(...value);
+    });
+    console.log("Concated array: ", assets_array);
+
     return (
         <>
-        {assets.map((asset, rowIdx)=> (
+        {assets_array.map((asset, rowIdx) => (
             <tr key={rowIdx}>
                 <td>
                     {asset.ticker}
@@ -48,11 +57,6 @@ function AssetsTableBody({assets}) {
                 <td>
                     {asset.price}
                 </td>
-                {/* {asset.map((asset_data, colIdx) => (
-                    <td key={colIdx}>
-                        {asset_data}
-                    </td>
-                ))} */}
             </tr>
         ))}
         </>
@@ -72,7 +76,7 @@ function AssetsTable({ assets }) {
 
 
 export default function StockPage() {
-    const [modal_visible, setModalVisible] = useState(false);
+    const [modal_visible, setModalVisible] = useState(new Map());
     const [assets, setAssets] = useState([]);
 
     function toggleModalVisibility() {
@@ -101,26 +105,35 @@ export default function StockPage() {
             return;
         }
 
-        var index = assets.length; // index we want to place our new share into
-        // we want to set asset at specific place (all shares of same stock should be one after another)
-        for (var i = assets.length - 1; i >= 0; i--) {
-            if (assets[i].ticker == ticker) {
-                // append share after the last one found
-                index = i;
-                break;
-            }
-        }
-        // append at the end
-        if (index == assets.length || index == assets.length - 1) {
-            setAssets([...assets, new AssetData(ticker, quantityNum, priceNum)]);
-        }
-        else {
-            // append item in the table
-            const new_arr = [...assets];
-            const sliced = new_arr.splice(index+1, assets.length - 1);
-            setAssets([...new_arr, new AssetData(ticker, quantityNum, priceNum), ...sliced]);
-        }
-        
+        // var index = assets.length; // index we want to place our new share into
+        // // we want to set asset at specific place (all shares of same stock should be one after another)
+        // for (var i = assets.length - 1; i >= 0; i--) {
+        //     if (assets[i].ticker == ticker) {
+        //         // append share after the last one found
+        //         index = i;
+        //         break;
+        //     }
+        // }
+        // // append at the end
+        // if (index == assets.length || index == assets.length - 1) {
+        //     setAssets([...assets, new AssetData(ticker, quantityNum, priceNum)]);
+        // }
+        // else {
+        //     // append item in the table
+        //     const new_arr = [...assets];
+        //     const sliced = new_arr.splice(index+1, assets.length - 1);
+        //     setAssets([...new_arr, new AssetData(ticker, quantityNum, priceNum), ...sliced]);
+        // }
+
+        var assets_map = new Map(assets);
+        const existing = assets_map.get(ticker) ?? [];
+        assets_map.set(ticker, 
+            [
+                ...existing,
+                new AssetData(ticker, quantityNum, priceNum)
+            ]
+        );
+        setAssets(assets_map);
         // hide modal on accept as well
         toggleModalVisibility();
     }

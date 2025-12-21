@@ -106,10 +106,15 @@ function GraphSelector({onAdd}) {
     onAdd(new GraphAssetData(ticker, indicator, randomHexColor()));
   }
 
+  function newSetIndicator(indicator) {
+    console.log("Add indicator ", indicator);
+    setIndicator(indicator);
+  }
+
   return (
   <div className="graph_selector">
     <GraphTickerSelector onChange={setTicker}></GraphTickerSelector>
-    <GraphIndicatorField onChange={setIndicator}></GraphIndicatorField>
+    <GraphIndicatorField onChange={newSetIndicator}></GraphIndicatorField>
     <button style={{backgroundColor: "aqua", color: "black", fontWeight: "bold"}} onClick={()=>addLegendEntry()}>
       +
     </button>
@@ -150,7 +155,7 @@ function GraphLegend({graphData, onDelete}) {
   );
 }
 
-function GraphLegendEntry({entry, onDelete, key, index}) {
+function GraphLegendEntry({entry, onDelete, index}) {
   return (
     <div className="legend_entry">
       <div className="legend_entry_description" >
