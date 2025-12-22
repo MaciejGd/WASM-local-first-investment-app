@@ -5,12 +5,54 @@ import AddAssetPopUp from './AddAssetPopUp';
 
 /// Represents data of a single stock asset (ex. quantity, price of purchase etc.)
 class AssetData {
-    constructor(ticker, quantity, price) {
-        this.ticker = ticker;
+    constructor(quantity, price) {
         this.quantity = quantity;
         this.price = price;
     }
 };
+
+// container for ticker assets
+class AssetsEntry {
+    // we can start from empty data
+    constructor(ticker) {
+        this.ticker = ticker;
+        this._data = [];
+        this.folded = false;
+    }
+
+    // add new AssetData object
+    addAsset(asset) {
+        if (asset instanceof AssetData) {
+            this._data.push(asset);
+        }
+        else {
+            console.log("AssetData expected, got ", typeof(asset));
+        }
+    }
+    // we want 
+    triggerVisibility() {
+        this.folded ^= true;
+    }
+
+    insert(quantity, price) {
+        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
+            this._data.push(new AssetData(quantity, price));
+        }
+        else {
+            throw new Error("Either quantity or price is not a number, failed to update asset entry");
+        }
+    }
+
+    get data() {
+        if (this.folded) {
+            return []; // for now return empty list
+        }
+        else {
+            return this._data;
+        }
+    }
+};
+
 
 function AddAssetButton({onAddPress}) {
     return (<div><button className="assets_add_button" onClick={onAddPress}>Add asset</button></div>);
@@ -37,12 +79,17 @@ function AssetsTableHead() {
 function AssetsTableBody({assets}) {
     // create list of elements from a assets map
     var assets_array = [];
-    console.log("Input map ", assets);
-    assets.forEach((value) => {
-        console.log("Map iteration ", value);
-        assets_array.push(...value);
+    assets.forEach((asset) => {
+        const ticker = asset.ticker;
+        asset.data.forEach((d) => {
+            const next_asset = {
+                ticker :    ticker,
+                quantity:   d.quantity,
+                price:      d.price,
+            };
+            assets_array.push(next_asset);    
+        });        
     });
-    console.log("Concated array: ", assets_array);
 
     return (
         <>
@@ -76,8 +123,8 @@ function AssetsTable({ assets }) {
 
 
 export default function StockPage() {
-    const [modal_visible, setModalVisible] = useState(new Map());
-    const [assets, setAssets] = useState([]);
+    const [modal_visible, setModalVisible] = useState(false);
+    const [assets, setAssets] = useState(new Map());
 
     function toggleModalVisibility() {
         setModalVisible(!modal_visible);
@@ -105,33 +152,13 @@ export default function StockPage() {
             return;
         }
 
-        // var index = assets.length; // index we want to place our new share into
-        // // we want to set asset at specific place (all shares of same stock should be one after another)
-        // for (var i = assets.length - 1; i >= 0; i--) {
-        //     if (assets[i].ticker == ticker) {
-        //         // append share after the last one found
-        //         index = i;
-        //         break;
-        //     }
-        // }
-        // // append at the end
-        // if (index == assets.length || index == assets.length - 1) {
-        //     setAssets([...assets, new AssetData(ticker, quantityNum, priceNum)]);
-        // }
-        // else {
-        //     // append item in the table
-        //     const new_arr = [...assets];
-        //     const sliced = new_arr.splice(index+1, assets.length - 1);
-        //     setAssets([...new_arr, new AssetData(ticker, quantityNum, priceNum), ...sliced]);
-        // }
 
         var assets_map = new Map(assets);
-        const existing = assets_map.get(ticker) ?? [];
+        const map_entry = assets_map.get(ticker) ?? new AssetsEntry(ticker);
+        console.log(map_entry);
+        map_entry.insert(quantity, price);   
         assets_map.set(ticker, 
-            [
-                ...existing,
-                new AssetData(ticker, quantityNum, priceNum)
-            ]
+            map_entry
         );
         setAssets(assets_map);
         // hide modal on accept as well
