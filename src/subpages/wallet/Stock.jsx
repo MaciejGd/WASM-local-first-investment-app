@@ -18,6 +18,7 @@ class AssetsEntry {
         this.ticker = ticker;
         this._data = [];
         this.folded = false;
+        this.folded_data = [new AssetData()]; // list with one element combining averages for data
     }
 
     // add new AssetData object
@@ -29,9 +30,20 @@ class AssetsEntry {
             console.log("AssetData expected, got ", typeof(asset));
         }
     }
-    // we want 
+    // show average values for all shares of the company
     triggerVisibility() {
         this.folded ^= true;
+        if (this.folded) {
+            var amount = 0.0; // summed amount of owned resource
+            var prices_cummulated = 0.0;
+
+            this._data.forEach((e) => {
+                amount += e.quantity;
+                prices_cummulated += (e.price * e.quantity)
+            });
+            // fill folded data with cummulated amount of stock and average price of one share
+            this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
+        }
     }
 
     insert(quantity, price) {
@@ -45,7 +57,7 @@ class AssetsEntry {
 
     get data() {
         if (this.folded) {
-            return []; // for now return empty list
+            return this.folded_data; // for now return empty list
         }
         else {
             return this._data;
@@ -85,7 +97,7 @@ function AssetsTableBody({assets}) {
             const next_asset = {
                 ticker :    ticker,
                 quantity:   d.quantity,
-                price:      d.price,
+                price:      d.price.toFixed(2), // display as string with .2 digit precision
             };
             assets_array.push(next_asset);    
         });        
@@ -156,7 +168,7 @@ export default function StockPage() {
         var assets_map = new Map(assets);
         const map_entry = assets_map.get(ticker) ?? new AssetsEntry(ticker);
         console.log(map_entry);
-        map_entry.insert(quantity, price);   
+        map_entry.insert(quantityNum, priceNum);
         assets_map.set(ticker, 
             map_entry
         );
