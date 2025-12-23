@@ -33,17 +33,6 @@ class AssetsEntry {
     // show average values for all shares of the company
     triggerVisibility() {
         this.folded ^= true;
-        if (this.folded) {
-            var amount = 0.0; // summed amount of owned resource
-            var prices_cummulated = 0.0;
-
-            this._data.forEach((e) => {
-                amount += e.quantity;
-                prices_cummulated += (e.price * e.quantity)
-            });
-            // fill folded data with cummulated amount of stock and average price of one share
-            this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
-        }
     }
 
     insert(quantity, price) {
@@ -53,6 +42,17 @@ class AssetsEntry {
         else {
             throw new Error("Either quantity or price is not a number, failed to update asset entry");
         }
+
+        // update averages
+        var amount = 0.0; // summed amount of owned resource
+        var prices_cummulated = 0.0;
+
+        this._data.forEach((e) => {
+            amount += e.quantity;
+            prices_cummulated += (e.price * e.quantity)
+        });
+        // fill folded data with cummulated amount of stock and average price of one share
+        this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
     }
 
     get data() {
@@ -70,13 +70,6 @@ function AddAssetButton({onAddPress}) {
     return (<div><button className="assets_add_button" onClick={onAddPress}>Add asset</button></div>);
 }
 
-function AssetPanel({assets}) {
-    return (
-    <>
-        <AssetsTable assets={assets}/>
-    </>
-    );
-}
 
 function AssetsTableHead() {
     return (
@@ -84,17 +77,19 @@ function AssetsTableHead() {
             <th>Ticker</th>
             <th>Quantity</th>
             <th>Price</th>
+            <th>Show/Hide</th>
         </tr>
     );
 }
 
-function AssetsTableBody({assets}) {
+function AssetsTableBody({assets, onToggleVisibility}) {
     // create list of elements from a assets map
     var assets_array = [];
     assets.forEach((asset) => {
         const ticker = asset.ticker;
-        asset.data.forEach((d) => {
+        asset.data.forEach((d, idx) => {
             const next_asset = {
+                isFirst:    idx == 0,
                 ticker :    ticker,
                 quantity:   d.quantity,
                 price:      d.price.toFixed(2), // display as string with .2 digit precision
@@ -116,18 +111,24 @@ function AssetsTableBody({assets}) {
                 <td>
                     {asset.price}
                 </td>
+                {asset.isFirst && (
+                    <td> 
+                        <button onClick={()=> onToggleVisibility(asset.ticker)}></button>
+                    </td>
+                )}
+                
             </tr>
         ))}
         </>
     );
 }
 
-function AssetsTable({ assets }) {
+function AssetsTable({ assets, onToggleVisibility }) {
     return (
         <table className="assets_table">
             <thead>
                 <AssetsTableHead/>
-                <AssetsTableBody assets={assets}/>
+                <AssetsTableBody assets={assets} onToggleVisibility={onToggleVisibility}/>
             </thead>
         </table>
     );
@@ -177,11 +178,23 @@ export default function StockPage() {
         toggleModalVisibility();
     }
 
+    function toggleAssetVisibility(ticker) {
+        if (!assets.has(ticker)) {
+            console.err(`There is no such ticker as ${ticker} in map.`);
+            return;
+        }
+        // trigger visibility on resource
+        const map_copy = new Map(assets);
+        let asset = map_copy.get(ticker);
+        asset.triggerVisibility();
+        setAssets(map_copy);
+    }
+
     return (
         <>
             <h1>Stock subpage!</h1>
             <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
-            <AssetPanel assets={assets}></AssetPanel>
+            <AssetsTable assets={assets} onToggleVisibility={toggleAssetVisibility}></AssetsTable>
             {/* Modal to be opened when proper button pressed */}
             <Modal onClose={toggleModalVisibility} onAccept={addAsset}/>
         </>
