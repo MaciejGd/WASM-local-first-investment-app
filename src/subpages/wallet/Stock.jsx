@@ -73,43 +73,43 @@ function AddAssetButton({onAddPress}) {
 }
 
 
-function AssetsTableHead() {
+function AssetsTableHead({ onSortUp, onSortDown }) {
     return (
         <tr>
             <th >
                 <div className="table_header">
                     <span>Ticker</span>
-                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                    <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
                 <div className="table_header">
                     <span>Quantity</span>
-                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                    <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
                 <div className='table_header'>
                     <span>Price</span>
-                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                    <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
                 <div className='table_header'>
                     <span>Curent Price</span>
-                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                    <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
                 <div className='table_header'>
                 <span>Profit</span>
-                <AssetsTableSortButtons></AssetsTableSortButtons>
+                <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
                 <div className='table_header'>
                 <span>Profit-percentage</span>
-                <AssetsTableSortButtons></AssetsTableSortButtons>
+                <AssetsTableSortButtons onSortUp={onSortUp} onSortDown={onSortDown}></AssetsTableSortButtons>
                 </div>
             </th>
             <th>
@@ -121,17 +121,14 @@ function AssetsTableHead() {
     );
 }
 
-function AssetsTableSortButtons() {
+// table sorting buttons
+function AssetsTableSortButtons({ onSortUp, onSortDown }) {
     return (
         <div className="sort_buttons">
-            <button><ArrowUpIcon/></button>
-            <button><ArrowDownIcon/></button>
+            <button onClick={onSortUp}><ArrowUpIcon/></button>
+            <button onClick={onSortDown}><ArrowDownIcon/></button>
         </div>
     );
-}
-
-function AssetTableRow({asset}) {
-    return (<></>);
 }
 
 function AssetsTableBody({assets, onToggleVisibility}) {
