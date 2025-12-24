@@ -29,3 +29,30 @@ tfoot {
 tbody tr:nth-child(odd) {
   background-color: #eeeeee;
 }
+
+.row_profit::after {
+  content : "%";
+
+}
+
+.table_header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sort_buttons {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  margin-left: auto;
+}
+
+.sort_buttons button {
+  all:unset;
+  font-size: 0.1rem;
+}
+
+.sort_buttons button:hover {
+  color: bisque;
+}

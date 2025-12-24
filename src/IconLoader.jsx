@@ -13,3 +13,5 @@ export const WalletIcon = () => (<span className="material-symbols-outlined">wal
 
 /* STOCK WALLET ICONS */
 export const AddAssetIcon = () => (<span className="material-symbols-outlined">plus</span>);
+export const ArrowUpIcon = () => (<span className="material-symbols-outlined">keyboard_arrow_up</span>);
+export const ArrowDownIcon = () => (<span className="material-symbols-outlined">keyboard_arrow_down</span>);

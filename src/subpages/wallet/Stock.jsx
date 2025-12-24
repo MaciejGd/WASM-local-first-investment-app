@@ -2,6 +2,8 @@ import '../../styling/pop_up.css';
 import '../../styling/wallet.css';
 import { useState } from 'react';
 import AddAssetPopUp from './AddAssetPopUp';
+import { ArrowDownIcon  } from '../../IconLoader';
+import { ArrowUpIcon  } from '../../IconLoader';
 
 /// Represents data of a single stock asset (ex. quantity, price of purchase etc.)
 class AssetData {
@@ -74,25 +76,80 @@ function AddAssetButton({onAddPress}) {
 function AssetsTableHead() {
     return (
         <tr>
-            <th>Ticker</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Show/Hide</th>
+            <th >
+                <div className="table_header">
+                    <span>Ticker</span>
+                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className="table_header">
+                    <span>Quantity</span>
+                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className='table_header'>
+                    <span>Price</span>
+                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className='table_header'>
+                    <span>Curent Price</span>
+                    <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className='table_header'>
+                <span>Profit</span>
+                <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className='table_header'>
+                <span>Profit-percentage</span>
+                <AssetsTableSortButtons></AssetsTableSortButtons>
+                </div>
+            </th>
+            <th>
+                <div className='table_header'>
+                    <span>Show/Hide</span>
+                </div>
+            </th>
         </tr>
     );
 }
 
+function AssetsTableSortButtons() {
+    return (
+        <div className="sort_buttons">
+            <button><ArrowUpIcon/></button>
+            <button><ArrowDownIcon/></button>
+        </div>
+    );
+}
+
+function AssetTableRow({asset}) {
+    return (<></>);
+}
+
 function AssetsTableBody({assets, onToggleVisibility}) {
     // create list of elements from a assets map
+    const dummy_profit_percentage = 10;
+    const dummy_profit = 5;
     var assets_array = [];
     assets.forEach((asset) => {
         const ticker = asset.ticker;
         asset.data.forEach((d, idx) => {
             const next_asset = {
-                isFirst:    idx == 0,
-                ticker :    ticker,
-                quantity:   d.quantity,
-                price:      d.price.toFixed(2), // display as string with .2 digit precision
+                isFirst:                    idx == 0,
+                ticker :                    ticker,
+                quantity:                   d.quantity,
+                current_price:              0,
+                profit:                     dummy_profit,
+                profit_percentage:          dummy_profit_percentage,
+                price:                      d.price.toFixed(2), // display as string with .2 digit precision
             };
             assets_array.push(next_asset);    
         });        
@@ -111,12 +168,20 @@ function AssetsTableBody({assets, onToggleVisibility}) {
                 <td>
                     {asset.price}
                 </td>
+                <td>
+                    {asset.current_price}
+                </td>
+                <td>
+                    {asset.profit}
+                </td>
+                <td className="row_profit">
+                    {asset.profit_percentage}
+                </td>
                 {asset.isFirst && (
-                    <td> 
+                    <td className="visibility_change"> 
                         <button onClick={()=> onToggleVisibility(asset.ticker)}></button>
                     </td>
                 )}
-                
             </tr>
         ))}
         </>
