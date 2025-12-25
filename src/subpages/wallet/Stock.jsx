@@ -92,11 +92,22 @@ export default function StockPage() {
         setAssets(new_map);
     }
 
+    function selectRow(ticker, idx, select) {
+        console.log("Select row callback");
+        const new_map = new AssetsMap(assets);
+        new_map.selectData(ticker, idx, select);
+        setAssets(new_map);
+    }
+
     return (
         <>
             <h1>Stock subpage!</h1>
             <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
-            <AssetsTable assets={assets} onToggleVisibility={toggleAssetVisibility} onSortUp={sortUp} onSortDown={sortDown}></AssetsTable>
+            <AssetsTable assets={assets} 
+                        onToggleVisibility={toggleAssetVisibility} 
+                        onSortUp={sortUp} 
+                        onSortDown={sortDown}
+                        onSelectRow={selectRow}></AssetsTable>
             {/* Modal to be opened when proper button pressed */}
             <Modal onClose={toggleModalVisibility} onAccept={addAsset}/>
         </>

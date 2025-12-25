@@ -1,10 +1,12 @@
-/// Represents data of a single stock asset (ex. quantity, price of purchase etc.)
+// Represents data about asset passed to the system by the user
 export class AssetData {
     constructor(quantity, price) {
         this.quantity = quantity;
         this.price = price;
         this.cost = this.price * this.quantity;
+        this.selected = false;
     }
+
     // get profit in percentages, relative to current price
     getProfitPercentage(current_price) {
         return (((current_price * this.quantity) - this.cost) / this.cost) * 100;
@@ -28,40 +30,6 @@ export class AssetsEntry {
         this._data = [];
         this.folded = false;
         this.folded_data = [new AssetData()]; // list with one element combining averages for data
-    }
-
-    // add new AssetData object
-    addAsset(asset) {
-        if (asset instanceof AssetData) {
-            this._data.push(asset);
-        }
-        else {
-            console.err("AssetData expected, got ", typeof(asset));
-        }
-    }
-    // show average values for all shares of the company
-    triggerVisibility() {
-        this.folded ^= true;
-    }
-
-    insert(quantity, price) {
-        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
-            this._data.push(new AssetData(quantity, price));
-        }
-        else {
-            throw new Error("Either quantity or price is not a number, failed to update asset entry");
-        }
-
-        // update averages
-        let amount = 0.0; // summed amount of owned resource
-        let prices_cummulated = 0.0;
-
-        this._data.forEach((e) => {
-            amount += e.quantity;
-            prices_cummulated += (e.price * e.quantity)
-        });
-        // fill folded data with cummulated amount of stock and average price of one share
-        this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
     }
 
     get average_data() {
@@ -93,12 +61,62 @@ export class AssetsEntry {
             return this._data;
         }
     }
+
+    // add new AssetData object
+    addAsset(asset) {
+        if (asset instanceof AssetData) {
+            this._data.push(asset);
+        }
+        else {
+            console.err("AssetData expected, got ", typeof(asset));
+        }
+    }
+    // show average values for all shares of the company
+    triggerVisibility() {
+        this.folded ^= true;
+    }
+
+    insert(quantity, price) {
+        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
+            this._data.push(new AssetData(quantity, price));
+        }
+        else {
+            throw new Error("Either quantity or price is not a number, failed to update asset entry");
+        }
+
+        // update averages
+        let amount = 0.0; // summed amount of owned resource
+        let prices_cummulated = 0.0;
+        let selected = true;
+
+        this._data.forEach((e) => {
+            amount += e.quantity;
+            prices_cummulated += (e.price * e.quantity)
+        });
+        // fill folded data with cummulated amount of stock and average price of one share
+        this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
+    }
+    // select data idx(int, index of data, to be selected), select(boolean, select or unselect)
+    selectData(idx, select) {
+        if (!this.folded) {
+            this._data[idx].selected = select;
+            if (select == false) {
+                // it means not all are selected so uncheck averages
+                this.average_data.selected = false;
+            }
+            return;
+        }
+        this._data.forEach((e) => { e.selected = select; } );
+        this.average_data.selected = select;
+    }
 };
 
 // data prepared for table to be rendered
 export class AssetsTableData {
-    /// folded (bool), ticker(string), idx (int, idx of data), data(AssetData)
-    constructor(ticker, isFolded, isFirst, quantity, current_price, current_value, profit, profit_percentage, price, cost) {
+    constructor(selected, ticker, isFolded, isFirst, quantity, 
+                current_price, current_value, profit, profit_percentage, 
+                price, cost, idx) {
+        this.selected = selected;
         this.ticker = ticker;
         this.isFolded = isFolded;
         this.isFirst = isFirst;
@@ -109,6 +127,7 @@ export class AssetsTableData {
         this.profit_percentage = profit_percentage;
         this.cost = cost,
         this.price = price;
+        this.idx = idx;
     }
 };
 
@@ -123,6 +142,13 @@ export class AssetsMap {
             this.asset_map = new Map();
         }
     }
+    // function for setting checkbox for table data row, ticker (string, ticker to be searched), 
+    // idx(int, index of data in AssetsEntry container), select(boolean, should we select or unselect)
+    selectData(ticker, idx, select) {
+        let entry = this.asset_map.get(ticker);
+        entry.selectData(idx, select);
+    }
+
     // return array of AssetsTableData produced based on personal assets
     produceTableData() {
         let output_array = []
@@ -130,6 +156,7 @@ export class AssetsMap {
             asset.data.forEach((data, idx) => {
                 output_array.push(
                     new AssetsTableData(
+                        data.selected,
                         asset.ticker, 
                         asset.folded, 
                         idx === 0,
@@ -140,6 +167,7 @@ export class AssetsMap {
                         data.getProfitPercentage(asset.current_price).toFixed(2),
                         data.price.toFixed(2),
                         data.cost,
+                        idx,
                     )
                 );
             })
@@ -183,7 +211,7 @@ export class AssetsMap {
         summary.isFirst = isFirst;
         summary.quantity = quantity;
         summary.current_price = "-";
-        summary.profit = profit;
+        summary.profit = profit.toFixed(2);
         summary.current_value = current_value;
         summary.profit_percentage = (100 + (profit / cost) * 100).toFixed(2);
         summary.price = "-";
@@ -221,8 +249,9 @@ export class AssetsMap {
                 sortDec = (a, b) => { return b[1].profit - a[1].profit; };
                 break;
             case "cost":
-                sortInc = (a, b) => { return a[1].cost - b[1].cost; }
-                sortDec = (a, b) => { return b[1].cost - a[1].cost; }
+                sortInc = (a, b) => { return a[1].average_data.cost - b[1].average_data.cost; }
+                sortDec = (a, b) => { return b[1].average_data.cost - a[1].average_data.cost; }
+                break;
             case "profit_percentage":
                 sortInc = (a, b) => { return a[1].profit_percentage - b[1].profit_percentage; };
                 sortDec = (a, b) => { return b[1].profit_percentage - a[1].profit_percentage; };

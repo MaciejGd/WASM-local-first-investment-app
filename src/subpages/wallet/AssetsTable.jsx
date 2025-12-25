@@ -65,28 +65,38 @@ function AssetsTableSortButtons({ onSortUp, onSortDown, columnName }) {
     );
 }
 
-function AssetsTableBody({assets, onToggleVisibility}) {
+function AssetsTableBody({ assets, onToggleVisibility, onSelectRow }) {
     // prepare data for rendering table
     const assets_array = assets.produceTableData();
+    console.log(assets_array);
     const assets_summary = assets.summary;
     return (
         <>
         {/* render regular rows */}
         {assets_array.map((asset, rowIdx) => (
-            <AssetRow asset={asset} key={rowIdx} rowClassName={""} onToggleVisibility={onToggleVisibility}/>
+            <AssetRow asset={asset} key={rowIdx} rowClassName={""} onToggleVisibility={onToggleVisibility} onSelectRow={onSelectRow}/>
         ))}
         {/* render summary row */}
-        <AssetRow asset={assets_summary} rowClassName={"assets_summary"} onToggleVisibility={onToggleVisibility}/>
+        <AssetRow asset={assets_summary} rowClassName={"assets_summary"} onToggleVisibility={onToggleVisibility} summary={true}/>
         </> 
     );
 }
 
-export function AssetRow({ asset, rowClassName, onToggleVisibility }) {
+export function AssetRow({ asset, rowClassName, onToggleVisibility, summary, onSelectRow }) {
+    console.log("Asset selected: ", asset.selected);
     return (
         <tr className={rowClassName}>
             <td>
                 <div className="row_ticker">
-                    <span style={{fontWeight: 'bold'}}>{asset.ticker}</span>
+                    {!summary && 
+                    <input type="checkbox" checked={asset.selected} onChange={
+                        ()=> {
+                            console.log("On checkbox selected!");
+                            const check_value = !asset.selected;
+                            onSelectRow(asset.ticker, asset.idx, check_value); 
+                        }
+                    }></input>}
+                    <span style={{fontWeight: 'bold', paddingLeft: 20}}>{asset.ticker}</span>
                     {asset.isFirst && (
                         <button onClick={()=> onToggleVisibility(asset.ticker)}>
                             {asset.isFolded ? (<ArrowDownIcon/>) : (<ArrowUpIcon/>)}
@@ -119,12 +129,12 @@ export function AssetRow({ asset, rowClassName, onToggleVisibility }) {
     );
 }
 
-export function AssetsTable({ assets, onToggleVisibility, onSortUp, onSortDown }) {
+export function AssetsTable({ assets, onToggleVisibility, onSortUp, onSortDown, onSelectRow }) {
     return (
         <table className="assets_table">
             <thead>
                 <AssetsTableHead onSortDown={onSortDown} onSortUp={onSortUp}/>
-                <AssetsTableBody assets={assets} onToggleVisibility={onToggleVisibility}/>
+                <AssetsTableBody assets={assets} onToggleVisibility={onToggleVisibility} onSelectRow={onSelectRow}/>
             </thead>
         </table>
     );
