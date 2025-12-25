@@ -67,3 +67,7 @@ tbody tr:nth-child(odd) {
 .sort_buttons button:hover {
   background-color: black;
 }
+
+.assets_summary {
+  background-color: rgb(40, 40, 40);
+}
