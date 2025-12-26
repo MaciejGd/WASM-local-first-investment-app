@@ -11,10 +11,16 @@ function AddAssetButton({onAddPress}) {
     return (<div><button className="assets_add_button" onClick={onAddPress}>Add asset</button></div>);
 }
 
+function DeleteSelectedButton({ onDeleteSelectedCb }) {
+    return (<button onClick={()=>onDeleteSelectedCb()}>Delete Selected</button>)
+}
+
 export default function StockPage() {
     /// EXAMPLE STARTING DATA 
     let a = new AssetsEntry("a");
     a.insert(1, 12);
+    a.insert(2, 32);
+    a.insert(0.5, 43);
     a.current_price = 11;
     let k = new AssetsEntry("k");
     k.insert(6, 10);
@@ -99,10 +105,18 @@ export default function StockPage() {
         setAssets(new_map);
     }
 
+    function deleteSelected() {
+        console.log("Delete selected callback");
+        const new_map = new AssetsMap(assets);
+        new_map.deleteSelected();
+        setAssets(new_map);
+    }
+
     return (
         <>
             <h1>Stock subpage!</h1>
             <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
+            <DeleteSelectedButton onDeleteSelectedCb={deleteSelected}></DeleteSelectedButton>
             <AssetsTable assets={assets} 
                         onToggleVisibility={toggleAssetVisibility} 
                         onSortUp={sortUp} 

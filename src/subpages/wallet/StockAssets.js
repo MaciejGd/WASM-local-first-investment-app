@@ -100,14 +100,34 @@ export class AssetsEntry {
     selectData(idx, select) {
         if (!this.folded) {
             this._data[idx].selected = select;
-            if (select == false) {
-                // it means not all are selected so uncheck averages
-                this.average_data.selected = false;
-            }
+            // if all selected, then average should be selected, if even one not selected then avg not selected
+            let sel_amount = 0;
+            this._data.forEach((e) => { sel_amount += (e.selected) ? 1 : 0; });
+            this.average_data.selected = (sel_amount === this._data.length) ? true : false;
             return;
         }
         this._data.forEach((e) => { e.selected = select; } );
         this.average_data.selected = select;
+    }
+    // function for deleting selected data from the assets container
+    // Returns: true -> delete whole container, false -> do not delete whole container
+    deleteData() {
+        // if folded, analyze all records as one
+        if (this.folded) {
+            if (this.average_data.selected) {
+                this._data = []; // clear data
+                this.folded_data = [];
+            }
+        }
+        else {
+            for (var i = this._data.length - 1; i >= 0; i--) {
+                if (this._data[i].selected === true) {
+                    this._data.splice(i, 1); // remove element if it is selected
+                }
+            }
+        }
+        // if data empty after removal, delete whole asset entry
+        return (this._data.length === 0) ? true : false; 
     }
 };
 
@@ -194,7 +214,7 @@ export class AssetsMap {
         let isFolded = false;
         let ticker = "Summary";
         let quantity = 0;
-        let cost = 0;
+        let cost = 0.0;
         let profit = 0.0;
         let current_value = 0.0;
         this.asset_map.forEach((entry) => {            
@@ -213,7 +233,8 @@ export class AssetsMap {
         summary.current_price = "-";
         summary.profit = profit.toFixed(2);
         summary.current_value = current_value;
-        summary.profit_percentage = (100 + (profit / cost) * 100).toFixed(2);
+        // we divide so if cost === 0, just return 0 :))
+        summary.profit_percentage = (cost != 0) ? ((profit / cost) * 100).toFixed(2) : 0; 
         summary.price = "-";
         summary.cost = cost;
 
@@ -262,5 +283,14 @@ export class AssetsMap {
         }
         const new_map = (inc) ? new Map([...this.asset_map].sort(sortInc)) : new Map([...this.asset_map].sort(sortDec));
         this.asset_map = new_map;
+    }
+
+    deleteSelected() {
+        this.asset_map.forEach(((el, idx, assets) => {
+            if (el.deleteData()) {
+                assets.delete(el.ticker);
+            }
+        }));
+        this.countAssetsSummary(); // recalculate summary
     }
 };

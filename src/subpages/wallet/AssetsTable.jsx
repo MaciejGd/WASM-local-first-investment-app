@@ -83,7 +83,6 @@ function AssetsTableBody({ assets, onToggleVisibility, onSelectRow }) {
 }
 
 export function AssetRow({ asset, rowClassName, onToggleVisibility, summary, onSelectRow }) {
-    console.log("Asset selected: ", asset.selected);
     return (
         <tr className={rowClassName}>
             <td>
