@@ -241,7 +241,7 @@ export class AssetsMap {
         // we divide so if cost === 0, just return 0 :))
         summary.profit_percentage = (cost != 0) ? ((profit / cost) * 100).toFixed(2) : 0; 
         summary.price = "-";
-        summary.cost = cost;
+        summary.cost = cost.toFixed(2);
 
         this.summary = summary;
     }

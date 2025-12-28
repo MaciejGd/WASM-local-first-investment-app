@@ -11,7 +11,7 @@ import { AssetsTable } from './AssetsTable.jsx'
 
 function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
     return (
-        <div>
+        <div className="assets_table_buttons_container">
             <AddAssetButton onAddAsset={onAddAsset}></AddAssetButton>
             <DeleteSelectedButton onDeleteSelectedCb={onDeleteSelectedCb}></DeleteSelectedButton>
         </div>
@@ -128,12 +128,14 @@ export default function StockPage() {
             <h1>Stock subpage!</h1>
             {/* <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
             <DeleteSelectedButton onDeleteSelectedCb={deleteSelected}></DeleteSelectedButton> */}
+            <div className="assets_page">
             <AssetButtons onAddAsset={toggleModalVisibility} onDeleteSelectedCb={deleteSelected}></AssetButtons>
             <AssetsTable assets={assets} 
                         onToggleVisibility={toggleAssetVisibility} 
                         onSortUp={sortUp} 
                         onSortDown={sortDown}
                         onSelectRow={selectRow}></AssetsTable>
+            </div>
             {/* Modal to be opened when proper button pressed */}
             <Modal onClose={toggleModalVisibility} onAccept={addAsset}/>
         </>

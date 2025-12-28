@@ -1,8 +1,3 @@
-.assets_add_button {
-    border-radius: 10px;
-    border-color: white;
-}
-
 .assets_table {
   background-color: rgb(59, 59, 59);
 }
@@ -26,9 +21,9 @@ tfoot {
     border-top: 1px solid #999999;
 }
 
-tbody tr:nth-child(odd) {
+/* tbody tr:nth-child(odd) {
   background-color: #eeeeee;
-}
+} */
 
 .row_ticker {
   display: flex;
@@ -70,4 +65,32 @@ tbody tr:nth-child(odd) {
 
 .assets_summary {
   background-color: rgb(40, 40, 40);
+}
+
+
+.assets_page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: purple; */
+}
+
+.assets_table_buttons_container {
+  /* background-color: aqua; */
+  width: 70%;
+  display: flex;
+  /* align-items: center;
+  justify-content: center; */
+}
+
+.assets_table_buttons_container button {
+  background-color: rgb(59, 59, 59);
+  border-radius: 10px;
+  border-color: white;
+  margin-left: 5px;
+}
+
+.assets_add_button {
+  margin-right: auto;
 }

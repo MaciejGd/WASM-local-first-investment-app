@@ -68,7 +68,6 @@ function AssetsTableSortButtons({ onSortUp, onSortDown, columnName }) {
 function AssetsTableBody({ assets, onToggleVisibility, onSelectRow }) {
     // prepare data for rendering table
     const assets_array = assets.produceTableData();
-    console.log(assets_array);
     const assets_summary = assets.summary;
     return (
         <>
@@ -83,6 +82,23 @@ function AssetsTableBody({ assets, onToggleVisibility, onSelectRow }) {
 }
 
 export function AssetRow({ asset, rowClassName, onToggleVisibility, summary, onSelectRow }) {
+    var profit_color = "";
+    try {
+        const float_percentage = parseFloat(asset.profit_percentage);
+        if (float_percentage > 0) {
+            profit_color = "#46D462";
+        }
+        else if (float_percentage < 0) {
+            profit_color = "#E85454";
+        }
+        else {
+            profit_color = "white";
+        }
+    }
+    catch (exception) {
+        console.log(exception);
+    }
+
     return (
         <tr className={rowClassName}>
             <td>
@@ -90,7 +106,6 @@ export function AssetRow({ asset, rowClassName, onToggleVisibility, summary, onS
                     {!summary && 
                     <input type="checkbox" checked={asset.selected} onChange={
                         ()=> {
-                            console.log("On checkbox selected!");
                             const check_value = !asset.selected;
                             onSelectRow(asset.ticker, asset.idx, check_value); 
                         }
@@ -121,7 +136,7 @@ export function AssetRow({ asset, rowClassName, onToggleVisibility, summary, onS
             <td>
                 {asset.profit}
             </td>
-            <td className="row_profit">
+            <td className="row_profit" style={{color : profit_color}}>
                 {asset.profit_percentage}
             </td>
         </tr>
@@ -133,8 +148,10 @@ export function AssetsTable({ assets, onToggleVisibility, onSortUp, onSortDown, 
         <table className="assets_table">
             <thead>
                 <AssetsTableHead onSortDown={onSortDown} onSortUp={onSortUp}/>
-                <AssetsTableBody assets={assets} onToggleVisibility={onToggleVisibility} onSelectRow={onSelectRow}/>
             </thead>
+            <tbody>
+                <AssetsTableBody assets={assets} onToggleVisibility={onToggleVisibility} onSelectRow={onSelectRow}/>
+            </tbody>
         </table>
     );
 }
