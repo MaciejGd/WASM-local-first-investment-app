@@ -187,7 +187,7 @@ export class AssetsMap {
                         idx === 0,
                         data.quantity,
                         asset.current_price,
-                        asset.current_value,
+                        data.getCurrentValue(asset.current_price),
                         data.getProfit(asset.current_price).toFixed(2),
                         data.getProfitPercentage(asset.current_price).toFixed(2),
                         data.price.toFixed(2),
