@@ -20,6 +20,8 @@
   flex-direction: column;
   gap: 12px;
   border-right: 1px solid #146ca7; 
+  position: fixed;
+  height: 100%;
 }
 
 .sidebar.hidden {
@@ -28,6 +30,8 @@
 
 .content {
   flex: 1;
+  min-height: 0;
+  overflow-x: auto;
   background-color: #222021;
 }
 

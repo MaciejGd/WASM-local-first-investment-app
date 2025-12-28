@@ -21,9 +21,9 @@ tfoot {
     border-top: 1px solid #999999;
 }
 
-/* tbody tr:nth-child(odd) {
-  background-color: #eeeeee;
-} */
+tbody tr:nth-child(odd) {
+  background-color: rgb(49,49,49);
+}
 
 .row_ticker {
   display: flex;

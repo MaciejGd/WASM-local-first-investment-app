@@ -32,9 +32,23 @@ export default function StockPage() {
     a.insert(1, 12);
     a.insert(2, 32);
     a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 43);
+    a.insert(0.5, 2);
     a.current_price = 11;
     let k = new AssetsEntry("k");
     k.insert(6, 10);
+    k.insert(0.5, 2);
+    k.insert(0.5, 2);
+    k.insert(0.5, 2);
+    k.insert(0.5, 2);
+    k.insert(0.5, 2);
     k.current_price = 30;
     let t = new AssetsEntry("t");
     t.insert(3, 7);
@@ -126,15 +140,13 @@ export default function StockPage() {
     return (
         <>
             <h1>Stock subpage!</h1>
-            {/* <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
-            <DeleteSelectedButton onDeleteSelectedCb={deleteSelected}></DeleteSelectedButton> */}
             <div className="assets_page">
-            <AssetButtons onAddAsset={toggleModalVisibility} onDeleteSelectedCb={deleteSelected}></AssetButtons>
-            <AssetsTable assets={assets} 
-                        onToggleVisibility={toggleAssetVisibility} 
-                        onSortUp={sortUp} 
-                        onSortDown={sortDown}
-                        onSelectRow={selectRow}></AssetsTable>
+                <AssetButtons onAddAsset={toggleModalVisibility} onDeleteSelectedCb={deleteSelected}></AssetButtons>
+                <AssetsTable assets={assets} 
+                            onToggleVisibility={toggleAssetVisibility} 
+                            onSortUp={sortUp} 
+                            onSortDown={sortDown}
+                            onSelectRow={selectRow}></AssetsTable>
             </div>
             {/* Modal to be opened when proper button pressed */}
             <Modal onClose={toggleModalVisibility} onAccept={addAsset}/>
