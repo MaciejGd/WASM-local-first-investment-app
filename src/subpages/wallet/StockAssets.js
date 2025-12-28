@@ -76,14 +76,7 @@ export class AssetsEntry {
         this.folded ^= true;
     }
 
-    insert(quantity, price) {
-        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
-            this._data.push(new AssetData(quantity, price));
-        }
-        else {
-            throw new Error("Either quantity or price is not a number, failed to update asset entry");
-        }
-
+    udpateAverageData() {
         // update averages
         let amount = 0.0; // summed amount of owned resource
         let prices_cummulated = 0.0;
@@ -95,6 +88,17 @@ export class AssetsEntry {
         });
         // fill folded data with cummulated amount of stock and average price of one share
         this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
+    }
+
+    insert(quantity, price) {
+        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
+            this._data.push(new AssetData(quantity, price));
+        }
+        else {
+            throw new Error("Either quantity or price is not a number, failed to update asset entry");
+        }
+
+        this.udpateAverageData();
     }
     // select data idx(int, index of data, to be selected), select(boolean, select or unselect)
     selectData(idx, select) {
@@ -126,6 +130,7 @@ export class AssetsEntry {
                 }
             }
         }
+        this.udpateAverageData();
         // if data empty after removal, delete whole asset entry
         return (this._data.length === 0) ? true : false; 
     }

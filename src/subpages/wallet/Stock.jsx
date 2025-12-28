@@ -7,8 +7,19 @@ import { ArrowUpIcon  } from '../../IconLoader';
 import { AssetsEntry, AssetsMap } from './StockAssets.js';
 import { AssetsTable } from './AssetsTable.jsx'
 
-function AddAssetButton({onAddPress}) {
-    return (<div><button className="assets_add_button" onClick={onAddPress}>Add asset</button></div>);
+
+
+function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
+    return (
+        <div>
+            <AddAssetButton onAddAsset={onAddAsset}></AddAssetButton>
+            <DeleteSelectedButton onDeleteSelectedCb={onDeleteSelectedCb}></DeleteSelectedButton>
+        </div>
+    );
+}
+
+function AddAssetButton({onAddAsset}) {
+    return (<div><button className="assets_add_button" onClick={onAddAsset}>Add asset</button></div>);
 }
 
 function DeleteSelectedButton({ onDeleteSelectedCb }) {
@@ -115,8 +126,9 @@ export default function StockPage() {
     return (
         <>
             <h1>Stock subpage!</h1>
-            <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
-            <DeleteSelectedButton onDeleteSelectedCb={deleteSelected}></DeleteSelectedButton>
+            {/* <AddAssetButton onAddPress={toggleModalVisibility}></AddAssetButton>
+            <DeleteSelectedButton onDeleteSelectedCb={deleteSelected}></DeleteSelectedButton> */}
+            <AssetButtons onAddAsset={toggleModalVisibility} onDeleteSelectedCb={deleteSelected}></AssetButtons>
             <AssetsTable assets={assets} 
                         onToggleVisibility={toggleAssetVisibility} 
                         onSortUp={sortUp} 
