@@ -248,8 +248,7 @@ export default function GraphsPage() {
             graph_array.map((records, idx) => (
               <GraphContainer records={records} key={idx} onDelete={deleteRecord}></GraphContainer>  
           ))}
-          </div>
-          
+          </div>          
       </div>
   );
 }
