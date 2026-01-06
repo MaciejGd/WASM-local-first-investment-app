@@ -1,0 +1,51 @@
+<!-- emscripten example -->
+<html lang=en-us>
+
+<head>
+    <meta charset=utf-8>
+    <meta content="text/html; charset=utf-8" http-equiv=Content-Type>
+    <title>Wasm testing!</title>
+</head>
+
+<body>
+    <script>
+        (async ()=> {
+            // best option for now
+            const wasm = await WebAssembly.instantiateStreaming(fetch('caesar.wasm'));
+            
+
+            const { memory, caesarEncrypt, caesarDecrypt } = wasm.instance.exports;
+
+            const plaintext = "helloworld";
+            const myKey = 3;
+
+            const encode = function stringToIntegerArray(string, array) {
+                start_idx = 'a'.charCodeAt(0);
+                for (let i = 0; i < string.length; i++) {
+                    array[i] = string.charCodeAt(i) - start_idx;
+                }
+            }
+
+            const decode = function integerArrayToString(array) {
+                const alphabet = "abcdefghijklmnopqrstuvwxyz";
+                let string = "";
+                for (let i = 0; i < array.length; i++) {
+                    string += alphabet[array[i]];
+                }
+                return string;
+            }
+
+            const myArray = new Int32Array(memory.buffer, 0, plaintext.length);
+            encode(plaintext, myArray); // insert the values into the shared array
+            console.log(myArray);
+            caesarEncrypt(myArray.byteOffset, myArray.length, myKey);
+            console.log(decode(myArray));
+
+            caesarDecrypt(myArray.byteOffset, myArray.length, myKey);
+            console.log(decode(myArray));
+        })();
+    </script>
+    <h1>Open Console to see result</h1>
+</body>
+
+</html>
