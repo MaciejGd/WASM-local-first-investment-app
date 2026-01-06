@@ -1,0 +1,96 @@
+.assets_table {
+  background-color: rgb(59, 59, 59);
+}
+
+table {
+  table-layout: fixed;
+  width: 70%;
+  margin: 10px auto;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.6em;
+  border: 2px;
+  border: 1px solid white;
+}
+
+tfoot {
+    border-top: 1px solid #999999;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: rgb(49,49,49);
+}
+
+.row_ticker {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.row_ticker button {
+  all: unset;
+  margin-left: auto;
+}
+
+.row_profit::after {
+  content : "%";
+
+}
+
+.table_header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sort_buttons {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  margin-left: auto;
+}
+
+.sort_buttons button {
+  all:unset;
+  font-size: 0.1rem;
+}
+
+.sort_buttons button:hover {
+  background-color: black;
+}
+
+.assets_summary {
+  background-color: rgb(40, 40, 40);
+}
+
+
+.assets_page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: purple; */
+}
+
+.assets_table_buttons_container {
+  /* background-color: aqua; */
+  width: 70%;
+  display: flex;
+  /* align-items: center;
+  justify-content: center; */
+}
+
+.assets_table_buttons_container button {
+  background-color: rgb(59, 59, 59);
+  border-radius: 10px;
+  border-color: white;
+  margin-left: 5px;
+}
+
+.assets_add_button {
+  margin-right: auto;
+}
