@@ -10,7 +10,7 @@ namespace linalg::primitives {
 
 // we actually need mosty matrix, as vector is just a matrix of 1 x n
 template <typename T>
-class CMatrix {
+class CMatrix {    
     using matrix_container = std::vector<std::vector<T>>;
 public:
     /// @brief Initialize matrix with zeros
@@ -58,7 +58,6 @@ public:
                 O value{};
                 for (uint32_t k = 0; k < t; k++) {
                     value += (at(i,k) * other.at(k,j));
-                    continue;
                 }
                 ret[i][j] = value;
             }
@@ -157,7 +156,7 @@ public:
         m_cols = m_mat[0].size();
     };
 
-private:
+protected:
     /// number of rows in a matrix 
     uint32_t m_rows;
     /// number of cols in a matrix

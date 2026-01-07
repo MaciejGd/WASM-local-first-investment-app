@@ -1,5 +1,6 @@
 #include <iostream>
 #include "../inc/matrix.h"
+#include "../inc/matrix_special.h"
 
 using std::vector;
 using namespace linalg::primitives;
@@ -27,24 +28,38 @@ void printCMatrix(const CMatrix<T>& mat) {
 
 int main() {
     vector<vector<int>> mat = {
-        {1, 3, 1, 7},
-        {3, 5, 6, 1},
-        {5, 2, 1, 5},
-        {5, 2, 1, 5}
+        {1, 3, 1, 7, 7, 7},
+        {3, 5, 6, 1, 1, 1},
+        {5, 2, 1, 5, 5, 5}
     };
     vector<vector<int>> mat2 = {
-        {4, 6, 4, 10},
-        {6, 8, 9, 4},
-        {8, 5, 4, 8},
-        {8, 5, 4, 8}
+        {4, 6, 4},
+        {6, 8, 9},
+        {8, 5, 4},
+        {8, 5, 4},
+        {8, 5, 4},
+        {8, 5, 4}
     };
-    vector<float> vec = {3, 2, 1};
+    // vector<vector<int>> mat = {
+    //     {1, 3, 1, 7},
+    //     {3, 5, 6, 1},
+    //     {5, 2, 1, 5}
+    // };
+    // vector<vector<int>> mat2 = {
+    //     {4, 6, 4},
+    //     {6, 8, 9},
+    //     {8, 5, 4},
+    //     {8, 5, 4}
+    // };
+    CMatrixLowTriangular tri2(mat2);
+    printCMatrix(tri2);
+    
+    CMatrixUpperTriangle tri(mat2);
+    printCMatrix(tri);
+
     CMatrix matrix1(mat);
-    CMatrix matrix2(mat2);
-    CMatrix matrix3(vec);
-    auto matrix4 = matrix1 * matrix2;
-    printCMatrix(matrix4);
-    auto matrix6 = matrix1 - matrix2;
-    printCMatrix(matrix6);
+    CMatrix out = tri * matrix1;
+    std::cout << "Print output matrix\n";
+    printCMatrix(out);
     return 0;   
 }
