@@ -9,12 +9,16 @@
 #include <vector>
 #include <deque>
 
+#include <span>
+
 namespace linalg::algorithms {
 
 //algorithms in particular that are needed 
 // 1_) Cholesky factorization
 // 2_) Counting means values
-// 3_) Couting covariance
+// 3_) Couting covariance -> this actually need to be done in steps
+//      -> counting 
+//      -> counting corelations of vars 
 // 4_) Generate Random numbers based on normal distribution
 using namespace linalg::primitives;
 
@@ -107,6 +111,52 @@ float Mean(T* buffer, size_t size) {
         sum += (*buffer);
     }
     return sum / static_cast<float>(size);
+};
+
+/// @brief Represent mean values as Matrix
+/// @tparam T type of input values
+/// @param buffer array with input values
+/// @param chunk_size size of single chunk
+/// @param chunks_amount amount of chunks for which mean values should be counted
+/// @return Matrix of dimensions: chunks_amount x 1
+template<typename T>
+CMatrix<float> Mean(T* buffer, size_t chunk_size, size_t chunks_amount) {
+    CMatrix<float> res(chunks_amount, 1);
+    // iterate through chunks and count mean value for each
+    for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
+        res[i][0] = Mean(buffer, chunk_size);
+    }
+    return res;
+};
+
+// TODO resulting matrix is symmetric, amount of computations can be strongly reduced
+template<typename T>
+CMatrix<float> Covariance(T* buffer, size_t chunk_size, const size_t& chunks_amount) {
+    // vector for variance values
+    std::vector<float> means(chunks_amount);
+    T* head = buffer;
+    for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
+        means[i] = Mean(buffer, chunk_size);
+    }
+    buffer = head; // bring buffer pointer back to the first element
+    CMatrix<float> res(chunks_amount, chunks_amount);
+    for (size_t i = 0; i < chunks_amount; i++) {
+        for (size_t j = 0; j < chunks_amount; j++) {
+            auto& cell = res[i][j];
+            size_t i_start = (i * chunk_size);
+            size_t j_start = (j * chunk_size);
+            std::cout << "starting points: " << i_start << " : " << j_start << std::endl;
+            for (size_t k = 0; k < chunk_size; k++)
+            {
+                T val1 = (buffer[i_start + k] - means[i]);
+                T val2 = (buffer[j_start + k] - means[j]);
+                cell += ((buffer[i_start + k] - means[i]) * (buffer[j_start + k] - means[j]));
+            }
+            cell /= (chunk_size - 1);            
+        }
+    }
+
+    return res;
 };
 
 };

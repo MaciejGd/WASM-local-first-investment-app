@@ -53,8 +53,6 @@ public:
         }
     };
 
-    ~CMatrixUpperTriangle() = default;
-
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());

@@ -6,7 +6,7 @@
 
 #include <deque>
 #include <set>
-
+#include <span>
 
 using std::vector;
 using namespace linalg::primitives;
@@ -89,8 +89,30 @@ void MeanTest() {
     arr[3] = 4;
     auto res4 = Mean(arr, 4);
     FLOATS_EQUAL(res4, 2.5);
-    
 
+    int new_arr[12] = {1,2,3, 1,2,3, 1,2,3, 1,2,3};
+    // 3 chunks as we need 3 separate means, and 4 chunks at total
+    auto mat = Mean(new_arr, 3, 4);
+    printCMatrix(mat);
+}
+
+void CovarianceTest() {
+    using namespace linalg::algorithms;
+    int* test = new int[20]{
+                1,  2,  3,  4,  5,
+                2,  1,  2,  3,  4,
+                3,  4,  2,  1,  3,
+                5,  3,  4,  2,  1
+                };
+//     int *test = new int[9] {
+//   10, 12, 11,  // Stock A
+//   20, 19, 21,  // Stock B
+//   5, 6, 7  
+// };
+    
+    auto res = Covariance(test, 5, 4);
+    printCMatrix(res);
+    delete []test;
 }
 
 int main() {
@@ -107,7 +129,8 @@ int main() {
         {8, 5, 4},
         {8, 5, 4}
     };
-    CholeskyTest();
-    MeanTest();
+    // CholeskyTest();
+    // MeanTest();
+    CovarianceTest();
     return 0;   
 }
