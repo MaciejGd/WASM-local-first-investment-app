@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "utils.h"
+
 namespace linalg::primitives {
 
 // we actually need mosty matrix, as vector is just a matrix of 1 x n
@@ -47,7 +49,7 @@ public:
         // output type for multiplying ex. float and int
         using O = decltype(std::declval<T>() * std::declval<N>());
         // handle not correct dimensions of matrix
-        m_DimensionsAssert(m_cols, other.rows());
+        CHECK_EQUAL(m_cols, other.rows());
         // create output matrix
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
@@ -73,8 +75,8 @@ public:
     auto operator+(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
         // for addition both rows and cols should be the same
-        m_DimensionsAssert(m_rows, other.rows());
-        m_DimensionsAssert(m_cols, other.cols());
+        CHECK_EQUAL(m_rows, other.rows());
+        CHECK_EQUAL(m_cols, other.cols());
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
         CMatrix<O> ret(n, m);
@@ -94,8 +96,8 @@ public:
     auto operator-(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
         // for addition both rows and cols should be the same
-        m_DimensionsAssert(m_rows, other.rows());
-        m_DimensionsAssert(m_cols, other.cols());
+        CHECK_EQUAL(m_rows, other.rows());
+        CHECK_EQUAL(m_cols, other.cols());
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
         CMatrix<O> ret(n, m);
@@ -111,9 +113,7 @@ public:
     /// @param idx number of row to be returned
     /// @return reference to the matrix row
     std::vector<T>& operator[](uint32_t idx) {
-        if (idx >= m_mat.size()) {
-            throw std::out_of_range("Requested row number, out of range for matrix");
-        }
+        CHECK_OUT_OF_RANGE(idx, m_mat.size());
         return m_mat[idx];
     }
 
@@ -122,12 +122,8 @@ public:
     /// @param x col index
     /// @return value at (y,x) coordinates
     const T& at(uint32_t y, uint32_t x) const {
-        if (y >= m_mat.size()) {
-            throw std::out_of_range("Requested row " + std::to_string(y) + " out of matrix range");
-        }
-        if (x >= m_mat[0].size()) {
-            throw std::out_of_range("Requested col " + std::to_string(x) + " out of matrix range");
-        }
+        CHECK_OUT_OF_RANGE(y, m_mat.size());
+        CHECK_OUT_OF_RANGE(x, m_mat[0].size());
         return m_mat[y][x];
     }
 
@@ -163,16 +159,6 @@ protected:
     uint32_t m_cols;
     /// underlying matrix container
     matrix_container m_mat;
-
-    /// @brief Throw exception if matrixes dimensions are not equal
-    /// @param n first dimension
-    /// @param m second dimension
-    inline void m_DimensionsAssert(uint32_t n, uint32_t m) {
-        if (n != m) {
-            std::string msg = "Wrong matrix dimensions";
-            throw std::runtime_error(msg);
-        }
-    }
 };
 
 template<typename T, typename N>

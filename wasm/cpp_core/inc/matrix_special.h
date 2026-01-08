@@ -20,7 +20,7 @@ public:
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        this->m_DimensionsAssert(this->m_cols, other.rows());
+        CHECK_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
@@ -41,6 +41,8 @@ template<typename T>
 class CMatrixUpperTriangle : public CMatrix<T> {
     using matrix_container = std::vector<std::vector<T>>;
 public:
+    CMatrixUpperTriangle(uint32_t n, uint32_t m): CMatrix<T>(n, m) {};
+    
     CMatrixUpperTriangle(matrix_container& mat): CMatrix<T>(mat) {
         // fill everything above diagonal with zeros
         for (uint32_t i = 0; i < this->m_rows; i++) {
@@ -56,7 +58,7 @@ public:
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        this->m_DimensionsAssert(this->m_cols, other.rows());
+        CHECK_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
@@ -79,10 +81,12 @@ public:
 };
 
 template<typename T> 
-class CMatrixLowTriangular : public CMatrix<T> {
+class CMatrixLowerTriangular : public CMatrix<T> {
     using matrix_container = std::vector<std::vector<T>>;
 public: 
-    CMatrixLowTriangular(matrix_container& mat): CMatrix<T>(mat) {
+    CMatrixLowerTriangular(uint32_t n, uint32_t m): CMatrix<T>(n, m) {};
+
+    CMatrixLowerTriangular(matrix_container& mat): CMatrix<T>(mat) {
         // fill everything above diagonal with zeros
         for (uint32_t i = 0; i < this->m_rows; i++) {
             for (uint32_t j = i + 1; j < this->m_cols; j++) {
@@ -91,12 +95,12 @@ public:
         }
     };
 
-    CMatrixLowTriangular(const std::vector<T>& vec): CMatrix<T>(vec) {};
+    CMatrixLowerTriangular(const std::vector<T>& vec): CMatrix<T>(vec) {};
 
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        this->m_DimensionsAssert(this->m_cols, other.rows());
+        CHECK_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
