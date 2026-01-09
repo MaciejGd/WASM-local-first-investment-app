@@ -115,6 +115,23 @@ void CovarianceTest() {
     delete []test;
 }
 
+void InverseTest() {
+    using namespace linalg::algorithms;
+    std::vector<double> randoms = {0.0,
+        0.2,
+        0.33,
+        0.53,
+        0.76,
+        0.89,
+        0.99,
+        1.0};
+
+    for (const auto& r : randoms) {
+        std::cout << "For random var: " << r << " icfd: " << InverseNormal(r) << std::endl;
+    }
+
+}
+
 int main() {
     vector<vector<int>> mat = {
         {1, 3, 1, 7, 7, 7},
@@ -131,6 +148,7 @@ int main() {
     };
     // CholeskyTest();
     // MeanTest();
-    CovarianceTest();
+    // CovarianceTest();
+    InverseTest();
     return 0;   
 }

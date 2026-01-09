@@ -16,9 +16,7 @@ namespace linalg::algorithms {
 //algorithms in particular that are needed 
 // 1_) Cholesky factorization
 // 2_) Counting means values
-// 3_) Couting covariance -> this actually need to be done in steps
-//      -> counting 
-//      -> counting corelations of vars 
+// 3_) Couting covariance
 // 4_) Generate Random numbers based on normal distribution
 using namespace linalg::primitives;
 
@@ -145,12 +143,11 @@ CMatrix<float> Covariance(T* buffer, size_t chunk_size, const size_t& chunks_amo
             auto& cell = res[i][j];
             size_t i_start = (i * chunk_size);
             size_t j_start = (j * chunk_size);
-            std::cout << "starting points: " << i_start << " : " << j_start << std::endl;
             for (size_t k = 0; k < chunk_size; k++)
             {
                 T val1 = (buffer[i_start + k] - means[i]);
                 T val2 = (buffer[j_start + k] - means[j]);
-                cell += ((buffer[i_start + k] - means[i]) * (buffer[j_start + k] - means[j]));
+                cell += (val1 * val2);
             }
             cell /= (chunk_size - 1);            
         }
@@ -159,4 +156,19 @@ CMatrix<float> Covariance(T* buffer, size_t chunk_size, const size_t& chunks_amo
     return res;
 };
 
+/// @brief Inverse normal distribution using Beasley-Springer-Moro  algorithm
+/// @param input random variable from range (0,1)
+/// @return random variable distributed with normal matter
+double InverseNormal(double input);
+
+
 };
+
+
+
+
+
+
+
+
+

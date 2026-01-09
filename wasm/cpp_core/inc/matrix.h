@@ -113,7 +113,7 @@ public:
     /// @param idx number of row to be returned
     /// @return reference to the matrix row
     std::vector<T>& operator[](uint32_t idx) {
-        CHECK_OUT_OF_RANGE(idx, m_mat.size());
+        CHECK_OUT_OF_RANGE(idx, m_mat.size()-1);
         return m_mat[idx];
     }
 
@@ -122,8 +122,8 @@ public:
     /// @param x col index
     /// @return value at (y,x) coordinates
     const T& at(uint32_t y, uint32_t x) const {
-        CHECK_OUT_OF_RANGE(y, m_mat.size());
-        CHECK_OUT_OF_RANGE(x, m_mat[0].size());
+        CHECK_OUT_OF_RANGE(y, m_mat.size()-1);
+        CHECK_OUT_OF_RANGE(x, m_mat[0].size()-1);
         return m_mat[y][x];
     }
 

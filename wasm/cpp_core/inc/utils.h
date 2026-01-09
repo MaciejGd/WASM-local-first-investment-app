@@ -19,7 +19,7 @@ template<typename T, typename N>
 void CheckOutOfRange(const T& n, const N& range, const char* filename, int line) {
     std::stringstream ss;
     ss << "Requested num: " << n << " out of range: " << range << ": " << filename << " in line: " << line;
-    if (n >= range) {
+    if (n > range) {
         throw std::runtime_error(ss.str().c_str());
     }
 }
