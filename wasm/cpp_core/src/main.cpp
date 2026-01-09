@@ -57,6 +57,7 @@ void CholeskyTest() {
 
 #define FLOATS_EQUAL(a, b) {\
     std::cout << "Comparing " << a << " and " << b << "\n"; \
+    std::cout << "Diff: " << a - b << std::endl; \
     assert( std::abs(a - b) < 0.000001 ); \
 }
 
@@ -73,11 +74,11 @@ void MeanTest() {
     auto res1 = Mean(s);
     FLOATS_EQUAL(res1, 321);
 
-    std::deque<float> d{3222.23, 32.9, 943.4};
+    std::deque<double> d{3222.23, 32.9, 943.4};
     auto res2 = Mean(d);
-    //FLOATS_EQUAL(res2, 1339.51);
+    FLOATS_EQUAL(res2, 1399.51);
 
-    std::array<float, 3> a = {14, 1.9, 32.12};
+    std::array<double, 3> a = {14, 1.9, 32.12};
     auto res3 = Mean(a);
     FLOATS_EQUAL(res3, 16.00666666);
     
@@ -92,11 +93,11 @@ void MeanTest() {
 
     int new_arr[12] = {1,2,3, 1,2,3, 1,2,3, 1,2,3};
     // 3 chunks as we need 3 separate means, and 4 chunks at total
-    auto mat = Mean(new_arr, 3, 4);
+    auto mat = GetMeanMatrix(new_arr, 3, 4);
     printCMatrix(mat);
 }
 
-void CovarianceTest() {
+void GetCovarianceMatrixTest() {
     using namespace linalg::algorithms;
     int* test = new int[20]{
                 1,  2,  3,  4,  5,
@@ -110,7 +111,7 @@ void CovarianceTest() {
 //   5, 6, 7  
 // };
     
-    auto res = Covariance(test, 5, 4);
+    auto res = GetCovarianceMatrix(test, 5, 4);
     printCMatrix(res);
     delete []test;
 }
@@ -146,9 +147,9 @@ int main() {
         {8, 5, 4},
         {8, 5, 4}
     };
-    // CholeskyTest();
-    // MeanTest();
-    // CovarianceTest();
+    CholeskyTest();
+    MeanTest();
+    GetCovarianceMatrixTest();
     InverseTest();
     return 0;   
 }

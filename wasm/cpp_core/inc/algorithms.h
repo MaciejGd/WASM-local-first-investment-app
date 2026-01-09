@@ -23,15 +23,15 @@ using namespace linalg::primitives;
 /// @brief Count Cholesky factorization for Symmetric positive define, matrix
 /// @tparam T underlying type for input matrix 
 /// @param mat input matrix
-/// @return LowerTriangular matrix of type float
+/// @return LowerTriangular matrix of type double
 template<typename T>
-CMatrixLowerTriangular<float> CholeskyFactorization(const CMatrix<T>& mat) {
+CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
     uint32_t n = mat.rows();
     uint32_t m = mat.cols();
     // cholesky factorization possible only for square matrices
     CHECK_EQUAL(n, m);
     // create output matrix
-    CMatrixLowerTriangular<float> res(n, n);
+    CMatrixLowerTriangular<double> res(n, n);
     for (int32_t i = 0; i < (int32_t)n; i++) {
         for (int32_t j = 0; j <= i; j++) {
             auto& cell = res[i][j];
@@ -81,15 +81,15 @@ struct is_stl_container<std::deque<T, A>> {
 /// @return mean value of the container's elements as float
 template<typename T, 
         typename = std::enable_if<is_stl_container<T>::value>::type >
-float Mean(const T& cont) {
-    float n = static_cast<float>(cont.size());
+double Mean(const T& cont) {
+    double n = static_cast<double>(cont.size());
     if (n == 0.0) {
         // prevent dividing by 0
         return 0.0;
     }
 
-    float sum = (std::accumulate(cont.begin(), cont.end(), 0.0, [](float acc, auto v) {
-                    return acc + static_cast<float>(v);
+    double sum = (std::accumulate(cont.begin(), cont.end(), 0.0, [](double acc, auto v) {
+                    return acc + static_cast<double>(v);
                 }));
     return sum / n;
 };
@@ -100,15 +100,15 @@ float Mean(const T& cont) {
 /// @param size size of the array
 /// @return mean value of the array's elements up to size, as float
 template<typename T>
-float Mean(T* buffer, size_t size) {
+double Mean(T* buffer, size_t size) {
     if (size <= 0) {
         return 0.0;
     }
-    float sum = 0.0;
+    double sum = 0.0;
     for (size_t i = 0; i < size; i++, buffer++) {
         sum += (*buffer);
     }
-    return sum / static_cast<float>(size);
+    return sum / static_cast<double>(size);
 };
 
 /// @brief Represent mean values as Matrix
@@ -118,8 +118,8 @@ float Mean(T* buffer, size_t size) {
 /// @param chunks_amount amount of chunks for which mean values should be counted
 /// @return Matrix of dimensions: chunks_amount x 1
 template<typename T>
-CMatrix<float> Mean(T* buffer, size_t chunk_size, size_t chunks_amount) {
-    CMatrix<float> res(chunks_amount, 1);
+CMatrix<double> GetMeanMatrix(T* buffer, size_t chunk_size, size_t chunks_amount) {
+    CMatrix<double> res(chunks_amount, 1);
     // iterate through chunks and count mean value for each
     for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
         res[i][0] = Mean(buffer, chunk_size);
@@ -129,15 +129,15 @@ CMatrix<float> Mean(T* buffer, size_t chunk_size, size_t chunks_amount) {
 
 // TODO resulting matrix is symmetric, amount of computations can be strongly reduced
 template<typename T>
-CMatrix<float> Covariance(T* buffer, size_t chunk_size, const size_t& chunks_amount) {
+CMatrix<double> GetCovarianceMatrix(T* buffer, size_t chunk_size, const size_t& chunks_amount) {
     // vector for variance values
-    std::vector<float> means(chunks_amount);
+    std::vector<double> means(chunks_amount);
     T* head = buffer;
     for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
         means[i] = Mean(buffer, chunk_size);
     }
     buffer = head; // bring buffer pointer back to the first element
-    CMatrix<float> res(chunks_amount, chunks_amount);
+    CMatrix<double> res(chunks_amount, chunks_amount);
     for (size_t i = 0; i < chunks_amount; i++) {
         for (size_t j = 0; j < chunks_amount; j++) {
             auto& cell = res[i][j];
