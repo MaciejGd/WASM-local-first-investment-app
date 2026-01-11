@@ -9,13 +9,21 @@ UNIT_TEST(AssertionsTests, CheckNearSuccess)
 
 UNIT_TEST(AssertionsTests, CheckNearFail) 
 {
-    CHECK_NEAR(1.0001, 1.022, 0.02); // should fail
+    auto lambda = [&]() {
+        CHECK_NEAR(1.0001, 1.022, 0.02); // should fail
+    };
+    lambda();
+    test_result_contianer.value ^= 1; // if assertion failed means success
 }
 
 // ################## CHECK_G ########################## 
 UNIT_TEST(AssertionsTests, CheckGreaterFail)
 {
-    CHECK_G(1, 2); // should fail
+    auto lambda = [&]() {
+        CHECK_G(1, 2); // should fail
+    };
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 UNIT_TEST(AssertionsTests, CheckGreaterSuccess)
@@ -26,7 +34,12 @@ UNIT_TEST(AssertionsTests, CheckGreaterSuccess)
 // ################## CHECK_GE ##########################
 UNIT_TEST(AssertionsTests, CheckGreaterEqualFail)
 {
-    CHECK_GE(1, 2); // should fail
+    auto lambda = [&]() {
+        CHECK_GE(1, 2); // should fail
+    };
+
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 UNIT_TEST(AssertionsTests, CheckGreaterEqualSuccess)
@@ -37,7 +50,11 @@ UNIT_TEST(AssertionsTests, CheckGreaterEqualSuccess)
 // ################## CHECK_LE ##########################
 UNIT_TEST(AssertionsTests, CheckLowerEqualFail)
 {
-    CHECK_LE(2, 1); // should fail
+    auto lambda = [&]() {
+        CHECK_LE(2, 1); // should fail
+    };
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 UNIT_TEST(AssertionsTests, CheckLowerEqualSuccess)
@@ -48,7 +65,12 @@ UNIT_TEST(AssertionsTests, CheckLowerEqualSuccess)
 // ################## CHECK_L ##########################
 UNIT_TEST(AssertionsTests, CheckLowerFail)
 {
-    CHECK_L(2, 2); // should fail
+    auto lambda = [&]() {
+        CHECK_L(2, 2); // should fail
+    };
+
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 UNIT_TEST(AssertionsTests, CheckLowerSuccess)
@@ -64,13 +86,23 @@ UNIT_TEST(AssertionsTest, CheckEqualSuccess)
 
 UNIT_TEST(AssertionsTest, CheckEqualFail) 
 {
-    CHECK_EQUAL(1, 2); // should fail
+    auto lambda = [&]() {
+        CHECK_EQUAL(1, 2); // should fail
+    };
+
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 // ################## CHECK_NOT_EQUAL ##########################
 UNIT_TEST(AssertionsTest, CheckNotEqualFail) 
 {
-    CHECK_NOT_EQUAL(1, 1); // should fail
+    auto lambda = [&]() {
+        CHECK_NOT_EQUAL(1, 1); // should fail
+    };
+
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 UNIT_TEST(AssertionsTest, CheckNotEqualSuccess) 
@@ -86,7 +118,12 @@ UNIT_TEST(AssertionTest, CheckTrueSuccess)
 
 UNIT_TEST(AssertionTest, CheckTrueFail) 
 {
-    CHECK_TRUE(2 != 2); // should fail
+    auto lambda = [&]() {
+        CHECK_TRUE(2 != 2); // should fail
+    };
+
+    lambda();
+    test_result_contianer.value ^= 1;
 }
 
 // ################## CHECK_FALSE ##########################
@@ -97,5 +134,9 @@ UNIT_TEST(AssertionTest, CheckFalseSuccess)
 
 UNIT_TEST(AssertionTest, CheckFalseFail) 
 {
-    CHECK_FALSE(2 == 2); // should fail
+    auto lambda = [&]() {
+        CHECK_FALSE(2 == 2); // should fail
+    };
+    lambda();
+    test_result_contianer.value ^= 1;
 }

@@ -12,8 +12,57 @@
 using std::vector;
 using std::string;
 
-
 namespace utests {
+
+// LOGGING UTILITY
+
+inline static constexpr const char* RED_TEXT_COLOR = "\033[31m";
+inline static constexpr const char* GREEN_TEXT_COLOR = "\033[32m";
+inline static constexpr const char* RESET_TEXT_COLOR = "\033[0m";
+inline static constexpr const char* WHITE_BOLD_TEXT_COLOR = "\033[1;37m";
+inline static constexpr const int INDENTATION = 60;
+
+
+#define PRINT_BOLD(msg)\
+    std::cout << WHITE_BOLD_TEXT_COLOR << msg << RESET_TEXT_COLOR;
+
+#define LOG_FAIL(msg)\
+    {\
+        std::stringstream ss;\
+        ss << utests::RED_TEXT_COLOR << msg << "FAILED" << utests::RESET_TEXT_COLOR << std::endl;\
+        std::cout << ss.str();\
+    }
+
+#define LOG_PASS(msg);\
+    {\
+        std::stringstream ss;\
+        ss << utests::GREEN_TEXT_COLOR << msg << "PASSED" << utests::RESET_TEXT_COLOR << std::endl;\
+        std::cout << ss.str();\
+    }
+
+#define LOG_TEST_RESULT(testsuite, testname, result);\
+    {\
+        int spacing = utests::INDENTATION - (testsuite.size() + testname.size());\
+        std::stringstream msg;\
+        msg << testsuite << ":" << testname << std::string(spacing, ' ');\
+        if (result) { LOG_PASS(msg.str()); }\
+        else { LOG_FAIL(msg.str()); }\
+    }\
+
+#define TESTS_SUMMARIZE(testsuite, testnum, testpassed)\
+    {\
+        std::stringstream ss;\
+        ss << testsuite << std::string(utests::INDENTATION - testsuite.size(), ' ') << testpassed << "/"\
+            << testnum << " PASSED" << std::endl;\
+        PRINT_BOLD(ss.str());\
+    }
+
+#define TESTSUITES_SEPARATION()\
+    {\
+        std::stringstream ss;\
+        ss << std::string(utests::INDENTATION + 10, '*') << std::endl;\
+        PRINT_BOLD(ss.str());\
+    }
 
 /// @brief Information about test, testsuite name and testname
 class [[nodiscard]] TestInfo {
@@ -46,7 +95,7 @@ public:
         bool value = true;
     };
 
-    virtual void Run(TestResultContainer& res) = 0;
+    virtual void Run(TestResultContainer& test_result_contianer) = 0;
 protected:
     TestInfo info;
 };
@@ -71,18 +120,22 @@ public:
 
     /// @brief Run all registered testcases
     static void RunTests() {
+        int tests_amount = 0;
+        int all_passed_tests = 0;
         for (const auto& testsuite : test_map) {
+            int tests_passed = 0;
+            TESTSUITES_SEPARATION();
             for (auto& test : testsuite.second) {
                 utests::Test::TestResultContainer res;
                 test->Run(res);
-                if (!res.value) {
-                    std::cout << "Testcase " << test->GetTestsuite() << ":" << test->GetTestName() << " failed!\n";
-                }
-                else {
-                    std::cout << "Testcase " << test->GetTestsuite() << ":" << test->GetTestName() << " passed!\n";
-                }
+                LOG_TEST_RESULT(test->GetTestsuite(), test->GetTestName(), res.value);
+                if (res.value) tests_passed++;
             }
+            TESTS_SUMMARIZE(testsuite.first, testsuite.second.size(), tests_passed);
+            tests_amount += testsuite.second.size();
+            all_passed_tests += tests_passed;
         }
+        TESTS_SUMMARIZE(std::string("All tests run, results: "), tests_amount, all_passed_tests);
     };
 
 private:
@@ -106,12 +159,12 @@ private:
             std::make_unique<test_suite##_##test_name##_Test>()\
         );\
 \
-        void test_suite##_##test_name##_Test::Run(utests::Test::TestResultContainer& res)
+        void test_suite##_##test_name##_Test::Run(utests::Test::TestResultContainer& test_result_contianer)
 
 };
 
 /// Action that should be taken on test fail
-#define FAIL_TEST res.value = false; return;
+#define FAIL_TEST test_result_contianer.value = false; return;
 
 /// Check if two values are equal
 #define CHECK_EQUAL(a,b)\
