@@ -59,7 +59,6 @@ public:
     /// @return bool, true on success, false otherwise
     static bool RegisterTest(std::unique_ptr<Test> test_ptr) {
         const auto& testsuite = test_ptr->GetTestsuite();
-        const auto& testname = test_ptr->GetTestName();
         // if testsuite not registered yet, register it and add test to container
         if (test_map.find(testsuite) == test_map.end()) {
             test_map[testsuite].push_back(std::move(test_ptr));
@@ -95,8 +94,8 @@ private:
     inline static std::map<std::string, std::vector<std::unique_ptr<Test>>> test_map;
 };
 
-
-#define UNIT_TEST(test_suite, test_name)\ 
+/// Macro for instantiating unit tests. Each test from particular testsuite should have unique name
+#define UNIT_TEST(test_suite, test_name)\
         class test_suite##_##test_name##_Test : public utests::Test {\
         public:\
             test_suite##_##test_name##_Test(): utests::Test(#test_suite, #test_name) {};\
@@ -111,12 +110,49 @@ private:
 
 };
 
-/// @brief Use for integers
-#define CHECK_EQUAL(a,b)\
-    if (a != b) res.value = false; return;
+/// Action that should be taken on test fail
+#define FAIL_TEST res.value = false; return;
 
-/// @brief Use for floating point numbers
-#define CHECK_NEAR(a,b)\
-    if (a - b <= -0.000001 || a - b >= 0.000001) res.value = false; return;
+/// Check if two values are equal
+#define CHECK_EQUAL(a,b)\
+    if (a != b) FAIL_TEST
+
+/// Check if two values are not equal
+#define CHECK_NOT_EQUAL(a,b)\
+    if (a == b) FAIL_TEST
+
+/// Check if value a is less or equal than b
+#define CHECK_LE(a,b)\
+    if (a > b) FAIL_TEST
+
+/// Check if value a is strictly less than b
+#define CHECK_L(a,b)\
+    if (a >= b) FAIL_TEST
+
+/// Check if value a is greater or equal than b
+#define CHECK_GE(a,b)\
+    if (a < b) FAIL_TEST
+
+/// Check if value a is strictly greater than b
+#define CHECK_G(a,b)\
+    if (a <= b) FAIL_TEST
+
+
+// TODO change that as it is not the best solution to check float values
+#define CHECK_EQUAL_FLOAT(a,b)\
+    if (a - b <= -0.000001 || a - b >= 0.000001) FAIL_TEST
+
+/// Check if difference between two numbers is less or equal to 'near'
+#define CHECK_NEAR(a,b,near)\
+    if (a - b <= -near || a - b >= near) FAIL_TEST
+
+/// Check if expression evaluates to true
+#define CHECK_TRUE(a)\
+    if (!a) FAIL_TEST
     
+/// Check if expression evaluates to false
+#define CHECK_FALSE(a)\
+    if (a) FAIL_TEST
+
+
 
