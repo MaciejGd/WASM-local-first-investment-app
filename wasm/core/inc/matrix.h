@@ -19,6 +19,9 @@ class MatrixRowProxy {
 public:
     MatrixRowProxy(T* data, uint32_t cols): m_data(data), m_cols(cols) {}
 
+    /// @brief Access element form the Matrix row
+    /// @param idx index of element that should be accessed
+    /// @return value of the element from the matrix
     T& operator[](uint32_t idx) {
         CHECK_OUT_OF_RANGE(idx, m_cols - 1);
         return m_data[idx];
@@ -175,7 +178,8 @@ public:
     constexpr uint32_t rows() const noexcept {
         return m_rows;
     }
-    /// @brief Transposing matrix. This would be done in place, modifying underlaying mat container
+
+    /// @brief Transposing matrix. This is done in place, modifying underlaying mat container
     void Transpose() {
         matrix_container cont(m_cols, std::vector<T>(m_rows, T{}));
         for (int32_t i = 0; i < m_rows; i++) {

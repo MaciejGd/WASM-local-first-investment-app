@@ -146,7 +146,7 @@ UNIT_TEST(MatrixValuesAccess, ConstantAccessEmptyInit) {
     CHECK_EQUAL(matrix.at(2, 0), 0); 
     CHECK_EQUAL(matrix.at(2, 1), 0);
 }
-
+// CHECKING elements access exceptions
 UNIT_TEST(MatrixValuesAccess, OutOfBoundsConstantAccess) {
     using namespace linalg::primitives;
     using namespace std;
@@ -165,3 +165,91 @@ UNIT_TEST(MatrixValuesAccess, OutOfBoundsReferenceAccess) {
     CHECK_THROW(value = matrix[3][0], std::out_of_range);
     CHECK_THROW(value = matrix[0][2], std::out_of_range);
 }
+
+/// ADD operator on matrix
+UNIT_TEST(MatrixAddition, MatrixAddition) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2,2}, {3,3,3}, {2,2,2}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    matrix1 = matrix1 + matrix2;
+    CHECK_EQUAL(matrix1[0][0], 3);
+    CHECK_EQUAL(matrix1[0][1], 4);
+    CHECK_EQUAL(matrix1[0][2], 5);
+    CHECK_EQUAL(matrix1[1][0], 4);
+    CHECK_EQUAL(matrix1[1][1], 5);
+    CHECK_EQUAL(matrix1[1][2], 6);
+    CHECK_EQUAL(matrix1[2][0], 3);
+    CHECK_EQUAL(matrix1[2][1], 4);
+    CHECK_EQUAL(matrix1[2][2], 5);
+}
+
+UNIT_TEST(MatrixAddition, IncorrectDimensionsHeight) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2,2}, {3,3,3}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_THROW(matrix1 = matrix1 + matrix2, std::logic_error);
+}
+
+UNIT_TEST(MatrixAddition, IncorrectDimensionsWidth) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2}, {3,3}, {1,2}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_THROW(matrix1 = matrix1 + matrix2, std::logic_error);
+}
+
+
+UNIT_TEST(MatrixSubstraction, MatrixSubstraction) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2,2}, {3,3,3}, {2,2,2}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    matrix1 = matrix1 - matrix2;
+    CHECK_EQUAL(matrix1[0][0], -1);
+    CHECK_EQUAL(matrix1[0][1], 0);
+    CHECK_EQUAL(matrix1[0][2], 1);
+    CHECK_EQUAL(matrix1[1][0], -2);
+    CHECK_EQUAL(matrix1[1][1], -1);
+    CHECK_EQUAL(matrix1[1][2], 0);
+    CHECK_EQUAL(matrix1[2][0], -1);
+    CHECK_EQUAL(matrix1[2][1], 0);
+    CHECK_EQUAL(matrix1[2][2], 1);
+}
+
+UNIT_TEST(MatrixSubstraction, IncorrectDimensionsHeight) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2,2}, {3,3,3}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_THROW(matrix1 = matrix1 - matrix2, std::logic_error);
+}
+
+UNIT_TEST(MatrixSubstraction, IncorrectDimensionsWidth) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1,2,3}, {1,2,3}, {1,2,3}};
+    vector<vector<float>> mat2 = {{2,2}, {3,3}, {1,2}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_THROW(matrix1 = matrix1 - matrix2, std::logic_error);
+}
+
+// TODO - add tests, for Transposing, * + and - operators

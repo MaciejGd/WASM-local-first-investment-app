@@ -11,7 +11,7 @@ void CheckEqual(const T& n, const T& m, const char* filename, int line) {
     std::stringstream ss;
     ss << "Invalid dimensions specified in: " << filename << " in line: " << line;
     if (n != m) {
-        throw std::runtime_error(ss.str().c_str());
+        throw std::logic_error(ss.str().c_str());
     }
 }
 
