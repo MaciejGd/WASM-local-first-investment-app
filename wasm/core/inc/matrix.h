@@ -10,22 +10,38 @@
 
 namespace linalg::primitives {
 
+/// @brief Main purpose of the class is to let us introduce the out_of_range checking on Matrix rows
+/// @tparam T inner type of Matrix row
+template<typename T>
+class MatrixRowProxy {
+    T* m_data = nullptr;
+    uint32_t m_cols = 0;
+public:
+    MatrixRowProxy(T* data, uint32_t cols): m_data(data), m_cols(cols) {}
+
+    T& operator[](uint32_t idx) {
+        CHECK_OUT_OF_RANGE(idx, m_cols - 1);
+        return m_data[idx];
+    }
+};
+
+
 // we actually need mosty matrix, as vector is just a matrix of 1 x n
 template <typename T>
 class CMatrix {    
-    using matrix_container = std::vector<std::vector<T>>;
+    using matrix_container = std::vector<T>;
 public:
     /// @brief Initialize matrix with zeros
     /// @param rows number of matrix rows 
     /// @param cols number of matrix cols
     CMatrix(const uint32_t& rows, const uint32_t& cols): m_rows(rows), m_cols(cols) {
         // zero initialize matrix
-        m_mat = matrix_container(m_rows, std::vector<T>(m_cols, T{}));
+        m_mat = matrix_container(m_rows * m_cols, T{});
     };
 
     /// @brief Initialize CMatrix from 2D vector
     /// @param mat 2D vector with initial values
-    CMatrix(const matrix_container& mat): m_mat(mat) {
+    CMatrix(const vector<vector<T>>& mat) {
         // throw expection if empty container passed
         if (mat.size() == 0) {
             throw std::invalid_argument("Matrix cannot be constructed from empty data");
@@ -37,15 +53,22 @@ public:
                 throw std::invalid_argument("All rows of the Matrix should be the same length");
             }
         }
-        m_rows = m_mat.size();
-        m_cols = m_mat[0].size();
+        m_rows = mat.size();
+        m_cols = mat[0].size();
+        m_mat = matrix_container(m_rows * m_cols, T{});
+        // fill values from 2D vector into a inner container
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = 0; j < m_cols; j++) {
+                m_mat[i*m_cols + j] = mat[i][j];
+            }
+        }
     }
 
     CMatrix(const std::vector<T>& vec): m_rows(1), m_cols(vec.size()) {
         if (vec.size() == 0) {
             throw std::invalid_argument("Matrix cannot be constructed from empty data");
         }
-        m_mat.push_back(vec);
+        m_mat = vec;
     }
 
     CMatrix(const CMatrix& other) = default;
@@ -126,9 +149,9 @@ public:
     /// @brief Return reference to the row of matrix
     /// @param idx number of row to be returned
     /// @return reference to the matrix row
-    std::vector<T>& operator[](uint32_t idx) {
-        CHECK_OUT_OF_RANGE(idx, m_mat.size()-1);
-        return m_mat[idx];
+    MatrixRowProxy<T> operator[](uint32_t idx) {
+        CHECK_OUT_OF_RANGE(idx, m_rows - 1);
+        return MatrixRowProxy<T>(&m_mat[idx * m_cols], m_cols);
     }
 
     /// @brief Constant getter of matrix value
@@ -136,9 +159,9 @@ public:
     /// @param x col index
     /// @return value at (y,x) coordinates
     const T& at(uint32_t y, uint32_t x) const {
-        CHECK_OUT_OF_RANGE(y, m_mat.size()-1);
-        CHECK_OUT_OF_RANGE(x, m_mat[0].size()-1);
-        return m_mat[y][x];
+        CHECK_OUT_OF_RANGE(y, m_rows-1);
+        CHECK_OUT_OF_RANGE(x, m_cols-1);
+        return m_mat[y * m_cols + x];
     }
 
     /// @brief Getter for number of matrix columns
@@ -165,7 +188,6 @@ public:
         m_rows = m_mat.size();
         m_cols = m_mat[0].size();
     };
-
 protected:
     /// number of rows in a matrix 
     uint32_t m_rows;

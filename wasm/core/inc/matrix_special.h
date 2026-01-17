@@ -13,7 +13,7 @@ public:
     CMatrixDiagonal(uint32_t rows, uint32_t cols, int32_t value): CMatrix<T>(rows, cols) {
         uint32_t diag_length = std::min(cols, rows);
         for (uint32_t i = 0; i < diag_length; i++) {
-            this->m_mat[i][i] = value;
+            this->m_mat[i * this->m_cols + i] = value;
         }
     }
 
@@ -48,7 +48,7 @@ public:
         for (uint32_t i = 0; i < this->m_rows; i++) {
             uint32_t range = std::min(this->m_cols, i);
             for (uint32_t j = 0; j < range; j++) {
-                this->m_mat[i][j] = 0;
+                this->m_mat[i * this->m_cols + j] = 0;
             }
         }
     };
@@ -88,7 +88,7 @@ public:
         // fill everything above diagonal with zeros
         for (uint32_t i = 0; i < this->m_rows; i++) {
             for (uint32_t j = i + 1; j < this->m_cols; j++) {
-                this->m_mat[i][j] = 0;
+                this->m_mat[i * this->m_cols + j] = 0;
             }
         }
     };
