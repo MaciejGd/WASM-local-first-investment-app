@@ -1,6 +1,6 @@
 #include <iostream>
 #include "./inc/tests_runner.h"
-#include "./inc/assertions_tests.h"
+#include "./inc/matrix_tests.h"
 
 int main() {
     utests::UnitTestRunner::RunTests();

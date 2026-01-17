@@ -29,7 +29,7 @@ CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
     uint32_t n = mat.rows();
     uint32_t m = mat.cols();
     // cholesky factorization possible only for square matrices
-    CHECK_EQUAL(n, m);
+    CHECK_VALUES_EQUAL(n, m);
     // create output matrix
     CMatrixLowerTriangular<double> res(n, n);
     for (int32_t i = 0; i < (int32_t)n; i++) {

@@ -207,5 +207,30 @@ private:
 #define CHECK_FALSE(a)\
     if (a) FAIL_TEST
 
+/// Check if code does not throw
+#define CHECK_NO_THROW(statement)\
+    {\
+        try {\
+            statement;\
+        }\
+        catch (...){\
+            FAIL_TEST\
+        }\
+    }
+
+/// Test should pass only when exception of correct type is thrown
+#define CHECK_THROW(statement, errortype)\
+    {\
+        try {\
+            statement;\
+            FAIL_TEST\
+        }\
+        catch (const errortype&) {\
+            ;\
+        }\
+        catch (...) {\
+            FAIL_TEST\
+        }\
+    }
 
 

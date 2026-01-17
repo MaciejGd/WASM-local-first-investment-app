@@ -26,11 +26,25 @@ public:
     /// @brief Initialize CMatrix from 2D vector
     /// @param mat 2D vector with initial values
     CMatrix(const matrix_container& mat): m_mat(mat) {
+        // throw expection if empty container passed
+        if (mat.size() == 0) {
+            throw std::invalid_argument("Matrix cannot be constructed from empty data");
+        }
+
+        size_t prev_row = mat[0].size();
+        for (int i = 0; i < mat.size(); i++) {
+            if (prev_row != mat[i].size()) {
+                throw std::invalid_argument("All rows of the Matrix should be the same length");
+            }
+        }
         m_rows = m_mat.size();
         m_cols = m_mat[0].size();
     }
 
     CMatrix(const std::vector<T>& vec): m_rows(1), m_cols(vec.size()) {
+        if (vec.size() == 0) {
+            throw std::invalid_argument("Matrix cannot be constructed from empty data");
+        }
         m_mat.push_back(vec);
     }
 
@@ -49,7 +63,7 @@ public:
         // output type for multiplying ex. float and int
         using O = decltype(std::declval<T>() * std::declval<N>());
         // handle not correct dimensions of matrix
-        CHECK_EQUAL(m_cols, other.rows());
+        CHECK_VALUES_EQUAL(m_cols, other.rows());
         // create output matrix
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
@@ -75,8 +89,8 @@ public:
     auto operator+(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
         // for addition both rows and cols should be the same
-        CHECK_EQUAL(m_rows, other.rows());
-        CHECK_EQUAL(m_cols, other.cols());
+        CHECK_VALUES_EQUAL(m_rows, other.rows());
+        CHECK_VALUES_EQUAL(m_cols, other.cols());
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
         CMatrix<O> ret(n, m);
@@ -96,8 +110,8 @@ public:
     auto operator-(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
         // for addition both rows and cols should be the same
-        CHECK_EQUAL(m_rows, other.rows());
-        CHECK_EQUAL(m_cols, other.cols());
+        CHECK_VALUES_EQUAL(m_rows, other.rows());
+        CHECK_VALUES_EQUAL(m_cols, other.cols());
         const uint32_t n = m_rows;
         const uint32_t m = other.cols();
         CMatrix<O> ret(n, m);

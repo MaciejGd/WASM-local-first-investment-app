@@ -1,5 +1,5 @@
 make all:
-	g++ main.cpp -o unit_tests
+	g++ main.cpp -g02 -o unit_tests
 
 make run:
-	g++ main.cpp -o unit_tests && ./unit_tests
+	g++ main.cpp -g02 -o unit_tests && ./unit_tests

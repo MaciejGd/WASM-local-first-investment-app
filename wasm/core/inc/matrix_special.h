@@ -20,7 +20,7 @@ public:
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        CHECK_EQUAL(this->m_cols, other.rows());
+        CHECK_VALUES_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
@@ -56,7 +56,7 @@ public:
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        CHECK_EQUAL(this->m_cols, other.rows());
+        CHECK_VALUES_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
@@ -98,7 +98,7 @@ public:
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
-        CHECK_EQUAL(this->m_cols, other.rows());
+        CHECK_VALUES_EQUAL(this->m_cols, other.rows());
         // create output matrix
         const uint32_t n = this->m_rows;
         const uint32_t m = other.cols();
