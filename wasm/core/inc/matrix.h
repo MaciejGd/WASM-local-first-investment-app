@@ -180,7 +180,7 @@ public:
     }
 
     /// @brief Transposing matrix. This is done in place, modifying underlaying mat container
-    void Transpose() {
+    CMatrix<T>& Transpose() {
         uint32_t new_cols = m_rows;
         uint32_t new_rows = m_cols;
         matrix_container cont(m_cols * m_rows, T{});
@@ -193,6 +193,7 @@ public:
         m_mat = std::move(cont);
         m_rows = new_rows;
         m_cols = new_cols;
+        return *this;
     };
 
 protected:
