@@ -252,4 +252,81 @@ UNIT_TEST(MatrixSubstraction, IncorrectDimensionsWidth) {
     CHECK_THROW(matrix1 = matrix1 - matrix2, std::logic_error);
 }
 
-// TODO - add tests, for Transposing, * + and - operators
+UNIT_TEST(MatrixMultiplication, MatrixByMatrix) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{3,1,2}, {2,0,2}};
+    vector<vector<float>> mat2 = {{4}, {5}, {6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    matrix1 = matrix1 * matrix2;
+    CHECK_EQUAL(matrix1.cols(), mat2[0].size());
+    CHECK_EQUAL(matrix1.rows(), mat1.size());
+    CHECK_EQUAL(matrix1[0][0], 29);
+    CHECK_EQUAL(matrix1[1][0], 20);
+}
+
+UNIT_TEST(MatrixMultiplication, MatrixByMatrixIncorrectDimensions) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{3,1,2}, {2,0,2}};
+    vector<vector<float>> mat2 = {{4}, {5}, {6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    // should throw as width of mat2 and height of mat1 does not match
+    CHECK_THROW(matrix2 * matrix1, std::logic_error);
+}
+
+UNIT_TEST(MatrixMultiplication, MatrixByScalar) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{3,1,2}, {2,0,2}};
+    auto matrix1 = CMatrix(mat1);
+    // should throw as width of mat2 and height of mat1 does not match
+    matrix1 = matrix1 * 4;
+    CHECK_EQUAL(matrix1[0][0], 12);
+    CHECK_EQUAL(matrix1[0][1], 4);
+    CHECK_EQUAL(matrix1[0][2], 8);
+    // second row
+    CHECK_EQUAL(matrix1[1][0], 8);
+    CHECK_EQUAL(matrix1[1][1], 0);
+    CHECK_EQUAL(matrix1[1][2], 8);
+}
+
+UNIT_TEST(MatrixMultiplication, ScalarByMatrix) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{3,1,2}, {2,0,2}};
+    auto matrix1 = CMatrix(mat1);
+    // should throw as width of mat2 and height of mat1 does not match
+    matrix1 = 4 * matrix1;
+    CHECK_EQUAL(matrix1[0][0], 12);
+    CHECK_EQUAL(matrix1[0][1], 4);
+    CHECK_EQUAL(matrix1[0][2], 8);
+    // second row
+    CHECK_EQUAL(matrix1[1][0], 8);
+    CHECK_EQUAL(matrix1[1][1], 0);
+    CHECK_EQUAL(matrix1[1][2], 8);
+}
+
+UNIT_TEST(MatrixTransposition, Transposition) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{3,1,2}, {2,0,2}};
+    auto matrix1 = CMatrix(mat1);
+    // should throw as width of mat2 and height of mat1 does not match
+    matrix1.Transpose();
+    CHECK_EQUAL(matrix1[0][0], 3);
+    CHECK_EQUAL(matrix1[0][1], 2);
+    // second row
+    CHECK_EQUAL(matrix1[1][0], 1);
+    CHECK_EQUAL(matrix1[1][1], 0);
+    // third row
+    CHECK_EQUAL(matrix1[2][0], 2);
+    CHECK_EQUAL(matrix1[2][1], 2);
+}
