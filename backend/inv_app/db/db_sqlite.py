@@ -24,3 +24,15 @@ class SQLite3DB(db_handler.DBHandler):
     def initialize(self, db_handle, schema_path: str):
         with current_app.open_resource(schema_path) as f:
             db_handle.executescript(f.read().decode('utf-8'))
+
+    def get_user_data(self, db_handle, user_id: int):
+        return db_handle.execute(
+            'SELECT * FROM user WHERE id = ?', (user_id,)
+        ).fetchone()
+    
+    def get_username_data(self, db_handle, username: str):
+        return db_handle.execute(
+            'SELECT * FROM user WHERE username = ?', (username, )
+        ).fetchone()
+
+        

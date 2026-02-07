@@ -29,6 +29,28 @@ class DBProxy(object):
         db = self.get_db()
         self.db_handler.initialize(db, self.schema_path)
 
+    def get_user_data(self, id: int):
+        """
+        Get information about the user specified with user_id from DB
+        
+        :param self: Description
+        :param id: Description
+        :type id: int id of user that we want get info about
+        """
+        db = self.get_db()
+        return self.db_handler.get_user_data(db, id)
+    
+    def get_username_data(self, username: str):
+        """
+        Get information about the user by his username 
+        
+        :param self: Description
+        :param username: Description
+        :type username: str
+        """
+        db = self.get_db()
+        return self.db_handler.get_username_data(db, username)
+
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")
 

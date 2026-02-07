@@ -1,5 +1,5 @@
 import os 
-from flask import Flask
+from flask import Flask, jsonify
 
 
 def create_app(test_config=None):
@@ -20,5 +20,12 @@ def create_app(test_config=None):
 
     from . import db
     db.init_app(app)
+
+    @app.route("/hello")
+    def hello():
+        return jsonify({"first" : "hello", "second" : "world"})
+    
+    from . import auth
+    app.register_blueprint(auth.bp)
 
     return app

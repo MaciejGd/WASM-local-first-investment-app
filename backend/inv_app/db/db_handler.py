@@ -22,3 +22,11 @@ class DBHandler(ABC):
     @abstractmethod
     def initialize(self, schema_path: str):
         raise NotImplementedError
+
+    @abstractmethod
+    def get_user_data(self, db_handle, user_id: int):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_username_data(self, db_handle, username: str):
+        raise NotImplementedError
