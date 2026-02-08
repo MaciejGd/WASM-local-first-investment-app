@@ -1,6 +1,6 @@
 import os 
 from flask import Flask, jsonify
-
+from flask_cors import CORS
 
 def create_app(test_config=None):
     # create and configure app instance
@@ -27,5 +27,8 @@ def create_app(test_config=None):
     
     from . import auth
     app.register_blueprint(auth.bp)
+
+    # register CORS so that react app can access server
+    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
     return app

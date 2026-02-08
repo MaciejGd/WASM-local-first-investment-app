@@ -7,49 +7,97 @@ import SimulationsPage from './subpages/Simulations.jsx';
 import GraphsPage from './subpages/graphs/Graphs.jsx';
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { useState } from 'react';
-import { WalletIcon, LeftArrowIcon, RightArrowIcon, CryptoIcon, GraphsIcon, ObligationsIcon, SimulationsIcon, SettingsIcon } from './IconLoader.jsx';
+import { 
+  WalletIcon,
+  LeftArrowIcon, 
+  RightArrowIcon, 
+  CryptoIcon, 
+  GraphsIcon, 
+  ObligationsIcon, 
+  SimulationsIcon, 
+  SettingsIcon, 
+  LogOutIcon 
+} from './IconLoader.jsx';
+import { LogInPopUp } from './subpages/auth/Login.jsx';
+import { LogOutPopUp } from './subpages/auth/Logout.jsx';
 
 
-function NavigationBar() {
+function NavigationBar({ onLogOut }) {
   const [visible, setVisible] = useState(true);
 
   function clickButton() {
-    console.log("Hide button pressed!");
     setVisible(!visible);
   }
 
-  return visible ? <NavBar onHideButtonClick={clickButton}></NavBar> : <HiddenNavBar onHideButtonClick={clickButton}></HiddenNavBar>;
+  return <NavBar onHideButtonClick={clickButton} onLogOut={onLogOut} visible={visible}></NavBar>
 }
 
-function HiddenNavBar({onHideButtonClick}) {
+// Left-oriented nav bar of the application
+function NavBar({onHideButtonClick, onLogOut, visible}) {
   return (
     <nav className="sidebar">
-      <button className="navigationButton" onClick={onHideButtonClick}><RightArrowIcon /></button>
-      <NavLink className="navigationButton" to="/stock"><WalletIcon /> </NavLink>
-      <NavLink className="navigationButton" to="/crypto"><CryptoIcon/></NavLink>
-      <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/></NavLink>
-      <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/></NavLink>
-      <NavLink className="navigationButton" to="/graphs"><GraphsIcon/></NavLink>
-      <NavLink className="navigationButton" to="/settings"><SettingsIcon/></NavLink>
+      <button className="navigationButton" onClick={onHideButtonClick}><LeftArrowIcon /><span>{visible ? " Hide navbar " : ""}</span></button>
+      <NavLink className="navigationButton" to="/stock"><WalletIcon />{visible ? " Stock " : ""} </NavLink>
+      <NavLink className="navigationButton" to="/crypto"><CryptoIcon/>{visible ? " Crypto " : ""}</NavLink>
+      <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/>{visible ? " Obligations " : ""}</NavLink>
+      <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/>{visible ? " Simulations " : ""}</NavLink>
+      <NavLink className="navigationButton" to="/graphs"><GraphsIcon/>{visible ? " Graphs " : ""}</NavLink>
+      <NavLink className="navigationButton" to="/settings"><SettingsIcon/>{visible ? " Settings " : ""}</NavLink>
+      <button className="navigationButton" onClick={onLogOut}><LogOutIcon/>{visible ? " Logout " : ""}</button>
     </nav>
   );
 }
 
-function NavBar({onHideButtonClick}) {
-  return (
-    <nav className="sidebar">
-      <button className="navigationButton" onClick={onHideButtonClick}><LeftArrowIcon /><span>Hide navbar</span></button>
-      <NavLink className="navigationButton" to="/stock"><WalletIcon />Stock </NavLink>
-      <NavLink className="navigationButton" to="/crypto"><CryptoIcon/>Crypto</NavLink>
-      <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/>Obligations</NavLink>
-      <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/>Simulations</NavLink>
-      <NavLink className="navigationButton" to="/graphs"><GraphsIcon/>Graphs</NavLink>
-      <NavLink className="navigationButton" to="/settings"><SettingsIcon/>Settings</NavLink>
-    </nav>
-  );
-}
-
+// main application component
 export default function App() {
+  // somewhere here we should check if we are logged in and if so, render different parts of the application
+  const [logged, setLogged] = useState(false);
+  const [show_logout, setShowLogout] = useState(false);
+
+  function setLoggedIn() {
+    setLogged(true);
+  }
+
+  function acceptLogginOut() {
+    setShowLogout(false);
+    setLogged(false);
+  }
+
+  function rejectLoggingOut() {
+    setShowLogout(false);
+  }
+
+  function showLogOut() {
+    setShowLogout(true);
+  }
+
+  return (
+      <>
+        {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>}
+        { logged &&
+          <BrowserRouter>
+            <div className="layout">
+              <NavigationBar onLogOut={showLogOut}></NavigationBar>
+              <main className="content">
+                <Routes>
+                  <Route path="/" element={<StockPage/>}></Route>
+                  <Route path="/stock" element={<StockPage/>}></Route>
+                  <Route path="/crypto" element={<CryptoPage/>}></Route>
+                  <Route path="/obligations" element={<ObligationsPage/>}></Route>
+                  <Route path="/simulations" element={<SimulationsPage/>}></Route>
+                  <Route path="/graphs" element={<GraphsPage/>}></Route>
+                  <Route path="/settings" element={<SettingsPage/>}></Route>
+                </Routes>
+              {show_logout && <LogOutPopUp onClose={rejectLoggingOut} onAccept={acceptLogginOut}/>}
+              </main>
+            </div>
+          </BrowserRouter>
+        }
+      </>
+  );
+
+
+
   return (
     <BrowserRouter>
       <div className="layout">

@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, jsonify
+    Blueprint, flash, g, redirect, render_template, request, session, jsonify, Response
 )
 
 from .db import db_proxy
@@ -33,9 +33,9 @@ def login():
     else:
         session.clear()
         session['user_id'] = user['id']
-        return 'Properly logged in', 200
+        return {'data' : 'Properly logged in'}, 200
     
-    return error, 401
+    return {'data' : error}, 401
     
     
 
@@ -43,9 +43,9 @@ def login():
 @bp.route("/logout", methods=("POST", ))
 def logout():
     session.clear()
-    return 'Properly logged out', 200
+    return {'data' : 'Properly logged out'}, 200
 
-
+# should be called each time before requesting from a blueprint
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')

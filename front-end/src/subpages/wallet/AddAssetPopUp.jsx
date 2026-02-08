@@ -14,10 +14,6 @@ export default function AddAssetPopUp({ onClose, onAccept }) {
     const [quantity, setQuantity] = useState("");
     const [price, setPrice] = useState("");
 
-    // const onTickerChange = (value) => { setTicker(value); };
-    // const onQuantityChange = (value) => { setQuantity(value); };
-    // const onQuantityChange = (value) => { setQuantity(value); };
-
     return (
     <div className="modal_overlay">
         <div className="modal_container">
