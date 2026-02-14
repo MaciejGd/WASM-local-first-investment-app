@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <cstring>
 
 #define CHECK_VALUES_EQUAL(n, m) linalg::utils::CheckEqual(n, m, __FILE_NAME__, __LINE__);
 #define CHECK_OUT_OF_RANGE(n, range) linalg::utils::CheckOutOfRange(n, range, __FILE_NAME__, __LINE__);
@@ -43,13 +44,17 @@ bool EqualOperator(const T& A, const T& B) {
 }
 
 template<>
-bool EqualOperator(const float& A, const float& B) {
+inline bool EqualOperator(const float& A, const float& B) {
     if (sizeof(float) != sizeof(int32_t)) {
-        std::runtime_error("Cannot compare floats using integers!");
+        throw std::runtime_error("Cannot compare floats using integers!");
     }
 
     if (A == B) return true;
-    int32_t int_diff = std::abs(*(int32_t*)&A - *(int32_t*)&B);
+    int32_t A_int;
+    int32_t B_int;
+    std::memcpy(&A_int, &A, sizeof(A));
+    std::memcpy(&B_int, &B, sizeof(B));
+    int32_t int_diff = std::abs(A_int - B_int);
     if (int_diff <= MAX_ULPS) {
         return true;
     }
@@ -58,13 +63,17 @@ bool EqualOperator(const float& A, const float& B) {
 }
 
 template<>
-bool EqualOperator(const double& A, const double& B) {
-    if (sizeof(float) != sizeof(int64_t)) {
-        std::runtime_error("Cannot compare dobules using integers!");
+inline bool EqualOperator(const double& A, const double& B) {
+    if (sizeof(double) != sizeof(int64_t)) {
+        throw std::runtime_error("Cannot compare doubles using integers!");
     }
 
     if (A == B) return true;
-    int64_t int_diff = std::abs(*(int64_t*)&A - *(int64_t*)&B);
+    int64_t A_int;
+    int64_t B_int;
+    std::memcpy(&A_int, &A, sizeof(A));
+    std::memcpy(&B_int, &B, sizeof(B));
+    int64_t int_diff = std::abs(A_int - B_int);
     if (int_diff <= MAX_ULPS) {
         return true;
     }

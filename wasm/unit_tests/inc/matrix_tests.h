@@ -230,7 +230,7 @@ UNIT_TEST(MatrixEquality, MatrixesEqualFail) {
 UNIT_TEST(MatrixEquality, MatrixesEqualFloatFail) {
     using namespace linalg::primitives;
     using namespace std;
-
+    // TODO change that to memcpy so that is safe while compiling with optimizations
     vector<vector<float>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
     int32_t first = *(int32_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
     int32_t second = *(int32_t*)&mat1[0][1] - linalg::utils::MAX_ULPS - 2;
