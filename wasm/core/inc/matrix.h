@@ -28,8 +28,6 @@ public:
     }
 };
 
-
-// we actually need mosty matrix, as vector is just a matrix of 1 x n
 template <typename T>
 class CMatrix {    
     using matrix_container = std::vector<T>;
@@ -79,6 +77,38 @@ public:
     CMatrix& operator=(const CMatrix& other) = default;
     CMatrix& operator=(CMatrix&& other) = default;
     virtual ~CMatrix() = default;
+
+    /// @brief Compare two matrixes by their values
+    /// @param other matrix to be compared with current
+    /// @return boolean indicating if matrixes are equal
+    bool operator==(const CMatrix<T>& other) {
+        CHECK_VALUES_EQUAL(m_cols, other.cols());
+        CHECK_VALUES_EQUAL(m_rows, other.rows());
+
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = 0; j < m_cols; j++) {
+                if (other.at(i,j) != at(i,j)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// @brief Compare two matrixes by their values
+    /// @param other matrix to be compared with current
+    /// @return boolean indicating if matrixes are equal
+    bool operator!=(const CMatrix<T>& other) {
+        CHECK_VALUES_EQUAL(m_cols, other.cols());
+        CHECK_VALUES_EQUAL(m_rows, other.rows());
+
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = 0; j < m_cols; j++) {
+                if (other.at(i,j) != at(i,j)) return true;
+            }
+        }
+
+        return false;
+    }
 
     /// @brief Operator for matrix multiplication
     /// @tparam N undderlaying type of matrix

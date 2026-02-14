@@ -30,6 +30,7 @@ CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
     uint32_t m = mat.cols();
     // cholesky factorization possible only for square matrices
     CHECK_VALUES_EQUAL(n, m);
+    // we should also reject matrixes that are not symmetric and not positive defined
     // create output matrix
     CMatrixLowerTriangular<double> res(n, n);
     for (int32_t i = 0; i < (int32_t)n; i++) {

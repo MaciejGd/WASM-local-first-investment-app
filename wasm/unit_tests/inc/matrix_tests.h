@@ -1,6 +1,6 @@
 #pragma once
 #include "../../core/inc/matrix.h"
-#include "tests_runner.h"
+#include "../test_source/tests_runner.h"
 
 /// INITIALIZATIONS TESTS
 UNIT_TEST(MatrixInitialization, EmptyInitialization) {
@@ -164,6 +164,50 @@ UNIT_TEST(MatrixValuesAccess, OutOfBoundsReferenceAccess) {
     int value = 0;
     CHECK_THROW(value = matrix[3][0], std::out_of_range);
     CHECK_THROW(value = matrix[0][2], std::out_of_range);
+}
+
+UNIT_TEST(MatrixEquality, MatrixesEqual) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
+    vector<vector<int>> mat2 = {{1,2,3}, {4,5,6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 == matrix2, true);
+}
+
+UNIT_TEST(MatrixEquality, MatrixesNotEqual) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
+    vector<vector<int>> mat2 = {{1,2,3}, {4,6,6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 == matrix2, false);
+}
+
+UNIT_TEST(MatrixNotEquality, MatrixesEqual) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
+    vector<vector<int>> mat2 = {{1,2,3}, {4,5,6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, false);
+}
+
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqual) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
+    vector<vector<int>> mat2 = {{1,2,3}, {4,6,6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, true);
 }
 
 /// ADD operator on matrix
