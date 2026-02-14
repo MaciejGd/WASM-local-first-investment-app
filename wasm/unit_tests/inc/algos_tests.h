@@ -30,6 +30,18 @@ UNIT_TEST(MatrixAlgorithms, CholeskyNotSymmetricMatrix) {
     CHECK_THROW(auto ret = CholeskyFactorization(matrix), std::logic_error);   
 }
 
+UNIT_TEST(MatrixAlgorithms, CholeskyNotPositiveMatrix) {
+    using namespace linalg::algorithms;
+
+    std::vector<std::vector<int>> mat = {
+                            {1, 2, 0}, 
+                            {2, -1, 0},
+                            {0, 0, 3}};
+
+
+    CMatrix matrix = CMatrix(mat);
+    CHECK_THROW(auto ret = CholeskyFactorization(matrix), std::logic_error);
+}
 
 UNIT_TEST(MatrixAlgorithms, CholeskyFactorization) {
     using namespace linalg::algorithms;
