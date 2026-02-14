@@ -1,5 +1,6 @@
 #pragma once
 #include "../../core/inc/matrix.h"
+#include "../../core/inc/utils.h"
 #include "../test_source/tests_runner.h"
 
 /// INITIALIZATIONS TESTS
@@ -177,7 +178,45 @@ UNIT_TEST(MatrixEquality, MatrixesEqual) {
     CHECK_EQUAL(matrix1 == matrix2, true);
 }
 
-UNIT_TEST(MatrixEquality, MatrixesNotEqual) {
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixEquality, MatrixesEqualFloat) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int32_t first = *(int32_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int32_t second = *(int32_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int32_t third = *(int32_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int32_t fourth = *(int32_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<float>> mat2 = { 
+                                    {*(float*)&first, *(float*)&second}, 
+                                    {*(float*)&third, *(float*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 == matrix2, true);
+}
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixEquality, MatrixesEqualDouble) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<double>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int64_t first = *(int64_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int64_t second = *(int64_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int64_t third = *(int64_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int64_t fourth = *(int64_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<double>> mat2 = { 
+                                    {*(double*)&first, *(double*)&second}, 
+                                    {*(double*)&third, *(double*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 == matrix2, true);
+}
+
+UNIT_TEST(MatrixEquality, MatrixesEqualFail) {
     using namespace linalg::primitives;
     using namespace std;
 
@@ -188,15 +227,42 @@ UNIT_TEST(MatrixEquality, MatrixesNotEqual) {
     CHECK_EQUAL(matrix1 == matrix2, false);
 }
 
-UNIT_TEST(MatrixNotEquality, MatrixesEqual) {
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixEquality, MatrixesEqualFloatFail) {
     using namespace linalg::primitives;
     using namespace std;
 
-    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
-    vector<vector<int>> mat2 = {{1,2,3}, {4,5,6}};
+    vector<vector<float>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int32_t first = *(int32_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int32_t second = *(int32_t*)&mat1[0][1] - linalg::utils::MAX_ULPS - 2;
+    int32_t third = *(int32_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int32_t fourth = *(int32_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<float>> mat2 = { 
+                                    {*(float*)&first, *(float*)&second}, 
+                                    {*(float*)&third, *(float*)&fourth}
+                                };
     auto matrix1 = CMatrix(mat1);
     auto matrix2 = CMatrix(mat2);
-    CHECK_EQUAL(matrix1 != matrix2, false);
+    CHECK_EQUAL(matrix1 == matrix2, false);
+}
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixEquality, MatrixesEqualDoubleFail) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<double>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int64_t first = *(int64_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int64_t second = *(int64_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int64_t third = *(int64_t*)&mat1[1][0] + linalg::utils::MAX_ULPS + 1;
+    int64_t fourth = *(int64_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<double>> mat2 = { 
+                                    {*(double*)&first, *(double*)&second}, 
+                                    {*(double*)&third, *(double*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 == matrix2, false);
 }
 
 UNIT_TEST(MatrixNotEquality, MatrixesNotEqual) {
@@ -208,6 +274,95 @@ UNIT_TEST(MatrixNotEquality, MatrixesNotEqual) {
     auto matrix1 = CMatrix(mat1);
     auto matrix2 = CMatrix(mat2);
     CHECK_EQUAL(matrix1 != matrix2, true);
+}
+
+
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqualFail) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<int>> mat1 = {{1,2,3}, {4,5,6}};
+    vector<vector<int>> mat2 = {{1,2,3}, {4,5,6}};
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, false);
+}
+
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqualFloat) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int32_t first = *(int32_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int32_t second = *(int32_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int32_t third = *(int32_t*)&mat1[1][0] + linalg::utils::MAX_ULPS + 3;
+    int32_t fourth = *(int32_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<float>> mat2 = { 
+                                    {*(float*)&first, *(float*)&second}, 
+                                    {*(float*)&third, *(float*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, true);
+}
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqualDouble) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<double>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int64_t first = *(int64_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int64_t second = *(int64_t*)&mat1[0][1] - linalg::utils::MAX_ULPS - 1;
+    int64_t third = *(int64_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int64_t fourth = *(int64_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<double>> mat2 = { 
+                                    {*(double*)&first, *(double*)&second}, 
+                                    {*(double*)&third, *(double*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, true);
+}
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqualFloatFail) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int32_t first = *(int32_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int32_t second = *(int32_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int32_t third = *(int32_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int32_t fourth = *(int32_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<float>> mat2 = { 
+                                    {*(float*)&first, *(float*)&second}, 
+                                    {*(float*)&third, *(float*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, false);
+}
+
+/// Check if equality up to some number of ULPS is allowed for float
+UNIT_TEST(MatrixNotEquality, MatrixesNotEqualDoubleFail) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<double>> mat1 = {{1.f, 2.f}, {4.f, 5.f}};
+    int64_t first = *(int64_t*)&mat1[0][0] + linalg::utils::MAX_ULPS;
+    int64_t second = *(int64_t*)&mat1[0][1] - linalg::utils::MAX_ULPS;
+    int64_t third = *(int64_t*)&mat1[1][0] + linalg::utils::MAX_ULPS;
+    int64_t fourth = *(int64_t*)&mat1[1][1] - linalg::utils::MAX_ULPS;
+    vector<vector<double>> mat2 = { 
+                                    {*(double*)&first, *(double*)&second}, 
+                                    {*(double*)&third, *(double*)&fourth}
+                                };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = CMatrix(mat2);
+    CHECK_EQUAL(matrix1 != matrix2, false);
 }
 
 /// ADD operator on matrix
@@ -410,5 +565,66 @@ UNIT_TEST(MatrixSymmetry, notSymmetric) {
                             {3, 4, 3}
     };
     auto matrix1 = CMatrix(mat1);
+    CHECK_FALSE(matrix1.isSymmetric());
+}
+// floats should check for some error while comparing so it needs separate test
+UNIT_TEST(MatrixSymmetry, SymmetricFloat) {
+    using namespace linalg::primitives;
+
+    vector<vector<float>> mat1 = {
+                            {1.f, 2.f},
+                            {2.f, 2.f},
+    };
+    // add some small error to the one of analyzed elements
+    int32_t first = *(int32_t*)&mat1[0][1] + linalg::utils::MAX_ULPS;
+    mat1[0][1] = *(float*)&first;
+    auto matrix1 = CMatrix(mat1);
+    // even though values not exactly equal it should return true
+    CHECK_TRUE(matrix1.isSymmetric());
+}
+
+// floats should check for some error while comparing so it needs separate test
+UNIT_TEST(MatrixSymmetry, NotSymmetricFloat) {
+    using namespace linalg::primitives;
+
+    vector<vector<float>> mat1 = {
+                            {1.f, 2.f},
+                            {2.f, 2.f},
+    };
+    // add some small error to the one of analyzed elements
+    int32_t first = *(int32_t*)&mat1[0][1] + linalg::utils::MAX_ULPS + 1;
+    mat1[0][1] = *(float*)&first;
+    auto matrix1 = CMatrix(mat1);
+    // even though values not exactly equal it should return true
+    CHECK_FALSE(matrix1.isSymmetric());
+}
+
+UNIT_TEST(MatrixSymmetry, SymmetricDouble) {
+    using namespace linalg::primitives;
+
+    vector<vector<double>> mat1 = {
+                            {1.f, 2.f},
+                            {2.f, 2.f},
+    };
+    // add some small error to the one of analyzed elements
+    int64_t first = *(int64_t*)&mat1[0][1] + linalg::utils::MAX_ULPS;
+    mat1[0][1] = *(double*)&first;
+    auto matrix1 = CMatrix(mat1);
+    // even though values not exactly equal it should return true
+    CHECK_TRUE(matrix1.isSymmetric());
+}
+
+UNIT_TEST(MatrixSymmetry, NotSymmetricDouble) {
+    using namespace linalg::primitives;
+
+    vector<vector<double>> mat1 = {
+                            {1.f, 2.f},
+                            {2.f, 2.f},
+    };
+    // add some small error to the one of analyzed elements
+    int64_t first = *(int64_t*)&mat1[0][1] - linalg::utils::MAX_ULPS - 1;
+    mat1[0][1] = *(double*)&first;
+    auto matrix1 = CMatrix(mat1);
+    // even though values not exactly equal it should return true
     CHECK_FALSE(matrix1.isSymmetric());
 }
