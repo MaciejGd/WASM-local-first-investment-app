@@ -168,11 +168,20 @@ private:
 
 /// Check if two values are equal
 #define CHECK_EQUAL(a,b)\
-    if (a != b) FAIL_TEST
+    if (a == b) {\
+        ;\
+    } else {\
+        FAIL_TEST\
+    }
 
 /// Check if two values are not equal
 #define CHECK_NOT_EQUAL(a,b)\
-    if (a == b) FAIL_TEST
+    if (a != b) {\
+        ;\
+    } else {\
+        FAIL_TEST\
+    }
+        
 
 /// Check if value a is less or equal than b
 #define CHECK_LE(a,b)\

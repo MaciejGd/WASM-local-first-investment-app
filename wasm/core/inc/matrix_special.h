@@ -17,6 +17,8 @@ public:
         }
     }
 
+    CMatrixDiagonal(): CMatrix<T>() {};
+
     template<typename N>
     auto operator*(const CMatrix<N>& other) {
         using O = decltype(std::declval<T>() * std::declval<N>());
@@ -42,6 +44,8 @@ class CMatrixUpperTriangle : public CMatrix<T> {
     using matrix_container = std::vector<std::vector<T>>;
 public:
     CMatrixUpperTriangle(uint32_t n, uint32_t m): CMatrix<T>(n, m) {};
+
+    CMatrixUpperTriangle(): CMatrix<T>() {};
     
     CMatrixUpperTriangle(matrix_container& mat): CMatrix<T>(mat) {
         // fill everything above diagonal with zeros
@@ -84,6 +88,8 @@ class CMatrixLowerTriangular : public CMatrix<T> {
 public: 
     CMatrixLowerTriangular(uint32_t n, uint32_t m): CMatrix<T>(n, m) {};
 
+    CMatrixLowerTriangular(): CMatrix<T>() {};
+
     CMatrixLowerTriangular(matrix_container& mat): CMatrix<T>(mat) {
         // fill everything above diagonal with zeros
         for (uint32_t i = 0; i < this->m_rows; i++) {
@@ -92,6 +98,10 @@ public:
             }
         }
     };
+
+    bool operator==(const CMatrix<T>& other) {
+        return false;
+    }
 
     CMatrixLowerTriangular(const std::vector<T>& vec): CMatrix<T>(vec) {};
 

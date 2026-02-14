@@ -28,8 +28,10 @@ template<typename T>
 CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
     uint32_t n = mat.rows();
     uint32_t m = mat.cols();
-    // cholesky factorization possible only for square matrices
-    CHECK_VALUES_EQUAL(n, m);
+    // check if analyzed matrix is symmetric
+    if (!mat.isSymmetric()) {
+        throw std::logic_error("Matrix for Cholesky Factorization needs to be symmetric");
+    }
     // we should also reject matrixes that are not symmetric and not positive defined
     // create output matrix
     CMatrixLowerTriangular<double> res(n, n);
@@ -40,7 +42,11 @@ CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
                 cell += (res.at(i,k) * res.at(j, k));
             }
             cell = mat.at(i, j) - cell;
-            if (i == j) {
+            // we will get the sqrt of cell, if the value is negative we can say that matrix is not pisitive definitness
+            if (cell <= 0) {
+                throw std::logic_error("Failed to ");
+            }
+            if (i == j) {                
                 cell = std::sqrt(cell);
                 continue;
             }
@@ -81,7 +87,7 @@ struct is_stl_container<std::deque<T, A>> {
 /// @param cont container
 /// @return mean value of the container's elements as float
 template<typename T, 
-        typename = std::enable_if<is_stl_container<T>::value>::type >
+        typename std::enable_if<is_stl_container<T>::value>::type >
 double Mean(const T& cont) {
     double n = static_cast<double>(cont.size());
     if (n == 0.0) {

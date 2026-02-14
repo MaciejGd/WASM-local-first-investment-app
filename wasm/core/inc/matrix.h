@@ -40,6 +40,10 @@ public:
         m_mat = matrix_container(m_rows * m_cols, T{});
     };
 
+    /// @brief Matrix should have default constructor as well, which
+    ///        initialize rows and cols to 0
+    CMatrix(): CMatrix(0, 0) {};
+
     /// @brief Initialize CMatrix from 2D vector
     /// @param mat 2D vector with initial values
     CMatrix(const vector<vector<T>>& mat) {
@@ -82,12 +86,18 @@ public:
     /// @param other matrix to be compared with current
     /// @return boolean indicating if matrixes are equal
     bool operator==(const CMatrix<T>& other) {
+        using namespace linalg::utils;
+
         CHECK_VALUES_EQUAL(m_cols, other.cols());
         CHECK_VALUES_EQUAL(m_rows, other.rows());
-
         for (int i = 0; i < m_rows; i++) {
             for (int j = 0; j < m_cols; j++) {
-                if (other.at(i,j) != at(i,j)) return false;
+                auto a = at(i, j);
+                auto b = other.at(i, j);
+                if (!CompareOperator(a, b)) {
+                    return false;
+                }
+                //if (other.at(i,j) != at(i,j)) return false;
             }
         }
 
@@ -216,7 +226,7 @@ public:
         matrix_container cont(m_cols * m_rows, T{});
         for (int32_t i = 0; i < m_rows; i++) {
             for (uint32_t j = 0; j < m_cols; j++) {
-                cont[j * m_rows + i] = std::move(m_mat[i * m_rows + j]);
+                cont[j * m_rows + i] = std::move(m_mat[i * m_cols + j]);
             }
         }
         // update properties
@@ -225,6 +235,35 @@ public:
         m_cols = new_cols;
         return *this;
     };
+
+    /// @brief Check if matrix is symmetric
+    /// @return true if symmetric, false otherwise
+    bool isSymmetric() const {
+        using namespace linalg::utils;
+        // symmetric matrix need to be square as well
+        try {
+            CHECK_VALUES_EQUAL(m_rows, m_cols);
+        }
+        catch (...) {
+            return false;
+        }
+
+        // now analyze the matrix, n/2 operations needed, where n = num of matrix elements
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = i + 1; j < m_cols; j++) {
+                auto a = at(i, j);
+                auto b = at(j, i);
+                if (!CompareOperator(a, b)) {
+                    return false;
+                }
+                // if (at(i,j) != at(j,i)) {
+                //     return false;
+                // }                
+            }
+        }
+
+        return true;        
+    }
 
 protected:
     /// number of rows in a matrix 
@@ -259,4 +298,22 @@ auto operator*(const N& scalar, const CMatrix<T>& mat)
     return mat * scalar;
 }
 
-}
+// /// @brief floating point numbers should have extra specialization of comparison
+// /// @param other 
+// /// @return 
+// template<>
+// bool CMatrix<float>::operator==(const CMatrix<float>& other) {
+//     return true;
+// }
+
+// /// @brief floating point numbers should have extra specialization of comparison
+// /// @param other 
+// /// @return 
+// template<>
+// bool CMatrix<double>::operator==(const CMatrix<double>& other) {
+//     return true;
+// }
+
+
+} // namespace linalg::primitives ends
+

@@ -374,3 +374,41 @@ UNIT_TEST(MatrixTransposition, Transposition) {
     CHECK_EQUAL(matrix1[2][0], 2);
     CHECK_EQUAL(matrix1[2][1], 2);
 }
+
+UNIT_TEST(MatrixSymmetry, isSymmetric) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {
+                            {1, 2, 3},
+                            {2, 2, 5},
+                            {3, 5, 3}
+    };
+    auto matrix1 = CMatrix(mat1);
+    CHECK_TRUE(matrix1.isSymmetric());
+}
+
+UNIT_TEST(MatrixSymmetry, isSymmetricNotSquare) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {
+                            {1, 2, 3},
+                            {2, 2, 5}
+    };
+    auto matrix1 = CMatrix(mat1);
+    CHECK_FALSE(matrix1.isSymmetric());
+}
+
+UNIT_TEST(MatrixSymmetry, notSymmetric) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {
+                            {1, 2, 3},
+                            {2, 2, 5},
+                            {3, 4, 3}
+    };
+    auto matrix1 = CMatrix(mat1);
+    CHECK_FALSE(matrix1.isSymmetric());
+}
