@@ -94,10 +94,9 @@ public:
             for (int j = 0; j < m_cols; j++) {
                 auto a = at(i, j);
                 auto b = other.at(i, j);
-                if (!CompareOperator(a, b)) {
+                if (!EqualOperator(a, b)) {
                     return false;
                 }
-                //if (other.at(i,j) != at(i,j)) return false;
             }
         }
 
@@ -108,12 +107,15 @@ public:
     /// @param other matrix to be compared with current
     /// @return boolean indicating if matrixes are equal
     bool operator!=(const CMatrix<T>& other) {
+        using namespace linalg::utils;
         CHECK_VALUES_EQUAL(m_cols, other.cols());
         CHECK_VALUES_EQUAL(m_rows, other.rows());
 
         for (int i = 0; i < m_rows; i++) {
             for (int j = 0; j < m_cols; j++) {
-                if (other.at(i,j) != at(i,j)) return true;
+                if (!EqualOperator(other.at(i,j), at(i,j))) {
+                    return true;
+                }
             }
         }
 
@@ -253,12 +255,9 @@ public:
             for (int j = i + 1; j < m_cols; j++) {
                 auto a = at(i, j);
                 auto b = at(j, i);
-                if (!CompareOperator(a, b)) {
+                if (!EqualOperator(a, b)) {
                     return false;
-                }
-                // if (at(i,j) != at(j,i)) {
-                //     return false;
-                // }                
+                }         
             }
         }
 

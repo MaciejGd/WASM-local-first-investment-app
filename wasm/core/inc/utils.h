@@ -10,7 +10,7 @@
 namespace linalg::utils {
 
 /// @brief MAXIMUM acceptable difference between floating point numbers
-static constexpr int32_t MAX_ULPS = 10;
+static constexpr int64_t MAX_ULPS = 10;
 
 template<typename T>
 void CheckEqual(const T& n, const T& m, const char* filename, int line) {
@@ -30,17 +30,20 @@ void CheckOutOfRange(const T& n, const N& range, const char* filename, int line)
     }
 }
 
-/// @brief We need custom compare operator for different datatypes
+/// Custom equal operator for different datatypes.
+/// Should be used over == operator as comparing floating point
+/// numbers with this operator does not provide correct results.
 /// @tparam T type of the values to be compared
 /// @param A first value
 /// @param B second value
+/// @return True if both values are equal, False otherwise
 template<typename T>
-bool CompareOperator(const T& A, const T& B) {
+bool EqualOperator(const T& A, const T& B) {
     return A == B;
 }
 
 template<>
-bool CompareOperator(const float& A, const float& B) {
+bool EqualOperator(const float& A, const float& B) {
     if (sizeof(float) != sizeof(int32_t)) {
         std::runtime_error("Cannot compare floats using integers!");
     }
@@ -55,7 +58,7 @@ bool CompareOperator(const float& A, const float& B) {
 }
 
 template<>
-bool CompareOperator(const double& A, const double& B) {
+bool EqualOperator(const double& A, const double& B) {
     if (sizeof(float) != sizeof(int64_t)) {
         std::runtime_error("Cannot compare dobules using integers!");
     }
