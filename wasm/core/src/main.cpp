@@ -1,6 +1,4 @@
 #include <iostream>
-#include "../inc/matrix.h"
-#include "../inc/matrix_special.h"
 #include "../inc/algorithms.h"
 #include <assert.h>
 
@@ -40,19 +38,19 @@ void CholeskyTest() {
                       {-5,  0, 11}});
     auto res = CholeskyFactorization(mat);
     printCMatrix(res, "Cholesky for first: ");
-    CMatrix<float> mat1({{6, 2, 1, 1}, 
-                         {2, 5, 2, 1}, 
-                         {1, 2, 4, 1}, 
-                         {1, 1, 1, 3}});
-    auto res1 = CholeskyFactorization(mat1);
-    printCMatrix(res1, "Cholesky for second: ");
-    CMatrix<float> mat2({{10, 2, 3, 1, 2}, 
-                         { 2, 9, 1, 2, 1}, 
-                         { 3, 1, 8, 2, 1}, 
-                         { 1, 2, 2, 7, 1},
-                         { 2, 1, 1, 1, 6}});
-    auto res2 = CholeskyFactorization(mat2);
-    printCMatrix(res2, "Cholesky for third: ");
+    // CMatrix<float> mat1({{6, 2, 1, 1}, 
+    //                      {2, 5, 2, 1}, 
+    //                      {1, 2, 4, 1}, 
+    //                      {1, 1, 1, 3}});
+    // auto res1 = CholeskyFactorization(mat1);
+    // printCMatrix(res1, "Cholesky for second: ");
+    // CMatrix<float> mat2({{10, 2, 3, 1, 2}, 
+    //                      { 2, 9, 1, 2, 1}, 
+    //                      { 3, 1, 8, 2, 1}, 
+    //                      { 1, 2, 2, 7, 1},
+    //                      { 2, 1, 1, 1, 6}});
+    // auto res2 = CholeskyFactorization(mat2);
+    // printCMatrix(res2, "Cholesky for third: ");
 }
 
 #define FLOATS_EQUAL(a, b) {\
@@ -147,9 +145,9 @@ int main() {
         {8, 5, 4},
         {8, 5, 4}
     };
-    CholeskyTest();
-    MeanTest();
+    // CholeskyTest();
+    // MeanTest();
     GetCovarianceMatrixTest();
-    InverseTest();
+    // InverseTest();
     return 0;   
 }

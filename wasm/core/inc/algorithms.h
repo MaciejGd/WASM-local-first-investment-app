@@ -1,7 +1,6 @@
 #pragma once
 
 #include "matrix_special.h"
-#include "utils.h"
 #include <cmath>
 #include <numeric>
 #include <array>
@@ -42,11 +41,11 @@ CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
                 cell += (res.at(i,k) * res.at(j, k));
             }
             cell = mat.at(i, j) - cell;
-            // we will get the sqrt of cell, if the value is negative we can say that matrix is not pisitive definitness
-            if (cell <= 0) {
-                throw std::logic_error("Failed to ");
-            }
-            if (i == j) {                
+            if (i == j) {              
+                // we will get the sqrt of cell, if the value is negative we can say that matrix is not pisitive definitness
+                if (cell < 0) {
+                    throw std::logic_error("Failed to perform CholeskyFactorization, matrix is not positive definite!");
+                }  
                 cell = std::sqrt(cell);
                 continue;
             }
@@ -87,7 +86,7 @@ struct is_stl_container<std::deque<T, A>> {
 /// @param cont container
 /// @return mean value of the container's elements as float
 template<typename T, 
-        typename std::enable_if<is_stl_container<T>::value>::type >
+        typename = typename std::enable_if<is_stl_container<T>::value>::type >
 double Mean(const T& cont) {
     double n = static_cast<double>(cont.size());
     if (n == 0.0) {
@@ -108,6 +107,11 @@ double Mean(const T& cont) {
 /// @return mean value of the array's elements up to size, as float
 template<typename T>
 double Mean(T* buffer, size_t size) {
+    // validate input buffer address
+    if (!buffer) {
+        throw std::invalid_argument("Provided buffer is nullptr");
+    }
+
     if (size <= 0) {
         return 0.0;
     }
@@ -118,9 +122,10 @@ double Mean(T* buffer, size_t size) {
     return sum / static_cast<double>(size);
 };
 
-/// @brief Represent mean values as Matrix
+/// @brief Represent mean values as Matrix (vector with chunks_size rows and one column)
 /// @tparam T type of input values
-/// @param buffer array with input values
+/// @param buffer input array consisting of chunks_amount chunks of data placed
+/// one after another
 /// @param chunk_size size of single chunk
 /// @param chunks_amount amount of chunks for which mean values should be counted
 /// @return Matrix of dimensions: chunks_amount x 1
@@ -134,16 +139,19 @@ CMatrix<double> GetMeanMatrix(T* buffer, size_t chunk_size, size_t chunks_amount
     return res;
 };
 
-// TODO resulting matrix is symmetric, amount of computations can be strongly reduced
+// TODO - resulting matrix is symmetric, amount of computations can be strongly reduced
 template<typename T>
-CMatrix<double> GetCovarianceMatrix(T* buffer, size_t chunk_size, const size_t& chunks_amount) {
+CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunk_size, const size_t& chunks_amount) {
+    if (!buffer) {
+        throw std::invalid_argument("Input buffer is nullptr!");
+    }
     // vector for variance values
     std::vector<double> means(chunks_amount);
     T* head = buffer;
-    for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
-        means[i] = Mean(buffer, chunk_size);
+    for (size_t i = 0; i < chunks_amount; i++, head += chunk_size) {
+        means[i] = Mean(head, chunk_size);
     }
-    buffer = head; // bring buffer pointer back to the first element
+    head = buffer; // bring buffer pointer back to the first element
     CMatrix<double> res(chunks_amount, chunks_amount);
     for (size_t i = 0; i < chunks_amount; i++) {
         for (size_t j = 0; j < chunks_amount; j++) {
@@ -152,8 +160,8 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, size_t chunk_size, const size_t& 
             size_t j_start = (j * chunk_size);
             for (size_t k = 0; k < chunk_size; k++)
             {
-                T val1 = (buffer[i_start + k] - means[i]);
-                T val2 = (buffer[j_start + k] - means[j]);
+                double val1 = (static_cast<double>(head[i_start + k]) - means[i]);
+                double val2 = (static_cast<double>(head[j_start + k]) - means[j]);
                 cell += (val1 * val2);
             }
             cell /= (chunk_size - 1);            

@@ -1,6 +1,5 @@
 #pragma once
 #include "../../core/inc/matrix.h"
-#include "../../core/inc/utils.h"
 #include "../test_source/tests_runner.h"
 
 /// INITIALIZATIONS TESTS

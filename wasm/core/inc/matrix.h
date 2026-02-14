@@ -46,7 +46,7 @@ public:
 
     /// @brief Initialize CMatrix from 2D vector
     /// @param mat 2D vector with initial values
-    CMatrix(const vector<vector<T>>& mat) {
+    CMatrix(const std::vector<std::vector<T>>& mat) {
         // throw expection if empty container passed
         if (mat.size() == 0) {
             throw std::invalid_argument("Matrix cannot be constructed from empty data");
@@ -296,23 +296,6 @@ auto operator*(const N& scalar, const CMatrix<T>& mat)
 {
     return mat * scalar;
 }
-
-// /// @brief floating point numbers should have extra specialization of comparison
-// /// @param other 
-// /// @return 
-// template<>
-// bool CMatrix<float>::operator==(const CMatrix<float>& other) {
-//     return true;
-// }
-
-// /// @brief floating point numbers should have extra specialization of comparison
-// /// @param other 
-// /// @return 
-// template<>
-// bool CMatrix<double>::operator==(const CMatrix<double>& other) {
-//     return true;
-// }
-
 
 } // namespace linalg::primitives ends
 
