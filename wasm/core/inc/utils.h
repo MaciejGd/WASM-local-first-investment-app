@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <cstring>
+#include <bit>
 
 #define CHECK_VALUES_EQUAL(n, m) linalg::utils::CheckEqual(n, m, __FILE_NAME__, __LINE__);
 #define CHECK_OUT_OF_RANGE(n, range) linalg::utils::CheckOutOfRange(n, range, __FILE_NAME__, __LINE__);
@@ -41,6 +42,7 @@ bool EqualOperator(const T& A, const T& B) {
     return A == B;
 }
 
+// TODO - add checking for 0+- corner case
 template<>
 inline bool EqualOperator(const float& A, const float& B) {
     if (sizeof(float) != sizeof(int32_t)) {
@@ -48,10 +50,8 @@ inline bool EqualOperator(const float& A, const float& B) {
     }
 
     if (A == B) return true;
-    int32_t A_int;
-    int32_t B_int;
-    std::memcpy(&A_int, &A, sizeof(A));
-    std::memcpy(&B_int, &B, sizeof(B));
+    int32_t A_int = std::bit_cast<int32_t>(A);
+    int32_t B_int = std::bit_cast<int32_t>(B);
     int32_t int_diff = std::abs(A_int - B_int);
     if (int_diff <= MAX_ULPS) {
         return true;
@@ -67,10 +67,12 @@ inline bool EqualOperator(const double& A, const double& B) {
     }
 
     if (A == B) return true;
-    int64_t A_int;
-    int64_t B_int;
-    std::memcpy(&A_int, &A, sizeof(A));
-    std::memcpy(&B_int, &B, sizeof(B));
+    int64_t A_int = std::bit_cast<int64_t>(A);
+    int64_t B_int = std::bit_cast<int64_t>(B);
+    // int64_t A_int;
+    // int64_t B_int;
+    // std::memcpy(&A_int, &A, sizeof(A));
+    // std::memcpy(&B_int, &B, sizeof(B));
     int64_t int_diff = std::abs(A_int - B_int);
     if (int_diff <= MAX_ULPS) {
         return true;

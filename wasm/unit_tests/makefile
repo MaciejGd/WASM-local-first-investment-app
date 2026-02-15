@@ -8,4 +8,4 @@ make win:
 	g++ main.cpp -g02 -o unit_tests.exe
 
 make winrun:
-	g++ main.cpp ../core/src/algorithms.cpp -g02 -o unit_tests.exe && unit_tests.exe
+	g++ --std=c++20 main.cpp ../core/src/algorithms.cpp -g02 -o unit_tests.exe && unit_tests.exe

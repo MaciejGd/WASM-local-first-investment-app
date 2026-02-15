@@ -99,10 +99,6 @@ public:
         }
     };
 
-    bool operator==(const CMatrix<T>& other) {
-        return false;
-    }
-
     CMatrixLowerTriangular(const std::vector<T>& vec): CMatrix<T>(vec) {};
 
     template<typename N>
