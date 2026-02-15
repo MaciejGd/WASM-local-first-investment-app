@@ -170,3 +170,42 @@ UNIT_TEST(GetCovarianceMatrix, GetCovariance) {
 
     CHECK_EQUAL(res, expected_output);
 }
+
+UNIT_TEST(InverseNormal, InputBelowRange) {
+    using namespace linalg::algorithms;
+
+    double test = -0.1;
+
+    CHECK_THROW(InverseNormal(test), std::out_of_range);
+}
+
+UNIT_TEST(InverseNormal, InputAboveRange) {
+    using namespace linalg::algorithms;
+
+    double test = 1.1;
+
+    CHECK_THROW(InverseNormal(test), std::out_of_range);
+}
+
+UNIT_TEST(InverseNormal, InverseNormal) {
+    using namespace linalg::algorithms;
+
+    double test = 1.1;
+
+    std::array<double, 5> inputs = {0.01,
+                                    0.25,
+                                    0.5,
+                                    0.75,
+                                    0.99};                                
+    std::array<double, 5> expected_outputs{-2.3263478740408408,
+                                            -0.6744897501960817,
+                                            0.0,
+                                            0.6744897501960817,
+                                            2.3263478740408408};
+
+
+    for (int i = 0; i < 5; i++) {
+        double ret = InverseNormal(inputs[i]);
+        CHECK_EQUAL_FLOAT(ret, expected_outputs[i]);
+    }
+}

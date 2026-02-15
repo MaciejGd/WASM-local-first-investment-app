@@ -183,11 +183,12 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunk_size, const s
     return res;
 };
 
-/// @brief Inverse normal distribution using Beasley-Springer-Moro  algorithm
+/// Inverse normal distribution using Beasley-Springer-Moro algorithm.
+/// Algorithm trades a little bit of accuracy for the speed. Error produced is typically 
+/// about 1e-10 which is sufficient for financial engineering.
 /// @param input random variable from range (0,1)
 /// @return random variable distributed with normal matter
 double InverseNormal(double input);
-
 
 };
 
