@@ -139,7 +139,12 @@ CMatrix<double> GetMeanMatrix(T* buffer, size_t chunk_size, size_t chunks_amount
     return res;
 };
 
-// TODO - resulting matrix is symmetric, amount of computations can be strongly reduced
+/// @brief Function producing covariance matrix from input data in form of C-style array
+/// @tparam T underlying type of input buffer 
+/// @param buffer array consisting data
+/// @param chunk_size size of each data chunk
+/// @param chunks_amount amount of data chunks stored in buffer
+/// @return Covariance matrix
 template<typename T>
 CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunk_size, const size_t& chunks_amount) {
     if (!buffer) {
@@ -154,7 +159,8 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunk_size, const s
     head = buffer; // bring buffer pointer back to the first element
     CMatrix<double> res(chunks_amount, chunks_amount);
     for (size_t i = 0; i < chunks_amount; i++) {
-        for (size_t j = 0; j < chunks_amount; j++) {
+        // count half of the output matrix
+        for (size_t j = i; j < chunks_amount; j++) {
             auto& cell = res[i][j];
             size_t i_start = (i * chunk_size);
             size_t j_start = (j * chunk_size);
@@ -165,6 +171,12 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunk_size, const s
                 cell += (val1 * val2);
             }
             cell /= (chunk_size - 1);            
+        }
+    }
+    // fill in second half of cov matrix, as it is symmetric
+    for (int i = 1; i < chunks_amount; i++) {
+        for (int j = 0; j < i; j++) {
+            res[i][j] = res.at(j,i);
         }
     }
 
