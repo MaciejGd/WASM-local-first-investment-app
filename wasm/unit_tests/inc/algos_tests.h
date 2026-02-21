@@ -137,7 +137,7 @@ UNIT_TEST(GetMeanMatrix, CorrectMeanReturns) {
                                     {10.5}
                                 };
     auto expected_matrix = CMatrix(expected_mat);
-    auto result_matrix = GetMeanMatrix(arr, chunks_size, chunks_amount);
+    auto result_matrix = GetMeanMatrix(arr, chunks_amount, chunks_size);
     CHECK_EQUAL(expected_matrix, result_matrix);
 }
 
@@ -150,7 +150,7 @@ UNIT_TEST(GetCovarianceMatrix, NullptrBuffer) {
     size_t chunks_amount = 5;
 
 
-    CHECK_THROW(GetCovarianceMatrix(buf, chunk_size, chunks_amount), std::invalid_argument);
+    CHECK_THROW(GetCovarianceMatrix(buf, chunks_amount, chunk_size), std::invalid_argument);
 }
 
 UNIT_TEST(GetCovarianceMatrix, GetCovariance) {
@@ -161,7 +161,7 @@ UNIT_TEST(GetCovarianceMatrix, GetCovariance) {
                 3,  4,  2,  1,  3,
                 5,  3,  4,  2,  1
                 };
-    auto res = GetCovarianceMatrix(test, 5, 4);
+    auto res = GetCovarianceMatrix(test, 4, 5);
 
     CMatrix<double> expected_output = CMatrix<double>({{2.5, 1.5, -0.75, -2.25},
                                                         {1.5, 1.3,  -0.55, -1.25},

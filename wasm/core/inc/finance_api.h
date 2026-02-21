@@ -65,9 +65,9 @@ public:
         // transform prices to returns
         auto returns = m_TransformPriceToReturns();
         // count mean values for prices
-        auto means = GetMeanMatrix(returns.data(), returns.cols(), returns.rows());
+        auto means = GetMeanMatrix(returns.data(), returns.rows(), returns.cols());
         // count Cholesky decomposition for returns data
-        auto covariance = GetCovarianceMatrix(returns.data(), returns.cols(), returns.rows());
+        auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         // create outputs matrix
         CMatrix<double> outputs(sims, time+1);   
