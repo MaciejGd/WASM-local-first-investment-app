@@ -81,4 +81,5 @@ inline bool EqualOperator(const double& A, const double& B) {
     return false;
 }
 
+
 };

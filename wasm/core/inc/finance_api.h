@@ -1,8 +1,10 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <memory>
 #include <random>
 #include "./matrix_special.h"
+#include "./random_generator.h"
 // jakich funkcji tutaj potrzebujemy???
 
 // co należy robić
@@ -26,10 +28,8 @@ private:
     CMatrix<double> m_weights; // we need weights 
 
     CMatrixLowerTriangular<double> m_cholesky_decomposition;
-protected:
-    // pseudo-random generators
-    std::mt19937 m_gen{std::random_device{}()};
-    std::uniform_real_distribution<double> m_dist{0.0, 1.0};
+
+    std::unique_ptr<IRandomGenerator> m_rand_gen;
 public:
     MonteCarloSimulator(T* buffer, size_t chunk_size, size_t chunks_amount, double* weights) {
         if (buffer == nullptr) {
@@ -48,6 +48,7 @@ public:
         m_buffer = buffer;
         m_stock_size = chunk_size;
         m_stocks = chunks_amount;
+        m_rand_gen = std::make_unique<CRandomGenerator>(); // init random double generator
         m_InitWeightMatrix(weights);
     };
 
@@ -55,27 +56,38 @@ public:
         return m_weights;
     }
 
-    void Simulate(int32_t time, int32_t simulations_amount) {
+    void Simulate(int32_t time, int32_t sims) {
         // here we need to accomplish a few things:
         // run two for loops, outer one, for number of simulations, inner one, for number of analyzed days.
         // for each day we want to analyze pseudo random sample
         auto means = GetMeanMatrix(m_buffer, m_stock_size, m_stocks);
         auto covariance = GetCovarianceMatrix(m_buffer, m_stock_size, m_stocks);
+        auto cholesky = CholeskyFactorization(covariance);
         // weight should be already filled in
+        // output matrix, with dimensions: rows - number of simulations, cols - timestamps
+        CMatrix<double> outputs(sims, time);   
 
+        CMatrix<double> random_samples;
+        for (int i = 0; i < sims; i++) {
+            for (int j = 0; j < time; j++) {
+                random_samples = m_GenerateRandomSamples();
+                auto motion = means + (cholesky * random_samples);
+                outputs[i][j] = outputs[i][j-1] + (m_weights * motion)[0][0];
+            }
+        }   
+    }
+
+    void SetRandomGenerator(std::unique_ptr<IRandomGenerator> rand_gen) {
+        m_rand_gen = std::move(rand_gen);
     }
 
 protected:
-    /// Generate pseudo-random double from the range 0 to 1
-    double m_GenerateRandom() {
-        // static as these should be initialized once at first use
-        return m_dist(m_gen);
-    }
-
+    /// @brief Generate vector of Random samples created using inverse of normal distribution.
+    /// @return Matrix of 1 to m_stocks dimensions filled with pseudo random nums.
     CMatrix<double> m_GenerateRandomSamples() {
-        CMatrix<double> samples(m_stocks, 1);
+        CMatrix<double> samples(1, m_stocks);
         for (int i = 0; i < samples.rows(); i++) {
-            samples[i][0] = InverseNormal(m_GenerateRandom());
+            samples[0][i] = InverseNormal(m_rand_gen->GenerateRandom());
         }
 
         return samples;

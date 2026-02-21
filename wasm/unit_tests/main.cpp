@@ -4,6 +4,7 @@
 #include "./inc/algos_tests.h"
 #include "./inc/utils_test.h"
 #include "./inc/finance_api_tests.h"
+#include "./inc/random_gen_tests.h"
 
 int main() {
     utests::UnitTestRunner::RunTests();

@@ -17,14 +17,6 @@ public:
     CMatrix<double> m_GenerateRandomSamples() {
         return MonteCarloSimulator<T>::m_GenerateRandomSamples();
     }
-
-    double m_GenerateRandom() {
-        return MonteCarloSimulator<T>::m_GenerateRandom();
-    }
-    // we should set seed for underlying MonteCarloSimulatorObject
-    void SetSeed(size_t seed) {
-        this->m_gen.seed(seed);
-    }
 };
 
 UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorNullptr) {    
@@ -55,23 +47,6 @@ UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorWeightsNullptr) {
     CHECK_THROW(MonteCarloSimulator(buf, 2, 2, weights), std::invalid_argument);
 }
 
-UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomDouble) {
-    double buf[] = { 1 };
-    size_t stock_size = 2;
-    size_t stocks = 4;
-    // compare output we values expected for below seed
-    size_t seed = 45;
-    double expected_output = 0.30453643924300827;
-    double weights[] = {1, 2, 3};
-    //initialize test api, set seed and generate random samples
-    auto test_instance = MonteCarloTests(buf, stock_size, stocks, weights);
-    test_instance.SetSeed(seed);
-    auto samples = test_instance.m_GenerateRandom();
-    // confirm results are correct
-    CHECK_EQUAL(samples, expected_output);
-    
-}
-
 UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomSamples) {    
     double buf[] = { 1 };
     size_t stock_size = 2;
@@ -85,13 +60,17 @@ UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomSamples) {
     double weights[] = {1, 2, 3};
     //initialize test api, set seed and generate random samples
     auto test_instance = MonteCarloTests(buf, stock_size, stocks, weights);
-    test_instance.SetSeed(seed);
+    // set random generator with predefined seed
+    std::unique_ptr<CRandomGenerator> rand_gen = std::make_unique<CRandomGenerator>();
+    rand_gen->SetSeed(seed);
+    test_instance.SetRandomGenerator(std::move(rand_gen));
+
     auto samples = test_instance.m_GenerateRandomSamples();
     // confirm results are correct
-    CHECK_EQUAL(samples.rows(), stocks);
-    CHECK_EQUAL(samples.cols(), 1);
-    for (int i = 0; i < samples.rows(); i++) {
-        CHECK_EQUAL_FLOAT(expected_output[i], samples[i][0]);
+    CHECK_EQUAL(samples.cols(), stocks);
+    CHECK_EQUAL(samples.rows(), 1);
+    for (int i = 0; i < samples.cols(); i++) {
+        CHECK_EQUAL_FLOAT(expected_output[i], samples[0][i]);
     }
 }
 
