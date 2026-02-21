@@ -5,12 +5,6 @@
 #include <random>
 #include "./matrix_special.h"
 #include "./random_generator.h"
-// jakich funkcji tutaj potrzebujemy???
-
-// co należy robić
-// 1) policzenie prerequisitów (to jest rzecz, którą należy liczyć tylko raz, cholesky etc.) 
-// 2) losowanie wektora liczb pomiędzy 0 a 1
-// 3) zamiana cen akcji w stopy zwrotów
 
 namespace finance_api {
 
@@ -18,7 +12,8 @@ using namespace linalg::algorithms;
 using namespace linalg::primitives;
 using namespace linalg::utils;
 
-// I guess we should encapsulate the logic in some kind of class to manage that
+/// @brief Class encapsulating Monte Carlo simulation
+/// @tparam T type of underlying data
 template<typename T>
 class MonteCarloSimulator {
 private:
@@ -31,7 +26,12 @@ private:
 
     std::unique_ptr<IRandomGenerator> m_rand_gen;
 public:
-    MonteCarloSimulator(T* buffer, size_t chunk_size, size_t chunks_amount, double* weights) {
+    /// @brief Class for running Monte Carlo simulations for input stock data
+    /// @param buffer pointer to stock values array
+    /// @param chunk_size size of particular stock data
+    /// @param chunks_amount number of stocks
+    /// @param weights pointer to array of weights for particular stocks
+    MonteCarloSimulator(T* buffer, size_t chunks_amount, size_t chunk_size, double* weights) {
         if (buffer == nullptr) {
             throw std::invalid_argument("Buffer passed as input argument is nullptr!");
         }
@@ -52,55 +52,56 @@ public:
         m_InitWeightMatrix(weights);
     };
 
+    /// Weights matrix getter
     const CMatrix<double>& GetWeights() const {
         return m_weights;
     }
 
-    void Simulate(int32_t time, int32_t sims) {
-        // here we need to accomplish a few things:
-        // run two for loops, outer one, for number of simulations, inner one, for number of analyzed days.
-        // for each day we want to analyze pseudo random sample
-        auto means = GetMeanMatrix(m_buffer, m_stock_size, m_stocks);
-        auto covariance = GetCovarianceMatrix(m_buffer, m_stock_size, m_stocks);
+    /// @brief Run Monte Carlo simulation
+    /// @param time number of timestamps that simulation would run for
+    /// @param sims number of simulations to be performed
+    /// @return Matrix of doubles with simulation's results
+    CMatrix<double> Simulate(int32_t time, int32_t sims) {
+        // transform prices to returns
+        auto returns = m_TransformPriceToReturns();
+        // count mean values for prices
+        auto means = GetMeanMatrix(returns.data(), returns.cols(), returns.rows());
+        // count Cholesky decomposition for returns data
+        auto covariance = GetCovarianceMatrix(returns.data(), returns.cols(), returns.rows());
         auto cholesky = CholeskyFactorization(covariance);
-        // weight should be already filled in
-        // output matrix, with dimensions: rows - number of simulations, cols - timestamps
-        CMatrix<double> outputs(sims, time);   
-
-        CMatrix<double> random_samples;
+        // create outputs matrix
+        CMatrix<double> outputs(sims, time+1);   
+        // run simulation
         for (int i = 0; i < sims; i++) {
-            for (int j = 0; j < time; j++) {
-                random_samples = m_GenerateRandomSamples();
+            for (int j = 1; j < time+1; j++) {
+                // generate random samples
+                CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
+                // add means + randoms generated with probability equivalent to covariance matrix
                 auto motion = means + (cholesky * random_samples);
+                // fill output matrix with motion multiplied by weight of asset
                 outputs[i][j] = outputs[i][j-1] + (m_weights * motion)[0][0];
             }
         }   
+        return outputs;
     }
 
+    /// @brief Random generator setter
+    /// @param rand_gen unique_ptr to IRandomGenerator instance
     void SetRandomGenerator(std::unique_ptr<IRandomGenerator> rand_gen) {
         m_rand_gen = std::move(rand_gen);
     }
-
 protected:
-    /// @brief Generate vector of Random samples created using inverse of normal distribution.
-    /// @return Matrix of 1 to m_stocks dimensions filled with pseudo random nums.
-    CMatrix<double> m_GenerateRandomSamples() {
-        CMatrix<double> samples(1, m_stocks);
-        for (int i = 0; i < samples.rows(); i++) {
-            samples[0][i] = InverseNormal(m_rand_gen->GenerateRandom());
-        }
-
-        return samples;
-    }
-    
-    std::vector<std::vector<double>> m_TransformPriceToReturns() {
+    /// @brief Transform input prices to returns
+    /// @return 2D doubles vector of returns
+    CMatrix<double> m_TransformPriceToReturns() {
         // each chunk of returns should be of size - 1
-        std::vector<std::vector<double>> result(m_stocks, std::vector<double>(m_stock_size - 1));
-        for (int i = 0; i < result.size(); i++) {
+        CMatrix<double> result(m_stocks, m_stock_size - 1);
+        // std::vector<std::vector<double>> result(m_stocks, std::vector<double>(m_stock_size - 1));
+        for (int i = 0; i < result.rows(); i++) {
             int start = i * m_stock_size;
             // check each chunk
             double prev = static_cast<double>(m_buffer[start]);
-            for (int j = 0; j < result[i].size(); j++) {
+            for (int j = 0; j < result.cols(); j++) {
                 double current = m_buffer[start + j + 1];
                 if (current == 0) {
                     throw std::logic_error("Stock price provided cannot be equal to zero!!!");
@@ -116,9 +117,9 @@ protected:
     /// @param weights pointer to double array with array weights.
     void m_InitWeightMatrix(double* weights) {
         double sum = 0.0; // weights should sum up to one
-        m_weights = CMatrix<double>(m_stocks, 1);
+        m_weights = CMatrix<double>(1, m_stocks);
         for (size_t i = 0; i < m_stocks; i++) {
-            m_weights[i][0] = weights[i];
+            m_weights[0][i] = weights[i];
             sum += weights[i];
         }
         // check if weights summed up to one
@@ -129,9 +130,3 @@ protected:
 };
 
 } // end of finance_api namespace
-
-//void PrepareData();
-
-
-
-

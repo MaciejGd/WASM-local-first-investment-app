@@ -264,6 +264,23 @@ public:
         return true;        
     }
 
+    /// Access pointer to underlying matrix container
+    /// @return pointer to underlying matrix container
+    const T* data() const {
+        return m_mat.data();
+    }
+
+    /// Debug printing function
+    void Print() const {
+        std::cout << "Printing matrix with dimensions: " << m_rows << ":" << m_cols << std::endl;
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = 0; j < m_cols; j++) {
+                std::cout << at(i, j) << ",";
+            }
+            std::cout << "\n";
+        }
+    }
+
 protected:
     /// number of rows in a matrix 
     uint32_t m_rows;

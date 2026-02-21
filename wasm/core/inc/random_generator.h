@@ -1,15 +1,14 @@
 #pragma once
 #include <random>
-
+#include "matrix.h"
 
 class IRandomGenerator {
 public:
     IRandomGenerator() = default;
     virtual ~IRandomGenerator() = default;
 
-    /// @brief Generate random number
-    /// @return double value
-    virtual double GenerateRandom() = 0;
+    /// @brief Generate matrix of pseudo-random generated values
+    virtual linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) = 0;
 };
 
 /// @brief Implementation of IRandomGenerator designed to be used in MonteCarlo sims
@@ -24,7 +23,18 @@ public:
         m_gen.seed(seed);
     };
     
-    inline double GenerateRandom() override {
+    inline double GenerateRandom() {
         return m_dist(m_gen);
+    };
+
+    /// @brief Generate vector of pseudo-random samples generated with Gaussian distribution
+    /// @param size number of vector columns
+    /// @return CMatrix<double> filled with pseudo-random values
+    inline linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) {
+        linalg::primitives::CMatrix<double> samples(size, 1);
+        for (int i = 0; i < samples.rows(); i++) {
+            samples[i][0] = linalg::algorithms::InverseNormal(GenerateRandom());
+        }
+        return samples;
     };
 };
