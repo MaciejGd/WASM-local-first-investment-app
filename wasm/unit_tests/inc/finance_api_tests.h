@@ -7,8 +7,8 @@ using namespace finance_api;
 template<typename T>
 class MonteCarloTests : public MonteCarloSimulator<T> {
 public:
-    MonteCarloTests(T* buffer, size_t chunk_size, size_t chunks_amount): 
-                        MonteCarloSimulator<T>(buffer, chunk_size, chunks_amount) {};
+    MonteCarloTests(T* buffer, size_t chunk_size, size_t chunks_amount, double* weights): 
+                        MonteCarloSimulator<T>(buffer, chunk_size, chunks_amount, weights) {};
     // public test interfaces for private MonteCarloSimulator methods
     vector<vector<double>> m_TransformPriceToReturns() {
         return MonteCarloSimulator<T>::m_TransformPriceToReturns();
@@ -29,21 +29,30 @@ public:
 
 UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorNullptr) {    
     double* buf = nullptr;
-    CHECK_THROW(MonteCarloSimulator(buf, 2, 2), std::invalid_argument);
+    double weights[] = {1, 2, 3};
+    CHECK_THROW(MonteCarloSimulator(buf, 2, 2, weights), std::invalid_argument);
 }
 
 UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorToLowChunksize) {    
     double buf[] = { 1,
                      2,
                      3};
-    CHECK_THROW(MonteCarloSimulator(buf, 1, 2), std::invalid_argument);
+    double weights[] = {1, 2, 3};
+    CHECK_THROW(MonteCarloSimulator(buf, 1, 2, weights), std::invalid_argument);
 }
 
 UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorToLowChunksAmount) {    
     double buf[] = { 1, 2,
                      2, 3,
                      3, 4};
-    CHECK_THROW(MonteCarloSimulator(buf, 2, 0), std::invalid_argument);
+    double weights[] = {1, 2, 3};
+    CHECK_THROW(MonteCarloSimulator(buf, 2, 0, weights), std::invalid_argument);
+}
+
+UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorWeightsNullptr) {    
+    double buf[] = {1, 2, 3};
+    double* weights = nullptr;
+    CHECK_THROW(MonteCarloSimulator(buf, 2, 2, weights), std::invalid_argument);
 }
 
 UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomDouble) {
@@ -53,8 +62,9 @@ UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomDouble) {
     // compare output we values expected for below seed
     size_t seed = 45;
     double expected_output = 0.30453643924300827;
+    double weights[] = {1, 2, 3};
     //initialize test api, set seed and generate random samples
-    auto test_instance = MonteCarloTests(buf, stock_size, stocks);
+    auto test_instance = MonteCarloTests(buf, stock_size, stocks, weights);
     test_instance.SetSeed(seed);
     auto samples = test_instance.m_GenerateRandom();
     // confirm results are correct
@@ -72,8 +82,9 @@ UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomSamples) {
                                             0.4440026648946756,
                                             -0.20153917455817283,
                                             1.7196552083405074};
+    double weights[] = {1, 2, 3};
     //initialize test api, set seed and generate random samples
-    auto test_instance = MonteCarloTests(buf, stock_size, stocks);
+    auto test_instance = MonteCarloTests(buf, stock_size, stocks, weights);
     test_instance.SetSeed(seed);
     auto samples = test_instance.m_GenerateRandomSamples();
     // confirm results are correct
@@ -84,7 +95,7 @@ UNIT_TEST(MonteCarloSimulatorTests, GenerateRandomSamples) {
     }
 }
 
-UNIT_TEST(FinanceApi, TransformPriceToReturnsWorking) {    
+UNIT_TEST(MonteCarloSimulatorTests, TransformPriceToReturnsWorking) {    
     using std::vector;
 
     int price[] = {1, 12, 35, 
@@ -94,8 +105,8 @@ UNIT_TEST(FinanceApi, TransformPriceToReturnsWorking) {
         {11, 1.91666666667},
         {-0,46341463414, -1}
     };
-
-    MonteCarloTests monte_carlo(price, 3, 2);
+    double weights[] = {1, 2, 3};
+    MonteCarloTests monte_carlo(price, 3, 2, weights);
 
     auto output = monte_carlo.m_TransformPriceToReturns();
     CHECK_EQUAL(output.size(), expected_out.size());    
@@ -109,6 +120,27 @@ UNIT_TEST(FinanceApi, TransformPriceToReturnsWorking) {
     }
 }
 
+UNIT_TEST(MonteCarloSimulatorTests, WeightsNotOne) {
+    int price[] = {1,2,3,4};
+    const size_t chunk_size = 1;
+    const size_t chunks_amount = 4;
+    double weights[chunks_amount] = {0.33, 0.25, 0.25, 0.18};
+    CHECK_THROW(MonteCarloSimulator(price, chunk_size, chunks_amount, weights), std::logic_error);
+}
+
+UNIT_TEST(MonteCarloSimulatorTests, InitWeights) {
+    int price[] = {1,2,3,4};
+    const size_t chunk_size = 2;
+    const size_t chunks_amount = 4;
+    double weights[chunks_amount] = {0.33, 0.25, 0.25, 0.17};
+    auto test = MonteCarloSimulator(price, chunk_size, chunks_amount, weights);
+    auto weights_mat = test.GetWeights();
+    CHECK_EQUAL(weights_mat.rows(), chunks_amount);
+    CHECK_EQUAL(weights_mat.cols(), 1);
+    for (int i = 0; i < chunks_amount; i++) {
+        CHECK_EQUAL(weights_mat[i][0], weights[i]);
+    }
+}
 
 
 

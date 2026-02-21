@@ -23,6 +23,7 @@ private:
     T* m_buffer;
     size_t m_stock_size;
     size_t m_stocks;
+    CMatrix<double> m_weights; // we need weights 
 
     CMatrixLowerTriangular<double> m_cholesky_decomposition;
 protected:
@@ -30,7 +31,7 @@ protected:
     std::mt19937 m_gen{std::random_device{}()};
     std::uniform_real_distribution<double> m_dist{0.0, 1.0};
 public:
-    MonteCarloSimulator(T* buffer, size_t chunk_size, size_t chunks_amount) {
+    MonteCarloSimulator(T* buffer, size_t chunk_size, size_t chunks_amount, double* weights) {
         if (buffer == nullptr) {
             throw std::invalid_argument("Buffer passed as input argument is nullptr!");
         }
@@ -40,17 +41,28 @@ public:
         if (chunks_amount <= 0) {
             throw std::invalid_argument("Analyzed stock amounts should be at least one!");
         }
+        if (weights == nullptr) {
+            throw std::invalid_argument("Weights input buffer is nullptr!!!");
+        }
+        
         m_buffer = buffer;
         m_stock_size = chunk_size;
         m_stocks = chunks_amount;
-
-        
+        m_InitWeightMatrix(weights);
     };
+
+    const CMatrix<double>& GetWeights() const {
+        return m_weights;
+    }
 
     void Simulate(int32_t time, int32_t simulations_amount) {
         // here we need to accomplish a few things:
         // run two for loops, outer one, for number of simulations, inner one, for number of analyzed days.
         // for each day we want to analyze pseudo random sample
+        auto means = GetMeanMatrix(m_buffer, m_stock_size, m_stocks);
+        auto covariance = GetCovarianceMatrix(m_buffer, m_stock_size, m_stocks);
+        // weight should be already filled in
+
     }
 
 protected:
@@ -87,9 +99,22 @@ protected:
         }
         return result;
     }
+
+    /// @brief Initialize weight matrix.
+    /// @param weights pointer to double array with array weights.
+    void m_InitWeightMatrix(double* weights) {
+        double sum = 0.0; // weights should sum up to one
+        m_weights = CMatrix<double>(m_stocks, 1);
+        for (size_t i = 0; i < m_stocks; i++) {
+            m_weights[i][0] = weights[i];
+            sum += weights[i];
+        }
+        // check if weights summed up to one
+        if (!EqualOperator<double>(sum, 1.0)) {
+            std::logic_error("Sum of stock prices weights should be equal to one!");
+        }
+    }
 };
-
-
 
 } // end of finance_api namespace
 
