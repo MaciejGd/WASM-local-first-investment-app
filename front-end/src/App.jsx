@@ -3,7 +3,7 @@ import StockPage from './subpages/wallet/Stock.jsx';
 import SettingsPage from './subpages/Settings.jsx';
 import CryptoPage from './subpages/Crypto.jsx';
 import ObligationsPage from './subpages/Obligations.jsx';
-import SimulationsPage from './subpages/Simulations.jsx';
+import SimulationsPage from './subpages/simulations/Simulations.jsx';
 import GraphsPage from './subpages/graphs/Graphs.jsx';
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { useState } from 'react';
@@ -36,7 +36,7 @@ function NavigationBar({ onLogOut }) {
 function NavBar({onHideButtonClick, onLogOut, visible}) {
   return (
     <nav className="sidebar">
-      <button className="navigationButton" onClick={onHideButtonClick}><LeftArrowIcon /><span>{visible ? " Hide navbar " : ""}</span></button>
+      <button className="navigationButton" onClick={onHideButtonClick}> {visible ? <LeftArrowIcon /> : <RightArrowIcon/>}<span>{visible ? " Hide navbar " : ""}</span></button>
       <NavLink className="navigationButton" to="/stock"><WalletIcon />{visible ? " Stock " : ""} </NavLink>
       <NavLink className="navigationButton" to="/crypto"><CryptoIcon/>{visible ? " Crypto " : ""}</NavLink>
       <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/>{visible ? " Obligations " : ""}</NavLink>
@@ -51,7 +51,7 @@ function NavBar({onHideButtonClick, onLogOut, visible}) {
 // main application component
 export default function App() {
   // somewhere here we should check if we are logged in and if so, render different parts of the application
-  const [logged, setLogged] = useState(false);
+  const [logged, setLogged] = useState(true); // TODO - to be changed to false after changes
   const [show_logout, setShowLogout] = useState(false);
 
   function setLoggedIn() {
@@ -95,26 +95,5 @@ export default function App() {
         }
       </>
   );
-
-
-
-  return (
-    <BrowserRouter>
-      <div className="layout">
-        <NavigationBar></NavigationBar>
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<StockPage/>}></Route>
-            <Route path="/stock" element={<StockPage/>}></Route>
-            <Route path="/crypto" element={<CryptoPage/>}></Route>
-            <Route path="/obligations" element={<ObligationsPage/>}></Route>
-            <Route path="/simulations" element={<SimulationsPage/>}></Route>
-            <Route path="/graphs" element={<GraphsPage/>}></Route>
-            <Route path="/settings" element={<SettingsPage/>}></Route>
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
-  )
 }
 

@@ -1,11 +1,11 @@
 import { useState } from "react";
 /** Pop-up component for adding asset to Portfolio */
 
-function InputRow({title, value, onChange}) {
+function InputRow({title, value, onChange, focus}) {
     return (
     <div className="modal_input_row">
         <span>{title}</span>
-        <input className="modal_input" onChange={(e)=>onChange(e.target.value)}></input>
+        <input className="modal_input" onChange={(e)=>onChange(e.target.value)} autoFocus={focus}></input>
     </div>);
 }
 
@@ -21,7 +21,7 @@ export default function AddAssetPopUp({ onClose, onAccept }) {
                 Add asset
             </div>
             <div className="modal_input_table">
-                <InputRow title="Ticker"    value={ticker}      onChange={setTicker}></InputRow>
+                <InputRow title="Ticker"    value={ticker}      onChange={setTicker} focus={true}></InputRow>
                 <InputRow title="Quantity"  value={quantity}    onChange={setQuantity}></InputRow>
                 <InputRow title="Price"     value={price}       onChange={setPrice}></InputRow>
             </div>

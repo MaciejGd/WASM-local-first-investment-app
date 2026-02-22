@@ -1,0 +1,15 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: purple; */
+}
+
+.sims_options_pane {
+  display: flex;
+}
+
+.sims_slider {
+
+}

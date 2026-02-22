@@ -9,7 +9,7 @@ import { AssetsTable } from './AssetsTable.jsx'
 
 
 
-function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
+export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
     return (
         <div className="assets_table_buttons_container">
             <AddAssetButton onAddAsset={onAddAsset}></AddAssetButton>
@@ -18,11 +18,11 @@ function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
     );
 }
 
-function AddAssetButton({onAddAsset}) {
+export function AddAssetButton({onAddAsset}) {
     return (<div><button className="assets_add_button" onClick={onAddAsset}>Add asset</button></div>);
 }
 
-function DeleteSelectedButton({ onDeleteSelectedCb }) {
+export function DeleteSelectedButton({ onDeleteSelectedCb }) {
     return (<button onClick={()=>onDeleteSelectedCb()}>Delete Selected</button>)
 }
 
