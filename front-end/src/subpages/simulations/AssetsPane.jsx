@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PieChart } from "./PieAssetChart.jsx";
 
 // Should show table with: Ticker -> Total investment cost -> percent of investment
 // and cricle graph chart at the right with percentages of each investments
@@ -30,21 +31,44 @@ function AssetTableHeader() {
     );
 }
 
-function AssetTableBody() {
+function AssetTableBody({ assets }) {
+    console.log(assets);
     return (
         <tbody>
+            {
+                assets.map(([ticker, price, percent], index)=> {
+                    return <AssetRow key={index} ticker={ticker} price={price} percent={percent}/>
+                })
+            
+            }
+            {/* <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
             <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
             <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
+            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
+            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow> */}
         </tbody>
     );
 }
 
-function AssetTable() {
+function AssetTable({assets}) {
     return (
-        <table className="modern-table">
-            <AssetTableHeader/>
-            <AssetTableBody/>
-        </table>
+        <div className="sims_table_container">
+            <table className="sims_asset_table">
+                <AssetTableHeader/>
+                <AssetTableBody assets={assets}/>
+            </table>
+        </div>
     );
 }
 
@@ -59,10 +83,11 @@ function AssetRow({ ticker, price, percent }) {
 }
 
 
-export default function AssetsPane() {
+export default function AssetsPane({ assets }) {
     return (
         <div className="sims_middle_pane">
-            <AssetTable></AssetTable>
+            <AssetTable assets={assets}></AssetTable>
+            <PieChart></PieChart>
         </div>
     );
 }

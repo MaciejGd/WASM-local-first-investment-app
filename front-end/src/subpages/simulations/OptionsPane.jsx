@@ -12,10 +12,10 @@ function Slider({ min_value, max_value, default_value }) {
     );
 }
 
-export default function SimulationsOptionsPane() {
+export default function SimulationsOptionsPane({ addAsset, deleteSelectedCb }) {
     return (
         <div className="sims_options_pane">
-            <AssetButtons onAddAsset={()=>{}}  onDeleteSelectedCb={()=>{}}/>
+            <AssetButtons onAddAsset={addAsset}  onDeleteSelectedCb={deleteSelectedCb}/>
             <Slider min_value={10} max_value={100} default_value={55}></Slider>
             <Slider min_value={10} max_value={100} default_value={55}></Slider>
         </div>
