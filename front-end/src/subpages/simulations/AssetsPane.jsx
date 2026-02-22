@@ -31,32 +31,15 @@ function AssetTableHeader() {
     );
 }
 
+/// Add assets as rows to the table
 function AssetTableBody({ assets }) {
-    console.log(assets);
     return (
         <tbody>
             {
                 assets.map(([ticker, price, percent], index)=> {
                     return <AssetRow key={index} ticker={ticker} price={price} percent={percent}/>
                 })
-            
             }
-            {/* <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow>
-            <AssetRow ticker={"Test"} price="3.1" percent="100%"></AssetRow>
-            <AssetRow ticker={"LPP.WA"} price="213.2" percent="10%"></AssetRow> */}
         </tbody>
     );
 }
@@ -87,7 +70,7 @@ export default function AssetsPane({ assets }) {
     return (
         <div className="sims_middle_pane">
             <AssetTable assets={assets}></AssetTable>
-            <PieChart></PieChart>
+            <PieChart assets={assets}></PieChart>
         </div>
     );
 }
