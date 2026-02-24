@@ -2,10 +2,10 @@ import { AssetButtons, AddAssetButton, DeleteSelectedButton } from "../wallet/St
 import "../../styling/simulations.css"
 import { useState } from "react" 
 
-import SimulationsOptionsPane from "./OptionsPane";
-import AssetsPane from "./AssetsPane"
-import { SimAssetMap } from "./SimAssetsData";
-
+import SimulationsOptionsPane from "./SimsOptionsPane";
+import AssetsPane from "./SimsAssetsPane"
+import { SimAssetMap } from "./SimsAssetsData";
+import SimsResults from "./SimsResults.jsx";
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of 
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
 function InputRow({title, onChange, focus}) {
@@ -77,6 +77,7 @@ export default function SimulationsPage() {
                 ></AssetButtons> */}
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
+                <SimsResults/>
             </div>
             {modal_visible && 
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} />

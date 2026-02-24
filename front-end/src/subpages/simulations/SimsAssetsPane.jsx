@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PieChart } from "./PieAssetChart.jsx";
+import { PieChart } from "./SimsPieAssetChart.jsx";
 
 // Should show table with: Ticker -> Total investment cost -> percent of investment
 // and cricle graph chart at the right with percentages of each investments
