@@ -32,33 +32,48 @@ function AssetTableHeader() {
 }
 
 /// Add assets as rows to the table
-function AssetTableBody({ assets }) {
+function AssetTableBody({ assets, onSelectCb }) {
     return (
         <tbody>
             {
-                assets.map(([ticker, price, percent], index)=> {
-                    return <AssetRow key={index} ticker={ticker} price={price} percent={percent}/>
+                assets.map(([_, data], index)=> {
+                    return <AssetRow key={index} 
+                                    ticker={data.ticker} 
+                                    price={data.price} 
+                                    percent={data.percent}
+                                    selected={data.selected}
+                                    onSelectCb = {onSelectCb}
+                            />
                 })
             }
         </tbody>
     );
 }
 
-function AssetTable({assets}) {
+function AssetTable({ assets, onSelectCb }) {
     return (
         <div className="sims_table_container">
             <table className="sims_asset_table">
                 <AssetTableHeader/>
-                <AssetTableBody assets={assets}/>
+                <AssetTableBody assets={assets} onSelectCb={onSelectCb}/>
             </table>
         </div>
     );
 }
 
-function AssetRow({ ticker, price, percent }) {
+function AssetRow({ ticker, price, percent, selected, onSelectCb }) {
     return (
         <tr className="sims_asset_row">
-            <td>{ticker}</td>
+            <td>
+                <div>
+                    <input type="checkbox" checked={selected} onChange={
+                        (e)=>onSelectCb(ticker, e.target.checked)
+                    }>                        
+                    </input>
+                    <span>{ticker}</span>
+                </div>
+            </td>
+            {/* <td>{ticker}</td> */}
             <td>{price}</td>
             <td>{percent}</td>
         </tr>
@@ -66,10 +81,10 @@ function AssetRow({ ticker, price, percent }) {
 }
 
 
-export default function AssetsPane({ assets }) {
+export default function AssetsPane({ assets, onSelectCb }) {
     return (
         <div className="sims_middle_pane">
-            <AssetTable assets={assets}></AssetTable>
+            <AssetTable assets={assets} onSelectCb={onSelectCb}></AssetTable>
             <PieChart assets={assets}></PieChart>
         </div>
     );

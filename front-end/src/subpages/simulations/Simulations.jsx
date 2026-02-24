@@ -56,6 +56,18 @@ export default function SimulationsPage() {
         toggleModalVisibility();
     }
 
+    function selectAsset(ticker, value) {
+        var asset_map = new SimAssetMap(assets);
+        asset_map.setSelected(ticker, value);
+        setAssets(asset_map);
+    }
+
+    function deleteSelected() {
+        var asset_map = new SimAssetMap(assets);
+        asset_map.deleteSelected();
+        setAssets(asset_map);
+    }
+
     return (
         <>
             <h1>Simulations!!!</h1>
@@ -63,8 +75,8 @@ export default function SimulationsPage() {
                 {/* <AssetButtons onAddAsset={toggleModalVisibility}
                                 onDeleteSelectedCb={()=>{}}
                 ></AssetButtons> */}
-                <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={()=>{}}/>
-                <AssetsPane assets={assets.toArray()}/>
+                <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected}/>
+                <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
             </div>
             {modal_visible && 
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} />

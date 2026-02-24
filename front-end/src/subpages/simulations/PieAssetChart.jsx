@@ -40,9 +40,9 @@ const options = {
 };
 
 function transformAssetsToPieData(assets) {
-  const labels = assets.map(([ticker, price, percent]) => { return ticker; });
-  const prices = assets.map(([ticker, price, percent]) => { return price; });
-  const offsets = assets.map(([ticker, price, percent]) => { return (50 - percent); });
+  const labels = assets.map(([ticker, data]) => { return ticker; });
+  const prices = assets.map(([ticker, data]) => { return data.price; });
+  const offsets = assets.map(([ticker, data]) => { return (50 - data.percent); });
   console.log(offsets);
   if (labels.length == 0) {
     return {
