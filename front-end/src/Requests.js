@@ -20,3 +20,25 @@ export const RequestPOST = async(url, data) => {
         throw err;
     }
 }
+
+export const RequestGET = async(url) => {
+    try {
+        const response = await fetch(
+            url,
+            {
+                method: 'GET',
+                headers: {
+                    'content-type' : 'application/json',
+                },
+            }
+        );
+        if (!response.ok) {
+            throw new Error(`HTTP error: Status: ${response.status}`)            
+        }
+        return response.json();
+    }
+    catch (err) {
+        console.log("Exception thrown during GET request");
+        throw err;        
+    }
+}

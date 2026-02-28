@@ -1,23 +1,25 @@
 import { AssetButtons, AddAssetButton, DeleteSelectedButton } from "../wallet/Stock"
 import "../../styling/simulations.css"
-import { useState } from "react" 
+import { useEffect, useState } from "react"
 
 import SimulationsOptionsPane from "./SimsOptionsPane";
 import AssetsPane from "./SimsAssetsPane"
 import { SimAssetMap } from "./SimsAssetsData";
 import SimsResults from "./SimsResults.jsx";
-import { RequestPOST } from "../../Requests.js";
-// what do we want in here??? we want some table which we can add tickers + set proportions / amount of 
+import { RequestGET, RequestPOST } from "../../Requests.js";
+import ComboBox from "../../components/Combobox.jsx";
+// what do we want in here??? we want some table which we can add tickers + set proportions / amount of
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
-function InputRow({title, onChange, focus}) {
+function InputRow({ title, onChange, focus, options=[] }) {
     return (
     <div className="modal_input_row">
         <span>{title}</span>
-        <input className="modal_input" onChange={(e)=>onChange(e.target.value)} autoFocus={focus}></input>
+        {/* <input className="modal_input" onChange={(e)=>onChange(e.target.value)} autoFocus={focus}></input> */}
+        <ComboBox onChange={onChange} placeholder="Ticker..." focus={focus} options={options} />
     </div>);
 }
 
-function AddAssetPopUp({ onClose, onAccept }) {
+function AddAssetPopUp({ onClose, onAccept, tickersList }) {
     const [ticker, setTicker] = useState("");
     const [price, setPrice] = useState("");
 
@@ -28,8 +30,8 @@ function AddAssetPopUp({ onClose, onAccept }) {
                 Add asset
             </div>
             <div className="modal_input_table">
-                <InputRow title="Ticker"          onChange={setTicker} focus={true}></InputRow>
-                <InputRow title="Planned cost"           onChange={setPrice}></InputRow>
+                <InputRow title="Ticker" onChange={setTicker} focus={true} options={tickersList} ></InputRow>
+                <InputRow title="Planned cost" onChange={setPrice}></InputRow>
             </div>
             <div className="modal_buttons">
                 <button className="modal_button" onClick={onClose}> Close </button>
@@ -44,6 +46,7 @@ function AddAssetPopUp({ onClose, onAccept }) {
 export default function SimulationsPage() {
     const [modal_visible, setModalVisible] = useState(false);
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
+    const [tickers_list, setTickersList] = useState([]);
 
     function toggleModalVisibility(vis) {
         setModalVisible(!modal_visible);
@@ -69,6 +72,13 @@ export default function SimulationsPage() {
         setAssets(asset_map);
     }
 
+    // should be done once on page loading
+    async function FetchStocksList() {
+        const api_url = "http://127.0.0.1:5000/finance/get_stocks_list";
+        const tickers_array = await RequestGET(api_url);
+        return tickers_array;
+    }
+
     // Fetch prices of the stock from remote server
     async function FetchStockPrices() {
         const tickers = assets.getTickers();
@@ -76,8 +86,17 @@ export default function SimulationsPage() {
 
         const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
         let responseJson = await RequestPOST(api_url, tickers);
+        console.log("List of possible tickers: ", tickers_list);
         console.log(responseJson);
     }
+    // fetch list of possible tickers upon page load
+    useEffect(() => {  
+        const load_tickers = async () => {
+            var tickers_array = await FetchStocksList();
+            setTickersList(tickers_array)
+        }; 
+        load_tickers();
+    }, []);
 
     return (
         <>
@@ -90,8 +109,8 @@ export default function SimulationsPage() {
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
                 <SimsResults/>
             </div>
-            {modal_visible && 
-                <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} />
+            {modal_visible &&
+                <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} tickersList={tickers_list} />
             }
         </>
     )

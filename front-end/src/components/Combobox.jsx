@@ -5,6 +5,7 @@ export default function ComboBox({
     options = [],
     onChange,
     placeholder = "Select...",
+    focus = false,
 }) {
     // text value inserted in input field
     const [inputValue, setInputValue] = useState("");
@@ -12,6 +13,7 @@ export default function ComboBox({
     // is dropbox opened
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
+    const listRef = useRef(null);
 
     // filter options by starting string
     const filteredOptions = options.filter((opt)=>
@@ -28,6 +30,17 @@ export default function ComboBox({
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+    // make sure list scrolls when hidden elements are highlighted
+    useEffect(() => {
+        const listElement = listRef.current;
+        const item = listElement?.children[highlightedIndex];
+
+        if (item) {
+            item.scrollIntoView({
+                block: 'nearest',
+            });
+        }
+    }, [highlightedIndex]);
 
     // handle value from options list selection
     const handleSelect = (option) => {
@@ -42,6 +55,7 @@ export default function ComboBox({
                 type="text"
                 value={inputValue}
                 placeholder={placeholder}
+                autofocus={focus}
                 onChange={(e) => {
                     setInputValue(e.target.value);
                     setIsOpen(true);
@@ -83,7 +97,7 @@ export default function ComboBox({
                 }}
             />
             {isOpen && filteredOptions.length > 0 && (
-                <ul className="combo-options">
+                <ul className="combo-options" ref={listRef}>
                     {filteredOptions.map((option, index)=>(
                         <li key={option} 
                             onClick={() => handleSelect(option)}
