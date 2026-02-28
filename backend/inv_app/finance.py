@@ -24,3 +24,8 @@ def get_stocks_prices():
     tickers = post_json.get("tickers")
     data = finance_api.get_stocks_prices(tickers)
     return jsonify(data)
+
+@bp.route('/get_stocks_list', methods=('GET',))
+def get_tickers_list():
+    tickers = finance_api.get_tickers_list()
+    return jsonify(tickers)

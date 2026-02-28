@@ -33,5 +33,13 @@ class FinanceDataAPI():
     def get_tickers_available(self) -> list[str]:
         pass
 
+
+    def get_tickers_list(self) -> list[str]:
+        cursor = self.db_handler.get_all_docs(self.db_name, self.stock_info_col)
+        tickers = []
+        for c in cursor:
+            tickers.append(c['ticker'])
+        return tickers
+
 # finance data api that should be shared across all files
 finance_api = FinanceDataAPI()

@@ -34,6 +34,10 @@ class MongoHandler():
         return cursor
         #return json.loads(json.dumps(cursor))
 
+    def get_all_docs(self, db_name, col_name):
+        cursor = self.client[db_name][col_name].find({}, {"ticker" : 1})
+        return cursor
+
 
     
 
