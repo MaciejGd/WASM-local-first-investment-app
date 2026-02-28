@@ -65,5 +65,6 @@ function SimResultsTable() {
 export default function SimsResults() {
     return (
         <SimResultsTable/>
+        // we do not want to plot all simulations run in here to the end-user
     );
 }

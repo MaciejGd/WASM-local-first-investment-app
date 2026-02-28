@@ -1,6 +1,8 @@
 import os 
 from flask import Flask, jsonify
 from flask_cors import CORS
+from .finance_api import FinanceDataAPI
+
 
 def create_app(test_config=None):
     # create and configure app instance
@@ -19,12 +21,26 @@ def create_app(test_config=None):
     os.makedirs(app.instance_path, exist_ok=True)
 
     from . import db
-    db.init_app(app)
+    db.init_app(app)    
 
     @app.route("/hello")
     def hello():
         return jsonify({"first" : "hello", "second" : "world"})
     
+    # init mongoDb handler
+    finance_db = FinanceDataAPI()
+
+    @app.route("/mongo_test")
+    def mongo_test():
+        find_dict = finance_db.get_stock_prices("LPP.WA")
+        return jsonify(find_dict)
+
+    @app.route("/mongo_test_list")
+    def mongo_test_list():
+        tickers = ["LPP.WA", "BDX.WA", "DNP.WA"]
+        found_prices = finance_db.get_stocks_prices(tickers)
+        return jsonify(found_prices)        
+
     from . import auth
     app.register_blueprint(auth.bp)
 
