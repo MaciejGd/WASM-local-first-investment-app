@@ -74,5 +74,11 @@ export class SimAssetMap {
             this.asset_map.delete(key);
         });
     }
+    // return tickers in form that our external API would accept
+    getTickers() {
+        const tickers = [];
+        this.asset_map.forEach((value, key) => tickers.push(key));
+        return { "tickers" : tickers };
+    }
 
 }

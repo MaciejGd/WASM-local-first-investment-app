@@ -6,6 +6,7 @@ import SimulationsOptionsPane from "./SimsOptionsPane";
 import AssetsPane from "./SimsAssetsPane"
 import { SimAssetMap } from "./SimsAssetsData";
 import SimsResults from "./SimsResults.jsx";
+import { RequestPOST } from "../../Requests.js";
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of 
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
 function InputRow({title, onChange, focus}) {
@@ -68,6 +69,16 @@ export default function SimulationsPage() {
         setAssets(asset_map);
     }
 
+    // Fetch prices of the stock from remote server
+    async function FetchStockPrices() {
+        const tickers = assets.getTickers();
+        console.log("Tickers: ", tickers);
+
+        const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
+        let responseJson = await RequestPOST(api_url, tickers);
+        console.log(responseJson);
+    }
+
     return (
         <>
             <h1>Simulations!!!</h1>
@@ -75,7 +86,7 @@ export default function SimulationsPage() {
                 {/* <AssetButtons onAddAsset={toggleModalVisibility}
                                 onDeleteSelectedCb={()=>{}}
                 ></AssetButtons> */}
-                <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected}/>
+                <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={FetchStockPrices}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
                 <SimsResults/>
             </div>

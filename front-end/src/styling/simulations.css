@@ -8,6 +8,7 @@
 
 .sims_options_pane {
   display: flex;
+  background-color: #ccc;
 }
 
 /* .sims_middle_pane {
@@ -24,6 +25,7 @@
   align-items: center;
   width: 80%;
   gap: 30px;
+  background-color: dimgray;
 }
 
 /* .sims_table_container {
@@ -58,4 +60,11 @@
 
 .sims_slider {
 
+}
+
+.sims_run_button {
+  background-color: rgb(59, 59, 59);
+  border-radius: 10px;
+  border-color: white;
+  margin-left: 5px;
 }

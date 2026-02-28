@@ -12,12 +12,20 @@ function Slider({ min_value, max_value, default_value }) {
     );
 }
 
-export default function SimulationsOptionsPane({ addAsset, deleteSelectedCb }) {
+function RunSimButton({ onRunSim }) {
+    return (
+    <button className="sims_run_button" onClick={onRunSim}>
+        Run Simulation
+    </button>);
+}
+
+export default function SimulationsOptionsPane({ addAsset, deleteSelectedCb, onRunSim }) {
     return (
         <div className="sims_options_pane">
             <AssetButtons onAddAsset={addAsset}  onDeleteSelectedCb={deleteSelectedCb}/>
             <Slider min_value={10} max_value={100} default_value={55}></Slider>
             <Slider min_value={10} max_value={100} default_value={55}></Slider>
+            <RunSimButton onRunSim={onRunSim}></RunSimButton>
         </div>
     );
 }
