@@ -11,6 +11,7 @@ bp = Blueprint('auth', __name__, url_prefix="/auth")
 # endpoint for registering new user account
 @bp.route("/register", methods=('GET', 'POST'))
 def register():
+    # TODO - implement registering new users
     pass
 
 # endpoint for logging into the service

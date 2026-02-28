@@ -32,3 +32,6 @@ class FinanceDataAPI():
 
     def get_tickers_available(self) -> list[str]:
         pass
+
+# finance data api that should be shared across all files
+finance_api = FinanceDataAPI()
