@@ -191,12 +191,3 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunks_amount, cons
 double InverseNormal(double input);
 
 };
-
-
-
-
-
-
-
-
-

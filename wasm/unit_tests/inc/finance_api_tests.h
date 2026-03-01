@@ -1,6 +1,6 @@
 #pragma once
 #include "../test_source/tests_runner.h"
-#include "../../core/inc/finance_api.h"
+#include "../../core/inc/monte_carlo_sim.h"
 
 using namespace finance_api;
 
