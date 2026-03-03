@@ -41,7 +41,7 @@ def login():
     
 
 # endpoint for logging user out
-@bp.route("/logout", methods=("POST", ))
+@bp.route("/logout", methods=("GET", ))
 def logout():
     session.clear()
     return {'data' : 'Properly logged out'}, 200
@@ -54,7 +54,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = db_proxy.get_user_data()
+        g.user = db_proxy.get_user_data(user_id)
 
 # decorator for checking if user is logged in when launching a request
 def login_required(view):

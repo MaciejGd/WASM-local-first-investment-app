@@ -51,7 +51,7 @@ function NavBar({onHideButtonClick, onLogOut, visible}) {
 // main application component
 export default function App() {
   // somewhere here we should check if we are logged in and if so, render different parts of the application
-  const [logged, setLogged] = useState(true); // TODO - to be changed to false after changes
+  const [logged, setLogged] = useState(false); // TODO - to be changed to false after changes
   const [show_logout, setShowLogout] = useState(false);
 
   function setLoggedIn() {

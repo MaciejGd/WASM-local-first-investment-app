@@ -16,7 +16,7 @@ class DBHandler(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def setup_connection(self):
+    def setup_connection(self, db_path):
         raise NotImplementedError
     
     @abstractmethod

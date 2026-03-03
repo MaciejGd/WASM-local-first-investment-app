@@ -8,35 +8,52 @@ class MongoHandler():
     def __init__(self, uri: str):
         self.uri = uri
         self.client = MongoClient(uri)
-        self.db_cache = dict()
-        self.col_cache = dict()
+
 
     def get_db(self, db_name: str):
-        # try searching for db in cache
-        if db_name in self.db_cache:
-            return self.db_cache[db_name]
-        # update cache if not stored already
-        db_handle = self.client.get_database(db_name)
-        self.db_cache[db_name] = db_handle
-        return db_handle
-    
+        """
+            Get db specified by db_name
+            @para
+        """
+
+        try:
+            db = self.client.get_database(db_name)
+            return db
+        except Exception as e:
+            raise Exception("Failed to get db: {}".format(db_name)) from e
+        
+
     def get_collection(self, db, col_name: str):
-        if col_name in self.col_cache:
-            return self.col_cache[col_name]
-        # update cache if not stored already
-        collection = db.get_collection(col_name)
-        self.col_cache[col_name] = collection
-        return collection
-    
+        """Try getting collection from db"""
+
+        try:
+            collection = db.get_collection(col_name)
+            return collection
+        except Exception as e:
+            raise Exception("Collection: {}".format(col_name)) from e
+
+
+
     def find_one(self, db_name, col_name, filter):
         # get element from db and reset id 
-        cursor = self.client[db_name][col_name].find_one(filter, {"_id" : 0})
-        return cursor
-        #return json.loads(json.dumps(cursor))
+        try:
+            db = self.get_db(db_name)
+            col = self.get_collection(db, col_name)
+            cursor = col.find_one(filter, {"_id" : 0})
+            return cursor
+        except Exception as e:
+            raise Exception("Failed to obtain one record from MongoDB") from e
+
 
     def get_all_docs(self, db_name, col_name):
-        cursor = self.client[db_name][col_name].find({}, {"ticker" : 1})
-        return cursor
+        try:
+            db = self.get_db(db_name)
+            col = self.get_collection(db, col_name)
+            # TODO - change that so it is not filtering by tickers (it should not be db specific)
+            cursor = col.find({}, {"ticker" : 1})
+            return cursor
+        except Exception as e:
+            raise Exception("Failed to get all docs from collection") from e
 
 
     

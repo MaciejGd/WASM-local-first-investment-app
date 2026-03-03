@@ -1,0 +1,18 @@
+[project]
+name = "inv_app"
+version = "1.0.0"
+description = "Flask backend for local-first investment app"
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+
+[tool.coverage.run]
+branch = true
+source = ["inv_app"]

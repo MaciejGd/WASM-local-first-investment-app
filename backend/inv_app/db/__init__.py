@@ -13,7 +13,9 @@ class DBProxy(object):
 
     def get_db(self):
         if 'db' not in g:
-            g.db = self.db_handler.setup_connection()
+            g.db = self.db_handler.setup_connection(
+                                        db_path=current_app.config['DATABASE']
+                                    )
         return g.db
     
     def close_db(self, e=None):
@@ -23,7 +25,7 @@ class DBProxy(object):
 
         db = g.pop('db', None)
         if db is not None:
-            db.close()
+            self.db_handler.close(db)
 
     def init_db(self):
         db = self.get_db()
@@ -37,8 +39,10 @@ class DBProxy(object):
         :param id: Description
         :type id: int id of user that we want get info about
         """
+
         db = self.get_db()
         return self.db_handler.get_user_data(db, id)
+    
     
     def get_username_data(self, username: str):
         """
@@ -48,6 +52,7 @@ class DBProxy(object):
         :param username: Description
         :type username: str
         """
+
         db = self.get_db()
         return self.db_handler.get_username_data(db, username)
 
