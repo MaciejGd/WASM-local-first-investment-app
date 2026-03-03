@@ -20,26 +20,25 @@ class FinanceDataAPI():
         
 
     def get_stock_prices(self, ticker: str) -> dict:
-        doc = self.db_handler.find_one(self.db_name, self.stock_prices_col, { "ticker" : ticker })        
-        if doc is None:
-            raise Exception("Requested ticker not found in db!!!")
+        try:
+            doc = self.db_handler.find_one(self.db_name, self.stock_prices_col, { "ticker" : ticker })        
         # from retrieved data get, ticker + closing prices
         # ticker_val = doc['ticker']
         # closed = doc['Close']
-        return_dict = { 'ticker' : doc['ticker'], 'prices' : doc['Close'] }
-        return return_dict
-
-
-    def get_tickers_available(self) -> list[str]:
-        pass
-
+            return_dict = { 'ticker' : doc['ticker'], 'prices' : doc['Close'] }
+            return return_dict
+        except Exception as e:
+            raise Exception('Failed to get {} finance data'.format(ticker)) from e
 
     def get_tickers_list(self) -> list[str]:
-        cursor = self.db_handler.get_all_docs(self.db_name, self.stock_info_col)
-        tickers = []
-        for c in cursor:
-            tickers.append(c['ticker'])
-        return tickers
+        try:
+            cursor = self.db_handler.get_all_docs(self.db_name, self.stock_info_col)
+            tickers = []
+            for c in cursor:
+                tickers.append(c['ticker'])
+            return tickers
+        except Exception as e:
+            raise Exception('Failed to retrieve tickers list') from e
 
 # finance data api that should be shared across all files
 finance_api = FinanceDataAPI()
