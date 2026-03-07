@@ -4,9 +4,12 @@ from flask_cors import CORS
 from .finance_api import finance_api
 
 
-def create_app(test_config=None):
+def create_app(test_config=None, instance_path=None):
     # create and configure app instance
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, 
+                instance_relative_config=True,
+                instance_path=instance_path)
+    
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'application.sqlite') # TODO, change that with some proxy etc.
@@ -36,8 +39,6 @@ def create_app(test_config=None):
     # init finance api
     from . import finance
     app.register_blueprint(finance.bp)
-
-    
 
     # register CORS so that react app can access server
     CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
