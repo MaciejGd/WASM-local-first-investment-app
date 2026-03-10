@@ -1,0 +1,64 @@
+#include "../inc/simulation_results.h"
+#include <algorithm>
+#include <iostream>
+
+void SimsResults::SetVAR(std::vector<double>& _rets) {
+    if (_rets.size() == 0) {
+        throw std::logic_error("Sims results for t_Counting VAR should not be empty!");
+    }
+
+    std::sort(_rets.begin(), _rets.end());
+    // find the lowest 5% of results
+    int idx = (_rets.size() - 1) / s_VAR_DIVIDER;
+    std::cout << "Rets size: " << _rets.size() << " \n";
+    std::cout << "5\% percentile: " << idx << std::endl;
+    // set VAR in buffer
+    this->t_buff[m_var_ptr] = _rets[idx];    
+};
+
+void SimsResults::SetReturns(std::vector<double>& _rets) {
+    auto res = t_CountPercentile(_rets);
+    t_InsertToBuff(res, m_returns_ptr);
+};
+
+void SimsResults::SetDrawdowns(std::vector<double>& _drawdowns) {
+    auto res = t_CountPercentile(_drawdowns);
+    t_InsertToBuff(res, m_drawdowns_ptr);
+};
+
+void SimsResults::SetUpsides(std::vector<double>& _upsides) {
+    auto res = t_CountPercentile(_upsides);
+    t_InsertToBuff(res, m_upsides_ptr);
+}
+
+void SimsResults::t_InsertToBuff(std::vector<double>& data, int start_ptr) {
+    if (data.size() > s_MEASURES) {
+        throw std::logic_error("Data passed to buffer exceeds measures points");
+    }
+    if (this->t_buff == nullptr) {
+        throw std::logic_error("Results buffer should be initialized prior appending to it!");
+    }
+
+    int idx = start_ptr;
+    for (const auto& d : data) {
+        this->t_buff[idx++] = d;
+    }
+};
+
+std::vector<double> SimsResults::t_CountPercentile(std::vector<double> &data) {
+    if (data.size() == 0) {
+        throw std::logic_error("Data vector for t_Counting percentile of results, should not be empty!");
+    }
+
+    // take all values, sort them 
+    // std::sort(data.begin(), data.end());
+    // now check the percentiles
+    int percentiles = data.size() / s_PERCENTILE_DIVIDER; // t_Count each 10 percent
+    std::vector<double> result(s_MEASURES, {});
+    // fill results with proper percentile
+    for (int i = 1; i <= 9; i++) {
+        result[i - 1] = data[i * percentiles - 1];
+    }
+    return result;
+}
+

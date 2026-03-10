@@ -13,6 +13,10 @@ public:
     CMatrix<double> m_TransformPriceToReturns() {
         return MonteCarloSimulator<T>::m_TransformPriceToReturns();
     }
+
+    CMatrix<double> m_InitWeightMatrix(double* weights) {
+        return MonteCarloSimulator<T>::m_InitWeightMatrix();
+    }
 };
 
 
@@ -54,7 +58,6 @@ public:
     TestRandomGenerator(): IRandomGenerator() {};
 
     linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) override {
-        std::cout << vec_cnt << std::endl;
         if (vec_cnt > data.size()) {
             throw std::logic_error("vector count outside of the bounds");
         }

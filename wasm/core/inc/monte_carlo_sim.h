@@ -5,6 +5,7 @@
 #include <random>
 #include "./matrix_special.h"
 #include "./random_generator.h"
+#include "./simulation_results.h"
 
 namespace finance_api {
 
@@ -25,6 +26,7 @@ private:
     CMatrixLowerTriangular<double> m_cholesky_decomposition;
 
     std::unique_ptr<IRandomGenerator> m_rand_gen;
+    std::unique_ptr<ISimsResults> m_results;
 public:
     /// @brief Class for running Monte Carlo simulations for input stock data
     /// @param buffer pointer to stock values array
@@ -57,6 +59,15 @@ public:
         return m_weights;
     }
 
+    CMatrix<double> RunSimulation(int32_t time, int32_t sims) {
+        m_results = std::make_unique<SimsResults>();
+        std::vector<double> max_drawdowns(sims); // count the minimum possible value of the wallet
+        // run simulation and produce output matrix
+        auto output = Simulate(time, sims);
+        m_GenerateResults(output); // get percentiles showing last results
+
+    }
+
     /// @brief Run Monte Carlo simulation
     /// @param time number of timestamps that simulation would run for
     /// @param sims number of simulations to be performed
@@ -69,8 +80,11 @@ public:
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
-        // create outputs matrix
+        // create outputs matrix, TODO - do not create a matrix with number of times as it can be very high
         CMatrix<double> outputs(sims, time+1);   
+        // lowest val achived for each path
+        std::vector<double> drawdowns(sims, 0);
+        std::vector<double> upsides(sims, 0);
         // run simulation
         for (int i = 0; i < sims; i++) {
             for (int j = 1; j < time+1; j++) {
@@ -80,8 +94,15 @@ public:
                 auto motion = means + (cholesky * random_samples);
                 // fill output matrix with motion multiplied by weight of asset
                 outputs[i][j] = outputs[i][j-1] + (m_weights * motion)[0][0];
+                // update minimal drawdown
+                drawdowns[i] = std::min(drawdowns[i], outputs[i][j]);
+                upsides[i] = std::max(upsides[i], outputs[i][j]);
             }
-        }   
+        }
+        // fill results with max drawdowns
+        if (m_results) {
+            m_results->SetDrawdowns(drawdowns);
+        }
         return outputs;
     }
 
@@ -96,7 +117,6 @@ protected:
     CMatrix<double> m_TransformPriceToReturns() {
         // each chunk of returns should be of size - 1
         CMatrix<double> result(m_stocks, m_stock_size - 1);
-        // std::vector<std::vector<double>> result(m_stocks, std::vector<double>(m_stock_size - 1));
         for (int i = 0; i < result.rows(); i++) {
             int start = i * m_stock_size;
             // check each chunk
@@ -126,6 +146,16 @@ protected:
         if (!EqualOperator<double>(sum, 1.0)) {
             std::logic_error("Sum of stock prices weights should be equal to one!");
         }
+    }
+
+    void m_GenerateResults(CMatrix<double>& mat) {
+        // fill data with 
+        int timestamp = mat.rows()-1;
+        std::vector<double> results(mat.cols(), 0);
+        for (int i = 0; i < mat.cols(); i++) {
+            results[i] = mat.at(i, timestamp);
+        }
+        m_results->SetReturns(results);
     }
 };
 
