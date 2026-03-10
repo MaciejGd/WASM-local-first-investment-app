@@ -160,7 +160,9 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
-    auto outputs = mont.Simulate(5, 5);
+    std::vector<double> drawdowns(5, 0.0);
+    std::vector<double> upsides(5, 0.0);
+    auto outputs = mont.Simulate(5, 5, drawdowns, upsides);
     // validate output
     for (int i = 0; i < outputs.rows(); i++) {
         for (int j = 0; j < outputs.cols(); j++) {

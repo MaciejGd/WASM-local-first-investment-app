@@ -28,7 +28,7 @@ CMatrixLowerTriangular<double> CholeskyFactorization(const CMatrix<T>& mat) {
     uint32_t n = mat.rows();
     uint32_t m = mat.cols();
     // check if analyzed matrix is symmetric
-    if (!mat.isSymmetric()) {
+    if (!mat.IsSymmetric()) {
         throw std::logic_error("Matrix for Cholesky Factorization needs to be symmetric");
     }
     // we should also reject matrixes that are not symmetric and not positive defined

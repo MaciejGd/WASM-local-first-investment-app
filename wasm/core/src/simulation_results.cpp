@@ -51,7 +51,7 @@ std::vector<double> SimsResults::t_CountPercentile(std::vector<double> &data) {
     }
 
     // take all values, sort them 
-    // std::sort(data.begin(), data.end());
+    std::sort(data.begin(), data.end());
     // now check the percentiles
     int percentiles = data.size() / s_PERCENTILE_DIVIDER; // t_Count each 10 percent
     std::vector<double> result(s_MEASURES, {});

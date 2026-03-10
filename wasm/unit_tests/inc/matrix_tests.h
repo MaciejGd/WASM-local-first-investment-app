@@ -529,7 +529,7 @@ UNIT_TEST(MatrixTransposition, Transposition) {
     CHECK_EQUAL(matrix1[2][1], 2);
 }
 
-UNIT_TEST(MatrixSymmetry, isSymmetric) {
+UNIT_TEST(MatrixSymmetry, IsSymmetric) {
     using namespace linalg::primitives;
     using namespace std;
 
@@ -539,10 +539,10 @@ UNIT_TEST(MatrixSymmetry, isSymmetric) {
                             {3, 5, 3}
     };
     auto matrix1 = CMatrix(mat1);
-    CHECK_TRUE(matrix1.isSymmetric());
+    CHECK_TRUE(matrix1.IsSymmetric());
 }
 
-UNIT_TEST(MatrixSymmetry, isSymmetricNotSquare) {
+UNIT_TEST(MatrixSymmetry, IsSymmetricNotSquare) {
     using namespace linalg::primitives;
     using namespace std;
 
@@ -551,7 +551,7 @@ UNIT_TEST(MatrixSymmetry, isSymmetricNotSquare) {
                             {2, 2, 5}
     };
     auto matrix1 = CMatrix(mat1);
-    CHECK_FALSE(matrix1.isSymmetric());
+    CHECK_FALSE(matrix1.IsSymmetric());
 }
 
 UNIT_TEST(MatrixSymmetry, notSymmetric) {
@@ -564,7 +564,7 @@ UNIT_TEST(MatrixSymmetry, notSymmetric) {
                             {3, 4, 3}
     };
     auto matrix1 = CMatrix(mat1);
-    CHECK_FALSE(matrix1.isSymmetric());
+    CHECK_FALSE(matrix1.IsSymmetric());
 }
 // floats should check for some error while comparing so it needs separate test
 UNIT_TEST(MatrixSymmetry, SymmetricFloat) {
@@ -579,7 +579,7 @@ UNIT_TEST(MatrixSymmetry, SymmetricFloat) {
     mat1[0][1] = *(float*)&first;
     auto matrix1 = CMatrix(mat1);
     // even though values not exactly equal it should return true
-    CHECK_TRUE(matrix1.isSymmetric());
+    CHECK_TRUE(matrix1.IsSymmetric());
 }
 
 // floats should check for some error while comparing so it needs separate test
@@ -595,7 +595,7 @@ UNIT_TEST(MatrixSymmetry, NotSymmetricFloat) {
     mat1[0][1] = *(float*)&first;
     auto matrix1 = CMatrix(mat1);
     // even though values not exactly equal it should return true
-    CHECK_FALSE(matrix1.isSymmetric());
+    CHECK_FALSE(matrix1.IsSymmetric());
 }
 
 UNIT_TEST(MatrixSymmetry, SymmetricDouble) {
@@ -610,7 +610,7 @@ UNIT_TEST(MatrixSymmetry, SymmetricDouble) {
     mat1[0][1] = *(double*)&first;
     auto matrix1 = CMatrix(mat1);
     // even though values not exactly equal it should return true
-    CHECK_TRUE(matrix1.isSymmetric());
+    CHECK_TRUE(matrix1.IsSymmetric());
 }
 
 UNIT_TEST(MatrixSymmetry, NotSymmetricDouble) {
@@ -625,5 +625,34 @@ UNIT_TEST(MatrixSymmetry, NotSymmetricDouble) {
     mat1[0][1] = *(double*)&first;
     auto matrix1 = CMatrix(mat1);
     // even though values not exactly equal it should return true
-    CHECK_FALSE(matrix1.isSymmetric());
+    CHECK_FALSE(matrix1.IsSymmetric());
+}
+
+UNIT_TEST(MatrixGetCol, OutOfRange) {
+    using namespace linalg::primitives;
+
+    vector<vector<double>> mat1 = {
+        {1, 2},
+        {3, 4}
+    };
+
+    CMatrix<double> test(mat1);
+    CHECK_THROW(test.GetCol(2), std::logic_error);
+}
+
+UNIT_TEST(MatrixGetCol, PositiveScenario) {
+    using namespace linalg::primitives;
+
+    vector<vector<double>> mat1 = {
+        {1, 2},
+        {3, 4}
+    };
+    vector<double> expected_res = {2, 4};
+
+    CMatrix<double> test(mat1);
+    auto res = test.GetCol(1);
+
+    for (int i = 0; i < res.size(); i++) {
+        CHECK_EQUAL(res[i], expected_res[i]);
+    }
 }

@@ -59,20 +59,38 @@ public:
         return m_weights;
     }
 
-    CMatrix<double> RunSimulation(int32_t time, int32_t sims) {
-        m_results = std::make_unique<SimsResults>();
-        std::vector<double> max_drawdowns(sims); // count the minimum possible value of the wallet
-        // run simulation and produce output matrix
-        auto output = Simulate(time, sims);
-        m_GenerateResults(output); // get percentiles showing last results
+    const ISimsResults& GetResults() const {
+        return *m_results;
+    }
 
+    /// @brief Main function for running Monte Carlo simulation. It runs simulation and returns results
+    /// @param time number of simulated timestamps
+    /// @param sims number of run simulations
+    /// @param buff buffer of doubles in which results would be stored
+    void RunSimulation(int32_t time, int32_t sims, double* buff) {        
+        std::vector<double> max_drawdowns(sims, 0); // count the minimum possible value of the wallet
+        std::vector<double> max_upsides(sims, 0);
+        // run simulation and produce output matrix
+        auto output = Simulate(time, sims, max_drawdowns, max_upsides);
+
+        // update the output buffer with results
+        m_results = std::make_unique<SimsResults>(buff);
+        if (m_results) {
+            auto last_col = output.GetCol(output.cols()-1);            
+            m_results->SetReturns(last_col);
+            m_results->SetVAR(last_col);
+            m_results->SetDrawdowns(max_drawdowns);
+            m_results->SetUpsides(max_upsides);            
+        }
     }
 
     /// @brief Run Monte Carlo simulation
     /// @param time number of timestamps that simulation would run for
     /// @param sims number of simulations to be performed
     /// @return Matrix of doubles with simulation's results
-    CMatrix<double> Simulate(int32_t time, int32_t sims) {
+    CMatrix<double> Simulate(int32_t time, int32_t sims, std::vector<double>& drawdowns, std::vector<double>& upsides) {
+        CHECK_OUT_OF_RANGE(drawdowns.size(), sims);
+        CHECK_OUT_OF_RANGE(upsides.size(), sims);
         // transform prices to returns
         auto returns = m_TransformPriceToReturns();
         // count mean values for prices
@@ -81,10 +99,7 @@ public:
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         // create outputs matrix, TODO - do not create a matrix with number of times as it can be very high
-        CMatrix<double> outputs(sims, time+1);   
-        // lowest val achived for each path
-        std::vector<double> drawdowns(sims, 0);
-        std::vector<double> upsides(sims, 0);
+        CMatrix<double> outputs(sims, time+1);
         // run simulation
         for (int i = 0; i < sims; i++) {
             for (int j = 1; j < time+1; j++) {
@@ -98,10 +113,6 @@ public:
                 drawdowns[i] = std::min(drawdowns[i], outputs[i][j]);
                 upsides[i] = std::max(upsides[i], outputs[i][j]);
             }
-        }
-        // fill results with max drawdowns
-        if (m_results) {
-            m_results->SetDrawdowns(drawdowns);
         }
         return outputs;
     }
@@ -146,16 +157,6 @@ protected:
         if (!EqualOperator<double>(sum, 1.0)) {
             std::logic_error("Sum of stock prices weights should be equal to one!");
         }
-    }
-
-    void m_GenerateResults(CMatrix<double>& mat) {
-        // fill data with 
-        int timestamp = mat.rows()-1;
-        std::vector<double> results(mat.cols(), 0);
-        for (int i = 0; i < mat.cols(); i++) {
-            results[i] = mat.at(i, timestamp);
-        }
-        m_results->SetReturns(results);
     }
 };
 

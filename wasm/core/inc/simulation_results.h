@@ -34,8 +34,8 @@ public:
     /// @brief Count percentiles for upsides passed as input and add them to the buffer
     /// @param _upsides vector of upsides to be added to the buffer
     virtual void SetUpsides(std::vector<double>& _upsides) = 0;
-
     
+    /// Return pointer to the underlying buffer
     inline double* GetBuf() const { return t_buff; };
 };
 

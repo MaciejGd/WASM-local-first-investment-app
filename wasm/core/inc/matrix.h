@@ -240,7 +240,7 @@ public:
 
     /// @brief Check if matrix is symmetric
     /// @return true if symmetric, false otherwise
-    bool isSymmetric() const {
+    bool IsSymmetric() const {
         using namespace linalg::utils;
         // symmetric matrix need to be square as well
         try {
@@ -262,6 +262,19 @@ public:
         }
 
         return true;        
+    }
+
+    /// @brief Return column specified by index, from the matrix
+    /// @param idx number of column to be returned
+    /// @return vector with data from column of the matrix
+    std::vector<T> GetCol(size_t column_idx) {
+        CHECK_OUT_OF_RANGE(column_idx, m_cols);
+
+        std::vector<T> vec(m_rows, {});
+        for (int i = 0; i < m_rows; i++) {
+            vec[i] = at(i, column_idx);
+        }
+        return vec;
     }
 
     /// Access pointer to underlying matrix container
