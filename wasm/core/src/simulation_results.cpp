@@ -6,12 +6,9 @@ void SimsResults::SetVAR(std::vector<double>& _rets) {
     if (_rets.size() == 0) {
         throw std::logic_error("Sims results for t_Counting VAR should not be empty!");
     }
-
     std::sort(_rets.begin(), _rets.end());
     // find the lowest 5% of results
     int idx = (_rets.size() - 1) / s_VAR_DIVIDER;
-    std::cout << "Rets size: " << _rets.size() << " \n";
-    std::cout << "5\% percentile: " << idx << std::endl;
     // set VAR in buffer
     this->t_buff[m_var_ptr] = _rets[idx];    
 };

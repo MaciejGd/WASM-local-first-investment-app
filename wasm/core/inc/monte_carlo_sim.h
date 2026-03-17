@@ -87,6 +87,8 @@ public:
     /// @brief Run Monte Carlo simulation
     /// @param time number of timestamps that simulation would run for
     /// @param sims number of simulations to be performed
+    /// @param[out] drawdowns vectoloSumr of max drawdowns to be filled during simulation
+    /// @param[out] upsides vector of max upsides to be filled during simulation
     /// @return Matrix of doubles with simulation's results
     CMatrix<double> Simulate(int32_t time, int32_t sims, std::vector<double>& drawdowns, std::vector<double>& upsides) {
         CHECK_OUT_OF_RANGE(drawdowns.size(), sims);
@@ -100,7 +102,7 @@ public:
         auto cholesky = CholeskyFactorization(covariance);
         // create outputs matrix, TODO - do not create a matrix with number of times as it can be very high
         CMatrix<double> outputs(sims, time+1);
-        // run simulation
+        // run simulation TODO - introduce multithreading in here so Simulation is sped up
         for (int i = 0; i < sims; i++) {
             for (int j = 1; j < time+1; j++) {
                 // generate random samples
@@ -110,11 +112,11 @@ public:
                 // fill output matrix with motion multiplied by weight of asset
                 outputs[i][j] = outputs[i][j-1] + (m_weights * motion)[0][0];
                 // update minimal drawdown
-                drawdowns[i] = std::min(drawdowns[i], outputs[i][j]);
+                drawdowns[i] = std::min(drawdowns[i], outputs[i][j]); 
                 upsides[i] = std::max(upsides[i], outputs[i][j]);
             }
         }
-        return outputs;
+        return outputs; 
     }
 
     /// @brief Random generator setter
