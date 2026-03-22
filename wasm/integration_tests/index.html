@@ -21,7 +21,7 @@
             const WEIGHTS = new Float64Array([0.5, 0.25, 0.25]);
             // input data for simulation
             const RESULTS_AMOUNT = 29;
-            const RESULTS = new Float64Array(RESULTS_AMOUNT)
+            var RESULTS = new Float64Array(RESULTS_AMOUNT)
             const TIME = 5;
             const SIMS = 20;
             const STOCKS_AMOUNT = 3;
@@ -41,9 +41,9 @@
                            TIME, SIMS,
                            res_ptr);
 
-            const new_res = Module.HEAPF64.subarray(res_ptr / RESULTS.BYTES_PER_ELEMENT, res_ptr / RESULTS.BYTES_PER_ELEMENT + RESULTS.length);
-
-            console.log("Results: ", new_res);
+            RESULTS = Module.HEAPF64.subarray(res_ptr / RESULTS.BYTES_PER_ELEMENT, res_ptr / RESULTS.BYTES_PER_ELEMENT + RESULTS.length).slice();
+            console.log("Ptr alignement: ", res_ptr % 8);
+            console.log("Results: ", RESULTS);
             // dealloc allocated resources
             Module._free(res_ptr);
             Module._free(stocks_ptr);
