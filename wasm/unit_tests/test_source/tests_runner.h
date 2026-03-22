@@ -164,7 +164,7 @@ private:
 };
 
 /// Action that should be taken on test fail
-#define FAIL_TEST test_result_contianer.value = false; return;
+#define FAIL_TEST { test_result_contianer.value = false; return; }
 
 /// Check if two values are equal
 #define CHECK_EQUAL(a,b)\

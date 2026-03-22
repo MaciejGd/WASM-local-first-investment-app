@@ -8,7 +8,7 @@ void SimsResults::SetVAR(std::vector<double>& _rets) {
     }
     std::sort(_rets.begin(), _rets.end());
     // find the lowest 5% of results
-    int idx = (_rets.size() - 1) / s_VAR_DIVIDER;
+    int idx = (_rets.size()) / s_VAR_DIVIDER - 1; // need to substract one as 0 indexed
     // set VAR in buffer
     this->t_buff[m_var_ptr] = _rets[idx];    
 };

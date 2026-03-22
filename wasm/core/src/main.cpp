@@ -5,6 +5,8 @@ typedef long int i32;
 typedef long long i64;
 typedef double f64;
 // TODO add last error method of preserving last failed error message
+static char* last_message = "";
+
 
 extern "C" {
     f64* alloc_f64(i32 size) {
@@ -16,9 +18,16 @@ extern "C" {
     }
 
     void runSimulations(f64* stocks, f64* weights, i32 stocks_amount, i32 stock_size, 
-                        f64* results, i32 time, i32 sims) {
+                        i32 time, i32 sims, f64* results) {
         using namespace finance_api;
-        MonteCarloSimulator<f64> mont = MonteCarloSimulator<f64>(stocks, stocks_amount, stock_size, weights);
-        mont.RunSimulation(time, sims, results);
+        // MonteCarloSimulator<f64> mont = MonteCarloSimulator<f64>(stocks, stocks_amount, stock_size, weights);
+        // mont.RunSimulation(time, sims, results);
+        for (int i = 0; i < 29; i++) {
+            results[i] = 100;
+        }
+    }
+
+    void getLastError() {
+
     }
 };
