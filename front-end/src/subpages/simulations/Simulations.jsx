@@ -115,12 +115,15 @@ export default function SimulationsPage() {
         return responseJson;
     }
 
-    async function RunFinanceSimulations() {
+    async function RunFinanceSimulations(times, sims) {
         const responseJson = await FetchStockPrices();
         
         // get amount of money invested in each asset
         const weights = assets.getWeights();
-        const test_res = simulationAPI.testSimulation(responseJson, weights, 5, 20);
+        console.log("Times ", times);
+        console.log("Sims: ", sims);
+        const test_res = simulationAPI.testSimulation(responseJson, weights, times, sims);
+        // const test_res = simulationAPI.testSimulation(responseJson, weights, times, sims);
     }
 
     // fetch list of possible tickers upon page load
@@ -136,9 +139,6 @@ export default function SimulationsPage() {
         <>
             <h1>Simulations!!!</h1>
             <div className="page">
-                {/* <AssetButtons onAddAsset={toggleModalVisibility}
-                                onDeleteSelectedCb={()=>{}}
-                ></AssetButtons> */}
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={RunFinanceSimulations}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
                 <SimsResults/>
