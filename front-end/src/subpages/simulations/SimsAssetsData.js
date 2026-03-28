@@ -1,3 +1,6 @@
+/**
+ * Simple entity data of stock hold by SimAssetMap
+ */
 export class SimsData {
     constructor(ticker, price, percent, selected) {
         if (isNaN(Number(price))) {
@@ -13,6 +16,11 @@ export class SimsData {
     }
 };
 
+/**
+ * Map of assets for the purpose of Simulations pane
+ * Covers basic functionalities needed for the 
+ * Simulations purpose.
+ */
 export class SimAssetMap {
     constructor(other) {
         // we want to map ticker to its data
@@ -24,6 +32,12 @@ export class SimAssetMap {
         }   
     }
 
+    /**
+     * Add rectord to underlying map
+     * @param {string} ticker ticker to be added to the list
+     * @param {number} price price of ticker to be added as value
+     * @returns true on success, false otherwise
+     */
     addRecord(ticker, price) {
         // at first check if price can be turned into a number
         if (isNaN(Number(price))) {
@@ -36,7 +50,10 @@ export class SimAssetMap {
         return true;
     }
 
-    // turn map into array and append percentage sum
+    /**
+     * Turn map to array and append percentage sum
+     * @returns array of pairs: ticker:percent
+     */
     toArray() {
         var sum = 0.0;
         this.asset_map.forEach((value) => {
@@ -52,6 +69,12 @@ export class SimAssetMap {
         return array;
     }
 
+    /**
+     * Set selected for requested ticker
+     * @param {string} ticker ticker to be selected
+     * @param {boolean} value True on selection, False otherwise
+     * @returns null
+     */
     setSelected(ticker, value) {
         console.log(`Running setSelected on ticker:value => ${ticker}:${value}`);
         let el = this.asset_map.get(ticker);
@@ -62,6 +85,9 @@ export class SimAssetMap {
         this.asset_map.set(ticker, el);
     }
 
+    /**
+     * Delete from map, tickers that has been selected
+     */
     deleteSelected() {
         const selected = [];
         // find which tickers have been selected
@@ -74,11 +100,25 @@ export class SimAssetMap {
             this.asset_map.delete(key);
         });
     }
-    // return tickers in form that our external API would accept
+    // 
+
+    /**
+     * Return tickers from inner map
+     * @returns object in form {"tickers":[array of tickers]}
+     */
     getTickers() {
         const tickers = [];
         this.asset_map.forEach((value, key) => tickers.push(key));
         return { "tickers" : tickers };
+    }
+
+    /**
+     * Get money meant for particular asset
+     */
+    getWeights() {
+        const weights = [];
+        this.asset_map.forEach((value, key) => { weights.push(value.price) });
+        return weights;
     }
 
 }

@@ -73,8 +73,8 @@ export default function App() {
 
   return (
       <>
-        {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>}
-        { logged &&
+        {/* {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>} */}
+        { !logged &&
           <BrowserRouter>
             <div className="layout">
               <NavigationBar onLogOut={showLogOut}></NavigationBar>
