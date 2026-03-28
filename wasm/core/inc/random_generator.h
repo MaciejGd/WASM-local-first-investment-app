@@ -1,6 +1,6 @@
 #pragma once
 #include <random>
-#include "algorithms.h"
+#include "../linalg/algorithms.h"
 
 class IRandomGenerator {
 public:

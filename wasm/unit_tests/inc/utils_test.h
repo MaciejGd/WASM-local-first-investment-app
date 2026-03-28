@@ -1,6 +1,6 @@
 #pragma once 
 #include "../test_source/tests_runner.h"
-#include "../../core/inc/utils.h"
+#include "../../core/linalg/utils.h"
 
 
 UNIT_TEST(UtilsCheckEqual, CheckEqual) {

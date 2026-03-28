@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <random>
-#include "./matrix_special.h"
+#include "../linalg/matrix_special.h"
 #include "./random_generator.h"
 #include "./simulation_results.h"
 

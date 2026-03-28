@@ -4,52 +4,15 @@
 <head>
     <meta charset=utf-8>
     <meta content="text/html; charset=utf-8" http-equiv=Content-Type>
-    <script src="main.js"></script>
+    <script type="module" src="wasm.js"></script>
     <title>Wasm testing!</title>
 </head>
 
 <body>
-    <script>
-        Module.onRuntimeInitialized = () => {
-            // instantiate WASM and import methods
-            const runSimulations = Module.cwrap('runSimulations', null, ['number', 'number', 'number', 'number',
-                                                                        'number', 'number', 'number']);
-
-            const STOCKS = new Float64Array([7,4,2,1,2,
-                            1,2,5,4,4,
-                            10,9,5,7,2]);
-            const WEIGHTS = new Float64Array([0.5, 0.25, 0.25]);
-            // input data for simulation
-            const RESULTS_AMOUNT = 29;
-            var RESULTS = new Float64Array(RESULTS_AMOUNT)
-            const TIME = 5;
-            const SIMS = 20;
-            const STOCKS_AMOUNT = 3;
-            const STOCK_SIZE = 5;
-
-            // allocate memory for simulation on heap
-            const res_ptr = Module._malloc(RESULTS.length * RESULTS.BYTES_PER_ELEMENT); // 8 bytes per each result
-            const stocks_ptr = Module._malloc(STOCKS.length * STOCKS.BYTES_PER_ELEMENT)
-            const weights_ptr = Module._malloc(WEIGHTS.length * WEIGHTS.BYTES_PER_ELEMENT);
-            // set memory for arrays
-            Module.HEAPF64.set(STOCKS, stocks_ptr / STOCKS.BYTES_PER_ELEMENT); // set works in float units, not in bytes so need to divide by 8
-            Module.HEAPF64.set(WEIGHTS, weights_ptr / WEIGHTS.BYTES_PER_ELEMENT);            
-            console.log("test");
-            // run main function utilizing buffers
-            runSimulations(stocks_ptr, weights_ptr,
-                           STOCKS_AMOUNT, STOCK_SIZE,
-                           TIME, SIMS,
-                           res_ptr);
-
-            RESULTS = Module.HEAPF64.subarray(res_ptr / RESULTS.BYTES_PER_ELEMENT, res_ptr / RESULTS.BYTES_PER_ELEMENT + RESULTS.length).slice();
-            console.log("Ptr alignement: ", res_ptr % 8);
-            console.log("Results: ", RESULTS);
-            // dealloc allocated resources
-            Module._free(res_ptr);
-            Module._free(stocks_ptr);
-            Module._free(weights_ptr);
-        };
-    </script>
+    <script type="module">
+    import onStart from './wasm.js';
+    onStart();
+</script>
     <h1>Open Console to see result</h1>
 </body>
 

@@ -1,6 +1,6 @@
 #pragma once 
 #include "../test_source/tests_runner.h"
-#include "../../core/inc/algorithms.h"
+#include "../../core/linalg/algorithms.h"
 
 
 UNIT_TEST(MatrixAlgorithms, CholeskyNotProperDimensions) {

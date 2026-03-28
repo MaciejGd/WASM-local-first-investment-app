@@ -1,4 +1,4 @@
-#include "../inc/algorithms.h"
+#include "./algorithms.h"
 
 using namespace linalg::algorithms;
 
