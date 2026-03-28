@@ -1,6 +1,6 @@
 import { AssetButtons, AddAssetButton, DeleteSelectedButton } from "../wallet/Stock"
-import "../../styling/simulations.css"
-import { useEffect, useState } from "react"
+import "../../styling/simulations.css";
+import { useEffect, useState } from "react";
 
 import SimulationsOptionsPane from "./SimsOptionsPane";
 import AssetsPane from "./SimsAssetsPane"
@@ -12,6 +12,7 @@ import ComboBox from "../../components/Combobox.jsx";
 // DEBUG
 import "./wasm/SimulationAPI.js";
 import { SimulationAPI } from "./wasm/SimulationAPI.js";
+import SimErrorPopUp from "./SimErrorPopUp.jsx";
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
 function InputRow({ title, onChange, focus, options=[] }) {
@@ -49,6 +50,7 @@ function AddAssetPopUp({ onClose, onAccept, tickersList }) {
 
 export default function SimulationsPage() {
     const [modal_visible, setModalVisible] = useState(false);
+    const [asset_error, setAssetError] = useState(""); // error on asset passed to pop-up
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
     const [tickers_list, setTickersList] = useState([]);
     const [simulationAPI, setSimulationAPI] = useState(null);
@@ -68,7 +70,18 @@ export default function SimulationsPage() {
     function onModalAccept(ticker, price) {
         // create new asset map
         var asset_map = new SimAssetMap(assets);
-        asset_map.addRecord(ticker, price);
+        // check if ticker is valid
+        if (!tickers_list.includes(ticker)) {
+            
+            setAssetError("No such asset with this tickers in database!");
+            return;
+        }
+        const rec_add = asset_map.addRecord(ticker, price);
+        // check if number passed as argument
+        if (rec_add === false) {
+            setAssetError("Failed to add asset, price should be a number!");
+            return ;
+        }
         setAssets(asset_map);
         toggleModalVisibility();
         console.log("New assets list: ", asset_map);
@@ -132,6 +145,9 @@ export default function SimulationsPage() {
             </div>
             {modal_visible &&
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} tickersList={tickers_list} />
+            }
+            {asset_error !== "" &&
+                <SimErrorPopUp content={asset_error} onClose={()=> setAssetError("")}></SimErrorPopUp>
             }
         </>
     )
