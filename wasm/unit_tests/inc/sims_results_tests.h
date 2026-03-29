@@ -42,7 +42,15 @@ UNIT_TEST(SimsResultsTests, SetReturns) {
     double* buff_data = buff.data();
 
     std::array<double, 29> expected_results = {
-        2, 4, 6, 8,10,12,14,16,18, // returns percentiles
+        6.38905609893065
+        ,53.598150033144236
+        ,402.4287934927351
+        ,2979.9579870417283
+        ,22025.465794806718
+        ,162753.79141900392
+        ,1202603.2841647768
+        ,8886109.520507872
+        ,65659968.13733051, // returns percentiles
         0, 0, 0, 0, 0, 0, 0, 0, 0, // drawdowns percentiles
         0, 0, 0, 0, 0, 0, 0, 0, 0, // upsides percentiles
         0, // VAR
@@ -66,7 +74,15 @@ UNIT_TEST(SimsResultsTests, SetDrawdowns) {
 
     std::array<double, 29> expected_results = {        
         0, 0, 0, 0, 0, 0, 0, 0, 0, // returns percentiles
-        2, 4, 6, 8,10,12,14,16,18, // drawdowns percentiles
+        6.38905609893065
+        ,53.598150033144236
+        ,402.4287934927351
+        ,2979.9579870417283
+        ,22025.465794806718
+        ,162753.79141900392
+        ,1202603.2841647768
+        ,8886109.520507872
+        ,65659968.13733051, // drawdowns percentiles
         0, 0, 0, 0, 0, 0, 0, 0, 0, // upsides percentiles
         0, // VAR
         0 // CVAR
@@ -87,7 +103,15 @@ UNIT_TEST(SimsResultsTests, SetUpsides) {
     std::array<double, 29> expected_results = {        
         0, 0, 0, 0, 0, 0, 0, 0, 0, // returns percentiles        
         0, 0, 0, 0, 0, 0, 0, 0, 0, // drawdowns percentiles
-        2, 4, 6, 8,10,12,14,16,18, // upsides percentiles
+        6.38905609893065
+        ,53.598150033144236
+        ,402.4287934927351
+        ,2979.9579870417283
+        ,22025.465794806718
+        ,162753.79141900392
+        ,1202603.2841647768
+        ,8886109.520507872
+        ,65659968.13733051, // upsides percentiles
         0, // VAR
         0 // CVAR
     };
@@ -112,7 +136,7 @@ UNIT_TEST(SimsResultsTests, SetVAR) {
         0, 0, 0, 0, 0, 0, 0, 0, 0, // returns percentiles        
         0, 0, 0, 0, 0, 0, 0, 0, 0, // drawdowns percentiles
         0, 0, 0, 0, 0, 0, 0, 0, 0, // upsides percentiles
-        1, // VAR
+        1.718281828459045, // VAR
         0 // CVAR
     };
 
@@ -150,7 +174,7 @@ UNIT_TEST(SimsResultsTests, InsertToBuffEmptyBuffer) {
 
 UNIT_TEST(SimsResultsTests, InsetToBuff) {
     std::vector<double> test(1, 1); // initialize 1x1 vector
-    std::array<double, 2> expected_res = {0, 1};
+    std::array<double, 2> expected_res = {0, 1.718281828459045};
 
     std::array<double, 2> buff{};
     SimsResultsTest res(buff.data());

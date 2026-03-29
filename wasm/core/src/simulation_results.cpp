@@ -1,6 +1,7 @@
 #include "../inc/simulation_results.h"
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 void SimsResults::SetVAR(std::vector<double>& _rets) {
     if (_rets.size() == 0) {
@@ -10,7 +11,7 @@ void SimsResults::SetVAR(std::vector<double>& _rets) {
     // find the lowest 5% of results
     int idx = (_rets.size()) / s_VAR_DIVIDER - 1; // need to substract one as 0 indexed
     // set VAR in buffer
-    this->t_buff[m_var_ptr] = _rets[idx];    
+    this->t_buff[m_var_ptr] = t_TransformToExp(_rets[idx]);
 };
 
 void SimsResults::SetReturns(std::vector<double>& _rets) {
@@ -28,6 +29,10 @@ void SimsResults::SetUpsides(std::vector<double>& _upsides) {
     t_InsertToBuff(res, m_upsides_ptr);
 }
 
+double SimsResults::t_TransformToExp(double value) {
+    return std::exp(value) - 1.0;
+}
+
 void SimsResults::t_InsertToBuff(std::vector<double>& data, int start_ptr) {
     if (data.size() > s_MEASURES) {
         throw std::logic_error("Data passed to buffer exceeds measures points");
@@ -38,7 +43,7 @@ void SimsResults::t_InsertToBuff(std::vector<double>& data, int start_ptr) {
 
     int idx = start_ptr;
     for (const auto& d : data) {
-        this->t_buff[idx++] = d;
+        this->t_buff[idx++] = t_TransformToExp(d);
     }
 };
 

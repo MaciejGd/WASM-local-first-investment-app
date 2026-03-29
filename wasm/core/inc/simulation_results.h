@@ -66,4 +66,6 @@ public:
 protected:
     std::vector<double> t_CountPercentile(std::vector<double>& data) override;
     void t_InsertToBuff(std::vector<double>& data, int start_ptr) override;
+    // we should transform price from logarithmic to regular
+    double t_TransformToExp(double value);
 };

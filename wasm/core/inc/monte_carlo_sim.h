@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <random>
+#include <cmath>
 #include "../linalg/matrix_special.h"
 #include "./random_generator.h"
 #include "./simulation_results.h"
@@ -125,7 +126,7 @@ public:
         m_rand_gen = std::move(rand_gen);
     }
 protected:
-    /// @brief Transform input prices to returns
+    /// @brief Transform input prices to logarithmic returns
     /// @return 2D doubles vector of returns
     CMatrix<double> m_TransformPriceToReturns() {
         // each chunk of returns should be of size - 1
@@ -139,7 +140,8 @@ protected:
                 if (current == 0) {
                     throw std::logic_error("Stock price provided cannot be equal to zero!!!");
                 }
-                result[i][j] = (current - prev) / prev;
+                // result[i][j] = (current - prev) / prev;
+                result[i][j] = std::log(current / prev);
                 prev = current;
             }
         }
