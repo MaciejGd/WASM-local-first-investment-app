@@ -54,6 +54,7 @@ export default function SimulationsPage() {
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
     const [tickers_list, setTickersList] = useState([]);
     const [simulationAPI, setSimulationAPI] = useState(null);
+    const [simsResults, setSimsResults] = useState([]);
 
     useEffect(() => {
         SimulationAPI.create().then((module) => {
@@ -117,13 +118,10 @@ export default function SimulationsPage() {
 
     async function RunFinanceSimulations(times, sims) {
         const responseJson = await FetchStockPrices();
-        
         // get amount of money invested in each asset
         const weights = assets.getWeights();
-        console.log("Times ", times);
-        console.log("Sims: ", sims);
         const test_res = simulationAPI.testSimulation(responseJson, weights, times, sims);
-        // const test_res = simulationAPI.testSimulation(responseJson, weights, times, sims);
+        setSimsResults(test_res);
     }
 
     // fetch list of possible tickers upon page load
@@ -141,7 +139,7 @@ export default function SimulationsPage() {
             <div className="page">
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={RunFinanceSimulations}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
-                <SimsResults/>
+                <SimsResults results={simsResults}/>
             </div>
             {modal_visible &&
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} tickersList={tickers_list} />

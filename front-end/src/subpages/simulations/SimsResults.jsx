@@ -9,29 +9,45 @@ function SimResultsTableHeader() {
         <tr>
             <th>Category</th>
             <th>10th Percentile</th>
-            <th>25th Percentile</th>
+            <th>20th Percentile</th>
+            <th>30th Percentile</th>
+            <th>40th Percentile</th>
             <th>50th Percentile</th>
-            <th>75th Percentile</th>
+            <th>60th Percentile</th>
+            <th>70th Percentile</th>
+            <th>80th Percentile</th>
             <th>90th Percentile</th>
         </tr>
     </thead>
     );
 }
 
-function SimResultsTableBody() {
+function SimResultsTableBody({ results }) {
+    if (!results) {
+        return (<></>);
+    }
     // const
-    const data = [
-        [10.9, 124.1, 43.5, 23, 76],
-        [1.9, 81.9, 85, 121, 234],
-        [2, 1.24, 43.5, 23, 11],
-        [10.9, 124.1, 43.5, 23, 101],
-    ];
+    // what should be a data??? we probably needs some kind of object to be passed
     const category = [
-        "Annual return",
-        "Test return",
-        "What next sim",
-        "Weekly changes"
+        "Returns",
+        "Max-Drawdowns",
+        "Max-Upsides",
     ];
+    const result_row_size = 9;
+    const percentiles = [
+        [], // Returns
+        [], // Max-Drawdowns
+        []  // Max-Upsides
+    ];
+    console.log(results);
+    for (var i = 0; i < 27; i++) {
+        // TODO - make it work
+        if (i >= results.length) break;
+        console.log("Math floor idx: ", Math.floor(i/9));
+        console.log("Result: ", results[i]);
+
+        percentiles[Math.floor(i/9)].push(results[i]);
+    }
 
     return (
     <tbody>
@@ -40,8 +56,9 @@ function SimResultsTableBody() {
             <tr>
                 <th>{val}</th>
                 {
-                    data[idx].map((dat, idx) => {
-                        return (<td>{dat}</td>);
+                    // show in precents of income
+                    percentiles[idx].map((dat, i) => {
+                        return (<td>{(dat*100).toFixed(2)}</td>);
                     })
                 }
             </tr>
@@ -52,19 +69,22 @@ function SimResultsTableBody() {
     );
 }
 
-function SimResultsTable() {
+function SimResultsTable({ results }) {
+    if (!results || results.length === 0) {
+        return (<></>);
+    }
     return (
         <table>
             <SimResultsTableHeader/>
-            <SimResultsTableBody/>
+            <SimResultsTableBody results={results}/>
         </table>
     );
 }
 
 
-export default function SimsResults() {
+export default function SimsResults({ results }) {
     return (
-        <SimResultsTable/>
+        <SimResultsTable results={results}/>
         // we do not want to plot all simulations run in here to the end-user
     );
 }
