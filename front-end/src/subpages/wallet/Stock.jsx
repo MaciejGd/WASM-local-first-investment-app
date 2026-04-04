@@ -1,12 +1,12 @@
 import '../../styling/pop_up.css';
 import '../../styling/wallet.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddAssetPopUp from './AddAssetPopUp';
 import { ArrowDownIcon  } from '../../IconLoader';
 import { ArrowUpIcon  } from '../../IconLoader';
 import { AssetsEntry, AssetsMap } from './StockAssets.js';
 import { AssetsTable } from './AssetsTable.jsx'
-
+import { db } from "../../db/db.js"; // indexed db instance 
 
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
@@ -27,41 +27,19 @@ export function DeleteSelectedButton({ onDeleteSelectedCb }) {
 }
 
 export default function StockPage() {
-    /// EXAMPLE STARTING DATA 
-    let a = new AssetsEntry("a");
-    a.insert(1, 12);
-    a.insert(2, 32);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 43);
-    a.insert(0.5, 2);
-    a.current_price = 11;
-    let k = new AssetsEntry("k");
-    k.insert(6, 10);
-    k.insert(0.5, 2);
-    k.insert(0.5, 2);
-    k.insert(0.5, 2);
-    k.insert(0.5, 2);
-    k.insert(0.5, 2);
-    k.current_price = 30;
-    let t = new AssetsEntry("t");
-    t.insert(3, 7);
-    t.current_price = 4;
-
-    let example_assets = new AssetsMap();
-    example_assets.set("a", a);
-    example_assets.set("k", k);
-    example_assets.set("t", t);
-    /// EXAMPLE STARTING DATA
-
     const [modal_visible, setModalVisible] = useState(false);
-    const [assets, setAssets] = useState(example_assets);
+    const [assets, setAssets] = useState(new AssetsMap());    
+    const [assets_init, setAssetsInit] = useState([]);
+    console.log(assets);
+    // we wanna fetch data from db on page render
+    useEffect(()=>{
+        const load_db_records = async () => {
+            const db_array = await db.wallet_assets.toArray();
+            const new_map = AssetsMap.createFromDB(db_array);
+            setAssets(new_map);
+        }; 
+        load_db_records();
+    },[]);
 
     function toggleModalVisibility() {
         setModalVisible(!modal_visible);
@@ -69,7 +47,7 @@ export default function StockPage() {
     const Modal = modal_visible ? AddAssetPopUp : () => (<></>);
 
     /// add asset to assets list
-    function addAsset(ticker, quantity, price) {
+    async function addAsset(ticker, quantity, price) {
         if (ticker === "") {
             console.err("Ticker should not be empty");
             return;
@@ -78,23 +56,36 @@ export default function StockPage() {
         // check if quantity and price is correct (number and not empty)
         const quantityNum = Number(quantity);
         if (Number.isNaN(quantityNum) || quantity == "") { // TODO fix that so it works
-            console.err("Quantity value is not a number!!!");
+            console.error("Quantity value is not a number!!!");
             return;
         }
         const priceNum = Number(price);
         if (Number.isNaN(priceNum) || price === "") {
-            console.err("price value should be a float!");
+            console.error("price value should be a float!");
+            return;
+        }
+        // add new asset to the db
+        var id = -1;
+        try {
+            id = await db.wallet_assets.add({
+                ticker, quantity, price
+            });
+            console.log("Successfully added value to the db: ", id);
+        }
+        catch (error) {
+            console.log("Failed adding into the db");
             return;
         }
 
-
         var assets_map = new AssetsMap(assets);
         const map_entry = assets_map.get(ticker) ?? new AssetsEntry(ticker);
-        map_entry.insert(quantityNum, priceNum);
+        map_entry.insert(id, quantityNum, priceNum);
         assets_map.set(ticker, 
             map_entry
         );
         setAssets(assets_map);
+        
+        
         // hide modal on accept as well
         toggleModalVisibility();
     }
@@ -130,10 +121,14 @@ export default function StockPage() {
         setAssets(new_map);
     }
 
-    function deleteSelected() {
+    async function deleteSelected() {
         console.log("Delete selected callback");
-        const new_map = new AssetsMap(assets);
-        new_map.deleteSelected();
+        // remove selected elements from indexed db
+        const selected_ids = assets.getSelectedIds();
+        await db.wallet_assets.bulkDelete(selected_ids);
+
+        const new_map = new AssetsMap(assets);        
+        new_map.deleteSelected();        
         setAssets(new_map);
     }
 

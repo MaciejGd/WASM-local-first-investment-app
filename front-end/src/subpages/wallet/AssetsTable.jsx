@@ -76,7 +76,7 @@ function AssetsTableBody({ assets, onToggleVisibility, onSelectRow }) {
             <AssetRow asset={asset} key={rowIdx} rowClassName={""} onToggleVisibility={onToggleVisibility} onSelectRow={onSelectRow}/>
         ))}
         {/* render summary row */}
-        <AssetRow asset={assets_summary} rowClassName={"assets_summary"} onToggleVisibility={onToggleVisibility} summary={true}/>
+            <AssetRow asset={assets_summary} rowClassName={"assets_summary"} onToggleVisibility={onToggleVisibility} summary={true}/>
         </> 
     );
 }

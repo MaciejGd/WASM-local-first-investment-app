@@ -1,29 +1,57 @@
-// Represents data about asset passed to the system by the user
+/**
+ * Class representing data from investment wallet
+ */
 export class AssetData {
-    constructor(quantity, price) {
+    /**
+     * @param {number} id number identifying the data entry
+     * @param {number} quantity amount of stocks bought
+     * @param {number} price money worth of one stock at the time of buy
+     */
+    constructor(id, quantity, price) {
         this.quantity = quantity;
         this.price = price;
         this.cost = this.price * this.quantity;
         this.selected = false;
+        this.id = id; // number which lets us identify the asset
     }
 
-    // get profit in percentages, relative to current price
+    /**
+     * Get profit in percentages, relative to current price
+     * @param {number} current_price current price of the asset
+     * @returns profit in percentages
+     */
     getProfitPercentage(current_price) {
         return (((current_price * this.quantity) - this.cost) / this.cost) * 100;
     }
-    // get profit relative to current price
+    
+    /**
+     * Get profit relative to current price
+     * @param {number} current_price Current price of the asset
+     * @returns current profit
+     */
     getProfit(current_price) {
         return (current_price - this.price) * this.quantity;
     }
-    // count current value of all shares relative to its current price
+
+    /**
+     * Count current value of all shares relative to its current price
+     * @param {number} current_price Current price of the stock
+     * @returns current value
+     */
     getCurrentValue(current_price) {
         return (current_price * this.quantity);
     }
 };
 
-// container for ticker assets
+/**
+ * Map entry of ticker. Consists of AssetData objects 
+ * as well as ticker's assets summary
+ */
 export class AssetsEntry {
-    // we can start from empty data
+    /**
+     * Accepts ticker name
+     * @param {string} ticker 
+     */
     constructor(ticker) {
         this.current_price = 10;
         this.ticker = ticker;
@@ -32,27 +60,44 @@ export class AssetsEntry {
         this.folded_data = [new AssetData()]; // list with one element combining averages for data
     }
 
+    /**
+     * Getter for average data of all investments of stock
+     */
     get average_data() {
         return this.folded_data[0];
     }
 
+    /**
+     * Getter for accumulated cost of all investments of stock
+     */
     get accumulated_cost() {
         return this.average_data.cost;
     }
 
+    /**
+     * Getter for current price of the stock
+     */
     get current_value() {
         return this.average_data.getCurrentValue(this.current_price);
     }
 
-    // get profit from all transactions of shares
+    /**
+     * Getter profit from all transactions of shares
+     */
     get profit() {
         return this.folded_data[0].getProfit(this.current_price);
     }
-    // get percentage profit from all transactions of shares
+
+    /**
+     * Getter for percentage profit from all transactions of shares
+     */
     get profit_percentage() {
         return this.folded_data[0].getProfitPercentage(this.current_price);
     }
 
+    /**
+     * Getter for getting displayed data of ticker
+     */
     get data() {
         if (this.folded) {
             return this.folded_data; // for now return empty list
@@ -62,7 +107,28 @@ export class AssetsEntry {
         }
     }
 
-    // add new AssetData object
+    /**
+     * Get selected positions of ticker
+     */
+    get selected() {        
+        // if folded and selected, return all data added
+        if (this.folded && this.folded_data[0].selected) {
+            return this._data;
+        }
+        // iterate over data and check which elements are selected
+        var selected_data = [];
+        var cont = this.data;        
+        cont.forEach((el) => {
+            if (el.selected)
+                selected_data.push(el);
+        });
+        return selected_data;
+    }
+
+    /**
+     * Adds asset to the ticker's entry
+     * @param {AssetData} asset 
+     */
     addAsset(asset) {
         if (asset instanceof AssetData) {
             this._data.push(asset);
@@ -71,13 +137,20 @@ export class AssetsEntry {
             console.err("AssetData expected, got ", typeof(asset));
         }
     }
-    // show average values for all shares of the company
+    
+    /**
+     * Trigger visibility change of ticker's assets
+     */
     triggerVisibility() {
         this.folded ^= true;
     }
 
+    /**
+     * Update summary data of the ticker's assets
+     */
     udpateAverageData() {
         // update averages
+        let id_placeholder = -1;
         let amount = 0.0; // summed amount of owned resource
         let prices_cummulated = 0.0;
         let selected = true;
@@ -87,12 +160,18 @@ export class AssetsEntry {
             prices_cummulated += (e.price * e.quantity)
         });
         // fill folded data with cummulated amount of stock and average price of one share
-        this.folded_data[0] = new AssetData(amount, prices_cummulated / amount);
+        this.folded_data[0] = new AssetData(id_placeholder, amount, prices_cummulated / amount);
     }
 
-    insert(quantity, price) {
-        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
-            this._data.push(new AssetData(quantity, price));
+    /**
+     * 
+     * @param {string} id identification number of the asset
+     * @param {string} quantity amount of stock owned
+     * @param {string} price price of the stock bought
+     */
+    insert(id, quantity, price) {
+        if (!Number.isNaN(id) && !Number.isNaN(quantity) && !Number.isNaN(price)) {
+            this._data.push(new AssetData(Number(id), Number(quantity), Number(price)));
         }
         else {
             throw new Error("Either quantity or price is not a number, failed to update asset entry");
@@ -100,7 +179,13 @@ export class AssetsEntry {
 
         this.udpateAverageData();
     }
-    // select data idx(int, index of data, to be selected), select(boolean, select or unselect)
+
+    /**
+     * Select asset at specified index
+     * @param {number} idx index od data to be selected
+     * @param {boolean} select True is selected, False otherwise
+     * @returns 
+     */
     selectData(idx, select) {
         if (!this.folded) {
             this._data[idx].selected = select;
@@ -113,8 +198,11 @@ export class AssetsEntry {
         this._data.forEach((e) => { e.selected = select; } );
         this.average_data.selected = select;
     }
-    // function for deleting selected data from the assets container
-    // Returns: true -> delete whole container, false -> do not delete whole container
+
+    /**
+     * Delete selected data from the assets container 
+     * @returns True if container is empty after deletion, False otherwise
+     */
     deleteData() {
         // if folded, analyze all records as one
         if (this.folded) {
@@ -136,8 +224,24 @@ export class AssetsEntry {
     }
 };
 
-// data prepared for table to be rendered
+/**
+ * Data prepared for table to be rendered
+ */
 export class AssetsTableData {
+    /**
+     * @param {boolean} selected is asset selected
+     * @param {string} ticker ticker of the asset
+     * @param {boolean} isFolded is asset folded
+     * @param {boolean} isFirst is asset first on the list
+     * @param {number} quantity amount of stock hold
+     * @param {number} current_price current price of the stock
+     * @param {number} current_value current value of the stock
+     * @param {number} profit profit from the asset purchase
+     * @param {number} profit_percentage percentage of the profit
+     * @param {number} price price of the asset at buy time
+     * @param {number} cost total cost of the asset
+     * @param {number} idx index of the asset
+     */
     constructor(selected, ticker, isFolded, isFirst, quantity, 
                 current_price, current_value, profit, profit_percentage, 
                 price, cost, idx) {
@@ -156,8 +260,13 @@ export class AssetsTableData {
     }
 };
 
-/// Map consisting assets
+/**
+ * Map of ticker : AssetEntry objects
+ */
 export class AssetsMap {
+    /**
+     * @param {AssetsMap} other accepts AssetsMap to perform copy constructing
+     */
     constructor(other) {
         if (other instanceof AssetsMap) {
             this.asset_map = new Map(other.asset_map);
@@ -165,18 +274,46 @@ export class AssetsMap {
         }
         else {
             this.asset_map = new Map();
+            this.countAssetsSummary();
         }
     }
-    // function for setting checkbox for table data row, ticker (string, ticker to be searched), 
-    // idx(int, index of data in AssetsEntry container), select(boolean, should we select or unselect)
+
+    /**
+     * Factory static method creating AssetMap from list of objects
+     * @param {Array} assets array of objects retrieved from db.
+     * Object structure: ticker, price, quantity
+     * @returns AssetMap object
+     */
+    static createFromDB(assets) {
+        const mp = new AssetsMap();
+        assets.forEach((el)=>{
+            if (mp.get(el.ticker) === undefined) {
+                // if map entry does not exist, create brand new
+                mp.set(el.ticker, new AssetsEntry(el.ticker));
+            }
+            mp.get(el.ticker).insert(el.id, el.price, el.quantity);
+        });  
+        mp.countAssetsSummary(); // count assets summary after addition is done
+        return mp;
+    }
+
+    /**
+     * Function for setting checkbox for table data row
+     * @param {string} ticker ticker to be selected
+     * @param {int} idx index of data in AssetsEntry container
+     * @param {boolean} select True if should be selected, False otherwise
+     */
     selectData(ticker, idx, select) {
         let entry = this.asset_map.get(ticker);
         entry.selectData(idx, select);
     }
 
-    // return array of AssetsTableData produced based on personal assets
+    /**
+     * Produce AssetsTableData based on user investments
+     * @returns Array of AssetsTableData produced based on personal assets
+     */
     produceTableData() {
-        let output_array = []
+        let output_array = [];
         this.asset_map.forEach((asset) => {
             asset.data.forEach((data, idx) => {
                 output_array.push(
@@ -199,20 +336,38 @@ export class AssetsMap {
         });
         return output_array;
     }
-    // set resource for given ticker
+
+    /**
+     * Set resource for given ticker
+     * @param {string} ticker ticker to be set
+     * @param {AssetsEntry} map_entry AssetsEntry object
+     */
     set(ticker, map_entry) {
         this.asset_map.set(ticker, map_entry);
         this.countAssetsSummary(); // we should re-count asset's summary after updating the map
     }
-    // get resource associated to ticker from map
+
+    /**
+     * Get resource associated to ticker provided
+     * @param {string} ticker ticker we want to retrieve data of
+     * @returns resource associated with ticker provided
+     */
     get(ticker) {
         return this.asset_map.get(ticker);
     }
-    // check if ticker exists in map
+
+    /**
+     * Check if ticker entry exists in the map
+     * @param {string} ticker ticker we want to check
+     * @returns True if exists, False otherwise
+     */
     has(ticker) {
         return this.asset_map.has(ticker);
     }
-    // prepare summary of all assets in map
+    
+    /**
+     * Prepare summary of all assets in a map
+     */
     countAssetsSummary() {
         let summary = new AssetsTableData();
         let isFirst = false;
@@ -245,7 +400,13 @@ export class AssetsMap {
 
         this.summary = summary;
     }
-    // sort map entries by column specified as input arg
+    
+    /**
+     * Sort map entries by column specified as input arg
+     * @param {string} columnName name of the column we want sort with 
+     * @param {boolean} inc True if sorting incrementally, False otherwise
+     * @returns 
+     */
     sort(columnName, inc) {
         let sortDec;
         let sortInc;
@@ -290,6 +451,22 @@ export class AssetsMap {
         this.asset_map = new_map;
     }
 
+    /**
+     * Return ids of all selected assets as an array
+     */
+    getSelectedIds() {        
+        var selected = [];
+        this.asset_map.forEach(((el, idx, assets) => {
+            // map all AssetData objects to get only ids
+            selected = selected.concat(el.selected.map(item => item.id));
+        }));
+
+        return selected;
+    }
+
+    /**
+     * Delete selected assets
+     */
     deleteSelected() {
         this.asset_map.forEach(((el, idx, assets) => {
             if (el.deleteData()) {
