@@ -26,7 +26,7 @@ export default function SimulationsOptionsPane({ addAsset, deleteSelectedCb, onR
         <div className="sims_options_pane">
             <AssetButtons onAddAsset={addAsset}  onDeleteSelectedCb={deleteSelectedCb}/>
             <Slider min_value={10} max_value={100} default_value={55} val={times} onChangeCb={setTimes}></Slider>
-            <Slider min_value={10} max_value={100} default_value={55} val={sims} onChangeCb={setSims}></Slider>
+            <Slider min_value={10} max_value={10000} default_value={55} val={sims} onChangeCb={setSims}></Slider>
             <RunSimButton onRunSim={onRunSim} times={times} sims={sims}></RunSimButton>
         </div>
     );

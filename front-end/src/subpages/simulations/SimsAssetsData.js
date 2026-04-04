@@ -59,7 +59,6 @@ export class SimAssetMap {
         this.asset_map.forEach((value) => {
             sum += value.price;
         });
-        console.log(sum);
         var array = Array.from(this.asset_map);
         for (var i = 0; i < array.length; i++) {            
             // append percentage value of each asset

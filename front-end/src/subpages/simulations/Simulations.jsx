@@ -1,6 +1,6 @@
 import { AssetButtons, AddAssetButton, DeleteSelectedButton } from "../wallet/Stock"
 import "../../styling/simulations.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import SimulationsOptionsPane from "./SimsOptionsPane";
 import AssetsPane from "./SimsAssetsPane"
@@ -12,7 +12,8 @@ import ComboBox from "../../components/Combobox.jsx";
 // DEBUG
 import "./wasm/SimulationAPI.js";
 import { SimulationAPI } from "./wasm/SimulationAPI.js";
-import SimErrorPopUp from "./SimErrorPopUp.jsx";
+import { SimErrorPopUp, SimRunningPopUp } from "./SimPopUps.jsx";
+
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
 function InputRow({ title, onChange, focus, options=[] }) {
@@ -47,22 +48,71 @@ function AddAssetPopUp({ onClose, onAccept, tickersList }) {
     );
 }
 
+/**
+ * Custom hook for managing Simulation WebWorker
+ * @param {Function} onMessage 
+ * @returns returns pair of functions to be called on worker, run and terminate
+ */
+function useSimulationWorker(onMessage) {
+    const workerRef = useRef(null); // worker instance
+
+    useEffect(()=>{
+        // initialize worker on mount
+        initWorker();
+        // cleanup on unmounting
+        return () => {
+            workerRef.current?.terminate();
+        };
+    }, []);
+
+
+    const initWorker = () => {
+        const worker = new Worker(new URL("./wasm/SimulationWorker.js", import.meta.url), 
+                                    {type:"module"});
+        worker.onmessage = (e) => {
+            onMessage?.(e.data);
+        };
+        workerRef.current = worker;
+        worker.postMessage({
+            type: "INIT"
+        });
+
+    };
+    /**
+     * Terminate and reinitailize worker
+     */
+    const simTerminate = () => {
+        workerRef.current?.terminate();
+        initWorker(); // initialize the worker again
+    };
+
+    const simRun = (payload) => {
+        if (!workerRef.current) {
+            console.error("Web worker for WASM Simulations has not been yet initialized!");
+            return;
+        }
+        workerRef.current.postMessage({
+            type: "RUN",
+            payload: payload
+        });
+    };
+
+    return { simRun, simTerminate };
+
+}
 
 export default function SimulationsPage() {
     const [modal_visible, setModalVisible] = useState(false);
     const [asset_error, setAssetError] = useState(""); // error on asset passed to pop-up
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
     const [tickers_list, setTickersList] = useState([]);
-    const [simulationAPI, setSimulationAPI] = useState(null);
     const [simsResults, setSimsResults] = useState([]);
-
-    useEffect(() => {
-        SimulationAPI.create().then((module) => {
-            if (module) {
-                setSimulationAPI(module);
-            }
-        });
-    }, []);
+    const [simRunning, setSimRunning] = useState(false);
+    const { simRun, simTerminate } = useSimulationWorker((e) => {
+        console.log("Message received by worker");
+        setSimRunning(false);
+        setSimsResults(e);
+    });
 
     function toggleModalVisibility(vis) {
         setModalVisible(!modal_visible);
@@ -101,6 +151,14 @@ export default function SimulationsPage() {
         setAssets(asset_map);
     }
 
+    /**
+     * Stop running simulation
+     */
+    function stopSimulation() {
+        simTerminate();
+        setSimRunning(false);        
+    }
+
     // should be done once on page loading
     async function FetchStocksList() {
         const api_url = "http://127.0.0.1:5000/finance/get_stocks_list";
@@ -117,11 +175,17 @@ export default function SimulationsPage() {
     }
 
     async function RunFinanceSimulations(times, sims) {
+        // fetch stock prices
         const responseJson = await FetchStockPrices();
         // get amount of money invested in each asset
+        setSimRunning(true); // set running as simulation status
         const weights = assets.getWeights();
-        const test_res = simulationAPI.testSimulation(responseJson, weights, times, sims);
-        setSimsResults(test_res);
+        simRun({
+            stockData: responseJson,
+            weights: weights,
+            times: times,
+            sims: sims
+        });
     }
 
     // fetch list of possible tickers upon page load
@@ -146,6 +210,9 @@ export default function SimulationsPage() {
             }
             {asset_error !== "" &&
                 <SimErrorPopUp content={asset_error} onClose={()=> setAssetError("")}></SimErrorPopUp>
+            }
+            {simRunning &&
+                <SimRunningPopUp onClose={stopSimulation}></SimRunningPopUp>
             }
         </>
     )

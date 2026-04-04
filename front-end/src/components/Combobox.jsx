@@ -55,7 +55,7 @@ export default function ComboBox({
                 type="text"
                 value={inputValue}
                 placeholder={placeholder}
-                autofocus={focus}
+                autoFocus={focus}
                 onChange={(e) => {
                     setInputValue(e.target.value);
                     setIsOpen(true);

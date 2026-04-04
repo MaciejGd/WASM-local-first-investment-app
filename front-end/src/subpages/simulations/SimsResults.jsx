@@ -41,11 +41,7 @@ function SimResultsTableBody({ results }) {
     ];
     console.log(results);
     for (var i = 0; i < 27; i++) {
-        // TODO - make it work
         if (i >= results.length) break;
-        console.log("Math floor idx: ", Math.floor(i/9));
-        console.log("Result: ", results[i]);
-
         percentiles[Math.floor(i/9)].push(results[i]);
     }
 

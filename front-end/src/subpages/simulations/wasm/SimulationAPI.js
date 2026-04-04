@@ -64,7 +64,7 @@ export class SimulationAPI {
      * @param {number} sims number of simulations to be run
      * @returns 
      */
-    testSimulation(stock_prices, stock_weights, time, sims) {
+    runSimulation(stock_prices, stock_weights, time, sims) {
         if (this.module === undefined) {
             return null;
         }
