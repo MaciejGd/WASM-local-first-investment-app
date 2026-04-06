@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <stdexcept>
+#include "./simulation_output.h"
 
 /// Wrapper for simmulation returns 
 /// should provide a way to serialize so it can be returned from WASM module
@@ -18,15 +19,12 @@ protected:
 public:
     ISimsResults() = default;
     ISimsResults(double* buff) : t_buff(buff) {};
-
-    /// @brief Count VAR value of input returns and append it to the buffer
-    /// @param _rets returns to be analyzed 
-    virtual void SetVAR(std::vector<double>& _rets) = 0;
-
-    /// @brief Count percentiles for returns passed as input and add them to the buffer
-    /// @param _rets vector of returns to be added to the buffer
-    virtual void SetReturns(std::vector<double>& _rets) = 0;
+    virtual ~ISimsResults() = default;
     
+    /// @brief Set output of the simulation
+    /// @param sims_output output of the simulation wrapped in SimulationOutput object
+    virtual void SetSimOutput(SimulationOutput& sims_output) = 0;
+
     /// @brief Count percentiles for drawdowns passed as input and add them to the buffer
     /// @param _drawdowns vector of drawdowns to be added to the buffer
     virtual void SetDrawdowns(std::vector<double>& _drawdowns) = 0;
@@ -58,8 +56,7 @@ public:
     SimsResults() = default;
     SimsResults(double* buff): ISimsResults(buff) {};
 
-    void SetVAR(std::vector<double>& _rets) override;
-    void SetReturns(std::vector<double>& _rets) override;
+    void SetSimOutput(SimulationOutput& sims_output) override;
     void SetDrawdowns(std::vector<double>& _drawdowns) override;
     void SetUpsides(std::vector<double>& _upsides) override;
 
@@ -68,4 +65,6 @@ protected:
     void t_InsertToBuff(std::vector<double>& data, int start_ptr) override;
     // we should transform price from logarithmic to regular
     double t_TransformToExp(double value);
+    void t_SetVAR(SimulationOutput& sims_output);
+    void t_SetReturns(std::vector<double>& sims_output);
 };

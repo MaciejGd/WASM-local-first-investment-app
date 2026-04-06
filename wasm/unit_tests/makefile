@@ -11,4 +11,4 @@ make winrun:
 	g++ --std=c++20 main.cpp ../core/linalg/algorithms.cpp ../core/src/simulation_results.cpp -o unit_tests.exe && unit_tests.exe
 
 make windebug:
-	g++ --std=c++20 main.cpp ../core/src/algorithms.cpp ../core/src/simulation_results.cpp -g02 -o unit_tests.exe && unit_tests.exe
+	g++ --std=c++20 main.cpp ../core/linalg/algorithms.cpp ../core/src/simulation_results.cpp -g02 -o unit_tests.exe && unit_tests.exe

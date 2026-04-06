@@ -239,12 +239,11 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<std::vector<double>> expected_results = 
-                    {{0, -0.21141187, -0.22014603, -0.13129061, -0.38029382, -0.16394326},
-                        {0, 0.09710707,  0.16541266,  0.19696754, -0.53662986, -0.5221177 },
-                        {0, 0.01230616, -0.04397431, -0.31080701, -0.64628238,  0.66622602},
-                        {0, 0.31989528,  0.81102485, -0.36946209, -0.27507596, -0.44275559},
-                        {0, 0.08825058, -0.21613876, -0.4886966,  -1.15749806,  0.31985147}};
+    std::vector<double> expected_results = {-0.16394326
+                                            ,-0.5221177 
+                                            , 0.66622602
+                                            ,-0.44275559
+                                            , 0.31985147};
 
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
@@ -255,10 +254,9 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     std::vector<double> upsides(5, 0.0);
     auto outputs = mont.Simulate(5, 5, drawdowns, upsides);
     // validate output
-    for (int i = 0; i < outputs.rows(); i++) {
-        for (int j = 0; j < outputs.cols(); j++) {
-            CHECK_EQUAL_FLOAT(expected_results[i][j], outputs[i][j]);
-        }
+    auto results = outputs.GetRets();
+    for (int i = 0; i < results.size(); i++) {
+        CHECK_EQUAL_FLOAT(expected_results[i], results[i]);
     }
 }
 
@@ -316,6 +314,36 @@ UNIT_TEST(MonteCarloSimulator, SimulationDrawdown) {
     }
 }
 
+UNIT_TEST(MonteCarloSimulator, SimulationStockChanges) {
+    int price[] = {7,4,5,1,2,
+                    1,2,5,4,7,
+                    10,9,5,7,4};
+    size_t stocks = 3;
+    size_t stock_size = 5;
+    double weights[] = {0.5, 0.25, 0.25};
+
+    std::vector<double> expected_results = 
+                    {-0.16394326, -0.5221177, 0.66622602, -0.44275559, 0.31985147};
+
+
+    auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
+
+    mont.SetRandomGenerator(std::move(rand_gen));
+    std::vector<double> drawdowns(5, 0.0);
+    std::vector<double> upsides(5, 0.0);
+    auto outputs = mont.Simulate(5, 5, drawdowns, upsides);
+    // multiply stocks changes by weights and sum up to check if they are equal to final changes
+    auto stocks_changes = outputs.GetStocksChanges();
+    for (int i = 0; i < stocks_changes.size(); i++) {
+        double sum = 0.0;
+        for (int j = 0; j < 3; j++) {
+            sum += (weights[j] * stocks_changes[i][j][0]);
+        }
+        CHECK_EQUAL_FLOAT(sum, expected_results[i]);
+    }
+}
+
 UNIT_TEST(MonteCarloSimulator, RunSimulationInvalidBuffer) {
     int price[] = {7,4,2,1,2,
                     1,2,5,4,4, 
@@ -328,7 +356,7 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationInvalidBuffer) {
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
-    CHECK_THROW(mont.RunSimulation(5, 5, buff), std::logic_error);
+    CHECK_EQUAL(mont.RunSimulation(5, 5, buff), false);
 }
 
 UNIT_TEST(MonteCarloSimulator, RunSimulationValid) {

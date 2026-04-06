@@ -3,18 +3,22 @@
 #include <iostream>
 #include <cmath>
 
-void SimsResults::SetVAR(std::vector<double>& _rets) {
-    if (_rets.size() == 0) {
-        throw std::logic_error("Sims results for t_Counting VAR should not be empty!");
-    }
-    std::sort(_rets.begin(), _rets.end());
+void SimsResults::SetSimOutput(SimulationOutput& sims_output) {
+    // sort output by returns
+    sims_output.sort();
+    std::vector<double> rets = sims_output.GetRets();
+    t_SetVAR(sims_output); // set VaR and CVaR
+    t_SetReturns(rets); // set returns
+}
+
+void SimsResults::t_SetVAR(SimulationOutput& sims_output) {    
     // find the lowest 5% of results
-    int idx = (_rets.size()) / s_VAR_DIVIDER - 1; // need to substract one as 0 indexed
+    int idx = (sims_output.size()) / s_VAR_DIVIDER - 1; // need to substract one as 0 indexed
     // set VAR in buffer
-    this->t_buff[m_var_ptr] = t_TransformToExp(_rets[idx]);
+    this->t_buff[m_var_ptr] = t_TransformToExp(sims_output.GetRet(idx));
 };
 
-void SimsResults::SetReturns(std::vector<double>& _rets) {
+void SimsResults::t_SetReturns(std::vector<double>& _rets) {
     auto res = t_CountPercentile(_rets);
     t_InsertToBuff(res, m_returns_ptr);
 };

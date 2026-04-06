@@ -22,7 +22,7 @@ private:
     T* m_buffer;
     size_t m_stock_size;
     size_t m_stocks;
-    CMatrix<double> m_weights; // we need weights 
+    CMatrix<double> m_weights; // we need weights     
 
     CMatrixLowerTriangular<double> m_cholesky_decomposition;
 
@@ -68,18 +68,20 @@ public:
     /// @param time number of simulated timestamps
     /// @param sims number of run simulations
     /// @param buff buffer of doubles in which results would be stored
-    void RunSimulation(int32_t time, int32_t sims, double* buff) {        
+    bool RunSimulation(int32_t time, int32_t sims, double* buff) {
+        if (buff == nullptr) {
+            return false;
+        }
+
         std::vector<double> max_drawdowns(sims, 0); // count the minimum possible value of the wallet
-        std::vector<double> max_upsides(sims, 0);
+        std::vector<double> max_upsides(sims, 0); // maximumm upsides
         // run simulation and produce output matrix
         auto output = Simulate(time, sims, max_drawdowns, max_upsides);
 
         // update the output buffer with results
         m_results = std::make_unique<SimsResults>(buff);
         if (m_results) {
-            auto last_col = output.GetCol(output.cols()-1);            
-            m_results->SetReturns(last_col);
-            m_results->SetVAR(last_col);
+            m_results->SetSimOutput(output);
             m_results->SetDrawdowns(max_drawdowns);
             m_results->SetUpsides(max_upsides);            
         }
@@ -91,9 +93,14 @@ public:
     /// @param[out] drawdowns vectoloSumr of max drawdowns to be filled during simulation
     /// @param[out] upsides vector of max upsides to be filled during simulation
     /// @return Matrix of doubles with simulation's results
-    CMatrix<double> Simulate(int32_t time, int32_t sims, std::vector<double>& drawdowns, std::vector<double>& upsides) {
+    SimulationOutput Simulate(int32_t time, 
+                            int32_t sims, 
+                            std::vector<double>& drawdowns, 
+                            std::vector<double>& upsides) {
         CHECK_OUT_OF_RANGE(drawdowns.size(), sims);
         CHECK_OUT_OF_RANGE(upsides.size(), sims);
+        // initialize output
+        SimulationOutput sim_out = SimulationOutput(sims, m_weights.cols());
         // transform prices to returns
         auto returns = m_TransformPriceToReturns();
         // count mean values for prices
@@ -101,8 +108,6 @@ public:
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
-        // create outputs matrix, TODO - do not create a matrix with number of times as it can be very high
-        CMatrix<double> outputs(sims, time+1);
         // run simulation TODO - introduce multithreading in here so Simulation is sped up
         for (int i = 0; i < sims; i++) {
             for (int j = 1; j < time+1; j++) {
@@ -111,13 +116,15 @@ public:
                 // add means + randoms generated with probability equivalent to covariance matrix
                 auto motion = means + (cholesky * random_samples);
                 // fill output matrix with motion multiplied by weight of asset
-                outputs[i][j] = outputs[i][j-1] + (m_weights * motion)[0][0];
+                sim_out.GetRet(i) += (m_weights * motion)[0][0];
+                // one row structure
+                sim_out.GetStocksChange(i) = sim_out.GetStocksChange(i) + motion; // sum up motions for particular stock
                 // update minimal drawdown
-                drawdowns[i] = std::min(drawdowns[i], outputs[i][j]); 
-                upsides[i] = std::max(upsides[i], outputs[i][j]);
+                drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i)); 
+                upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
             }
         }
-        return outputs; 
+        return sim_out; 
     }
 
     /// @brief Random generator setter
