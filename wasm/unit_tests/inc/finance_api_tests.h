@@ -8,7 +8,7 @@ using namespace finance_api;
 template<typename T>
 class MonteCarloTests : public MonteCarloSimulator<T> {
 public:
-    MonteCarloTests(T* buffer, size_t chunks_amount, size_t chunk_size, double* weights): 
+    MonteCarloTests(T* buffer, size_t chunks_amount, size_t chunk_size, double* weights):
                         MonteCarloSimulator<T>(buffer, chunks_amount, chunk_size, weights) {};
     // public test interfaces for private MonteCarloSimulator methods
     CMatrix<double> m_TransformPriceToReturns() {
@@ -185,16 +185,16 @@ UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorToLowChunksAmount) {
     CHECK_THROW(MonteCarloSimulator(buf, 0, 2, weights), std::invalid_argument);
 }
 
-UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorWeightsNullptr) {    
+UNIT_TEST(MonteCarloSimulatorTests, MonteCarloSimulatorWeightsNullptr) {
     double buf[] = {1, 2, 3};
     double* weights = nullptr;
     CHECK_THROW(MonteCarloSimulator(buf, 2, 2, weights), std::invalid_argument);
 }
 
-UNIT_TEST(MonteCarloSimulatorTests, TransformPriceToReturnsWorking) {    
+UNIT_TEST(MonteCarloSimulatorTests, TransformPriceToReturnsWorking) {
     using std::vector;
 
-    int price[] = {1, 12, 35, 
+    int price[] = {1, 12, 35,
                     41, 22, 11};
 
     std::vector<std::vector<double>> vec{
@@ -239,11 +239,7 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<double> expected_results = {-0.16394326
-                                            ,-0.5221177 
-                                            , 0.66622602
-                                            ,-0.44275559
-                                            , 0.31985147};
+    std::vector<double> expected_results = {3.71337462, 2.99464877, 7.54594324, 5.05260566, 6.18458635};
 
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
@@ -268,11 +264,11 @@ UNIT_TEST(MonteCarloSimulator, SimulationUpsides) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<double> expected_results = {0, 
-                                            0.19696754281963075, 
-                                            0.6662260173825458, 
-                                            0.8110248529004866, 
-                                            0.3198514657149032};
+    std::vector<double> expected_results = {3.713374615272557, 
+                                            2.9946487739656593, 
+                                            7.5459432366090065, 
+                                            5.052605659459024, 
+                                            6.184586353453597};
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
@@ -295,11 +291,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationDrawdown) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<double> expected_results = {-0.38029381988898425, 
-                                            -0.5366298556651139, 
-                                            -0.6462823831338917, 
-                                            -0.4427555916327263, 
-                                            -1.1574980562963189};
+    std::vector<double> expected_results = {-0.12610791746510455, 0, 0, 0, 0};
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
@@ -322,7 +314,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationStockChanges) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<double> expected_results = 
+    std::vector<double> expected_results =
                     {-0.16394326, -0.5221177, 0.66622602, -0.44275559, 0.31985147};
 
 
@@ -346,7 +338,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationStockChanges) {
 
 UNIT_TEST(MonteCarloSimulator, RunSimulationInvalidBuffer) {
     int price[] = {7,4,2,1,2,
-                    1,2,5,4,4, 
+                    1,2,5,4,4,
                     10,9,5,7,2};
     size_t stocks = 3;
     size_t stock_size = 5;
@@ -367,15 +359,15 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationValid) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::array<double, 29> expected_results = {
-            -0.860871367725424,-0.8353315559719388,-0.7565555204083475,-0.6850593405757054,-0.4067371331223565,-0.2855825718109001,-0.1512098162240496,0.28371363555774964,0.4213050166182293,
-            -0.8893620750630875,-0.8353315559719388,-0.804562785772201,-0.7514849445148736,-0.6414764712347873,-0.44056377234829225,-0.4152844887934918,-0.3166132081424473,-0.3153414270998597,
-            0,0,0,0,0.17168299511009155,0.21770451680935632,0.3769232288386375,0.43911997469088004,0.9276254148407697,
-            -0.9072825667482578, 
-            0
+    std::array<double, 31> expected_results = {
+            -0.0954805060374801,0.03668832290704804,0.18820470642450823,0.32892596324010703,1.4004578802956584,2.4679858821746303,3.713374615272557,5.052605659459024,6.184586353453597, // returns
+            -0.3919309424359614,-0.2878297492506418,-0.2522299061951612,-0.19379420054502533,-0.17375368115258444,0,0,0,0, // DRAWDOWNS
+            0.03668832290704804,0.13788667070476263,0.32232207972891425,0.32892596324010703,1.4004578802956584,2.7574889736371064,3.713374615272557,5.052605659459024,6.184586353453597, // UPSIDES
+            -0.2923375735491905, // VAR
+            -0.49237985, 0.2473031, -0.04726082 // CVARS
         };
 
-    std::array<double,29> buff{};
+    std::array<double, 31> buff{};
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
@@ -383,7 +375,5 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationValid) {
     mont.RunSimulation(5, 20, buff.data());
     for (int i = 0; i < 29; i++) {
         CHECK_EQUAL_FLOAT(buff[i], expected_results[i]);
-    } 
-    std::cout << std::endl;
-} 
-
+    }
+}

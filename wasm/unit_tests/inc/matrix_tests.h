@@ -542,6 +542,28 @@ UNIT_TEST(MatrixSymmetry, IsSymmetric) {
     CHECK_TRUE(matrix1.IsSymmetric());
 }
 
+UNIT_TEST(MatrixMap, Lambda) {
+    using namespace linalg::primitives;
+    using namespace std;
+
+    vector<vector<float>> mat1 = {
+                            {1, 2, 3},
+                            {2, 2, 5}
+    };
+    auto matrix1 = CMatrix(mat1);
+    auto matrix2 = matrix1.Map([](auto& x) {
+        return x * 2;
+    });
+    // first row
+    CHECK_EQUAL(matrix2[0][0], 2);
+    CHECK_EQUAL(matrix2[0][1], 4);
+    CHECK_EQUAL(matrix2[0][2], 6);
+    // second row
+    CHECK_EQUAL(matrix2[1][0], 4);
+    CHECK_EQUAL(matrix2[1][1], 4);
+    CHECK_EQUAL(matrix2[1][2], 10);
+}
+
 UNIT_TEST(MatrixSymmetry, IsSymmetricNotSquare) {
     using namespace linalg::primitives;
     using namespace std;

@@ -11,12 +11,6 @@
 #include <span>
 
 namespace linalg::algorithms {
-
-//algorithms in particular that are needed 
-// 1_) Cholesky factorization
-// 2_) Counting means values
-// 3_) Couting covariance
-// 4_) Generate Random numbers based on normal distribution
 using namespace linalg::primitives;
 
 /// @brief Count Cholesky factorization for Symmetric positive define, matrix
@@ -183,11 +177,31 @@ CMatrix<double> GetCovarianceMatrix(T* buffer, const size_t& chunks_amount, cons
     return res;
 };
 
+/// @brief Perform Hadamard product over two matrices
+/// @tparam T type of the first matrix
+/// @tparam N type of the second matrix
+/// @param a first matrix to be multiplied
+/// @param b second matrix to be multiplied
+/// @return new matrix created after applying Hadamard product
+template<typename T, typename N>
+auto HadamardProduct(const CMatrix<T>& a, const CMatrix<N>& b) {
+    using O = decltype(std::declval<T>() * std::declval<N>());
+    CHECK_VALUES_EQUAL(a.rows(), b.rows());
+    CHECK_VALUES_EQUAL(a.cols(), b.cols());
+    // perform HadamardProduct of two matrices
+    CMatrix<O> mat(a.rows(), a.cols());
+    for (int i = 0; i < a.rows(); i++) {
+        for (int j = 0; j < a.cols(); j++) {
+            mat[i][j] = a.at(i,j) * b.at(i,j);
+        }
+    }
+    return mat;
+}
+
 /// Inverse normal distribution using Beasley-Springer-Moro algorithm.
 /// Algorithm trades a little bit of accuracy for the speed. Error produced is typically 
 /// about 1e-10 which is sufficient for financial engineering.
 /// @param input random variable from range (0,1)
 /// @return random variable distributed with normal matter
 double InverseNormal(double input);
-
 };

@@ -22,7 +22,7 @@ private:
     T* m_buffer;
     size_t m_stock_size;
     size_t m_stocks;
-    CMatrix<double> m_weights; // we need weights     
+    CMatrix<double> m_weights; // we need weights
 
     CMatrixLowerTriangular<double> m_cholesky_decomposition;
 
@@ -47,7 +47,7 @@ public:
         if (weights == nullptr) {
             throw std::invalid_argument("Weights input buffer is nullptr!!!");
         }
-        
+
         m_buffer = buffer;
         m_stock_size = chunk_size;
         m_stocks = chunks_amount;
@@ -81,9 +81,9 @@ public:
         // update the output buffer with results
         m_results = std::make_unique<SimsResults>(buff);
         if (m_results) {
-            m_results->SetSimOutput(output);
+            m_results->SetSimOutput(output, m_weights);
             m_results->SetDrawdowns(max_drawdowns);
-            m_results->SetUpsides(max_upsides);            
+            m_results->SetUpsides(max_upsides);
         }
     }
 
@@ -93,9 +93,9 @@ public:
     /// @param[out] drawdowns vectoloSumr of max drawdowns to be filled during simulation
     /// @param[out] upsides vector of max upsides to be filled during simulation
     /// @return Matrix of doubles with simulation's results
-    SimulationOutput Simulate(int32_t time, 
-                            int32_t sims, 
-                            std::vector<double>& drawdowns, 
+    SimulationOutput Simulate(int32_t time,
+                            int32_t sims,
+                            std::vector<double>& drawdowns,
                             std::vector<double>& upsides) {
         CHECK_OUT_OF_RANGE(drawdowns.size(), sims);
         CHECK_OUT_OF_RANGE(upsides.size(), sims);
@@ -108,6 +108,7 @@ public:
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
+        auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
         // run simulation TODO - introduce multithreading in here so Simulation is sped up
         for (int i = 0; i < sims; i++) {
             for (int j = 1; j < time+1; j++) {
@@ -115,16 +116,19 @@ public:
                 CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
                 // add means + randoms generated with probability equivalent to covariance matrix
                 auto motion = means + (cholesky * random_samples);
-                // fill output matrix with motion multiplied by weight of asset
-                sim_out.GetRet(i) += (m_weights * motion)[0][0];
-                // one row structure
-                sim_out.GetStocksChange(i) = sim_out.GetStocksChange(i) + motion; // sum up motions for particular stock
+                sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
+                // turn into a simple returns space
+                auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
+                    return std::exp(el) - 1;
+                });
+                // store returns as we need upsides and drawdowns
+                sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
                 // update minimal drawdown
-                drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i)); 
+                drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
                 upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
             }
         }
-        return sim_out; 
+        return sim_out;
     }
 
     /// @brief Random generator setter

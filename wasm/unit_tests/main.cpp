@@ -6,6 +6,7 @@
 #include "./inc/finance_api_tests.h"
 #include "./inc/random_gen_tests.h"
 #include "./inc/sims_results_tests.h"
+#include "./inc/simulation_output_tests.h"
 
 
 void generate_randoms() {

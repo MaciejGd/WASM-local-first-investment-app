@@ -23,7 +23,8 @@ public:
     
     /// @brief Set output of the simulation
     /// @param sims_output output of the simulation wrapped in SimulationOutput object
-    virtual void SetSimOutput(SimulationOutput& sims_output) = 0;
+    /// @param weights weights of particular stock. Needed for counting Component VaR
+    virtual void SetSimOutput(SimulationOutput& sims_output, const CMatrix<double>& weights) = 0;
 
     /// @brief Count percentiles for drawdowns passed as input and add them to the buffer
     /// @param _drawdowns vector of drawdowns to be added to the buffer
@@ -56,7 +57,7 @@ public:
     SimsResults() = default;
     SimsResults(double* buff): ISimsResults(buff) {};
 
-    void SetSimOutput(SimulationOutput& sims_output) override;
+    void SetSimOutput(SimulationOutput& sims_output, const CMatrix<double>& weights) override;
     void SetDrawdowns(std::vector<double>& _drawdowns) override;
     void SetUpsides(std::vector<double>& _upsides) override;
 
@@ -65,6 +66,8 @@ protected:
     void t_InsertToBuff(std::vector<double>& data, int start_ptr) override;
     // we should transform price from logarithmic to regular
     double t_TransformToExp(double value);
-    void t_SetVAR(SimulationOutput& sims_output);
+    void t_SetVAR(SimulationOutput& sims_output, CMatrix<double> weights);
     void t_SetReturns(std::vector<double>& sims_output);
+
+    double t_ES = 0.0; // expected shortfall
 };

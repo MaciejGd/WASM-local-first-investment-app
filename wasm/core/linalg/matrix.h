@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <functional>
 
 #include "utils.h"
 
@@ -35,9 +36,10 @@ public:
     /// @brief Initialize matrix with zeros
     /// @param rows number of matrix rows 
     /// @param cols number of matrix cols
-    CMatrix(const uint32_t& rows, const uint32_t& cols): m_rows(rows), m_cols(cols) {
+    CMatrix(const uint32_t& rows, const uint32_t& cols, const T& init_value=T{}): m_rows(rows), m_cols(cols) {
         // zero initialize matrix
-        m_mat = matrix_container(m_rows * m_cols, T{});
+        m_mat = matrix_container(m_rows * m_cols, init_value);
+
     };
 
     /// @brief Matrix should have default constructor as well, which
@@ -262,6 +264,20 @@ public:
         }
 
         return true;        
+    }
+    /// @brief Apply function passed as argument to all of the matrix elements and return as new matrix
+    /// @tparam Func type of function provided
+    /// @param func function to be run
+    /// @return new matrix after function applying
+    template<typename Func>
+    CMatrix<T> Map(Func&& func) {
+        CMatrix<T> mat(m_rows, m_cols);
+        for (int i = 0; i < m_rows; i++) {
+            for (int j = 0; j < m_cols; j++) {
+                mat[i][j] = std::invoke(std::forward<Func>(func), at(i,j));
+            }
+        }
+        return mat;
     }
 
     /// @brief Return column specified by index, from the matrix
