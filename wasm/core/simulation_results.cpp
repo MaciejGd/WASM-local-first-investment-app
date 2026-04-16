@@ -1,8 +1,8 @@
-#include "../inc/simulation_results.h"
+#include "./inc/simulation_results.h"
 #include <algorithm>
 #include <iostream>
 #include <cmath>
-#include "../linalg/algorithms.h"
+#include "./linalg/algorithms.h"
 
 void SimsResults::SetSimOutput(SimulationOutput& sims_output, const CMatrix<double>& weights) {
     // sort output by returns

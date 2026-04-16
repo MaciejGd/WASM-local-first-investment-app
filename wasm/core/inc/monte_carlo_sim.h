@@ -85,6 +85,8 @@ public:
             m_results->SetDrawdowns(max_drawdowns);
             m_results->SetUpsides(max_upsides);
         }
+
+        return true;
     }
 
     /// @brief Run Monte Carlo simulation

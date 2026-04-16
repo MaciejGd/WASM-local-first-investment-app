@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../inc/monte_carlo_sim.h"
+#include "./inc/monte_carlo_sim.h"
 
 typedef long int i32;
 typedef long long i64;
@@ -21,7 +21,7 @@ extern "C" {
                         i32 time, i32 sims, f64* results) {
         using namespace finance_api;
         MonteCarloSimulator<f64> mont = MonteCarloSimulator<f64>(stocks, stocks_amount, stock_size, weights);
-        mont.RunSimulation(time, sims, results);
+        static_cast<void>(mont.RunSimulation(time, sims, results));
     }
 
     void getLastError() {

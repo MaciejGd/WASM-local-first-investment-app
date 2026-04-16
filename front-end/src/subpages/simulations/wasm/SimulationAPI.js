@@ -4,7 +4,7 @@ export class SimulationAPI {
     }
     // how many days back should we look at
     static days_back = 300;
-    static results_length = 29;
+    static RESULTS_BASE = 28; // base size of the results
 
     /**
      * Create an instance of SimulationAPI
@@ -12,7 +12,8 @@ export class SimulationAPI {
      */
     static async create() {
         // import and unpack create module function
-        const { default : createModule } = await import("./wasm_module.js");
+        // const { default : createModule } = await import("./cpp/core/main.js");
+        const { default : createModule } = await import("./main.js");
         const module = await createModule();
         return new SimulationAPI(module);
     }
@@ -77,7 +78,9 @@ export class SimulationAPI {
         const stocks = this.#createStockArray(stock_prices);
         const weights = this.#createWeightsArray(stock_weights);
         const STOCKS_AMOUNT = weights.length;
-        const RESULTS_AMOUNT = SimulationAPI.results_length;
+        // we should take into consideration that CVAR for each asset should be added to the results
+        const RESULTS_AMOUNT = SimulationAPI.RESULTS_BASE + stock_weights.length;
+        console.log("Results amount: ", RESULTS_AMOUNT);
         var RESULTS = new Float64Array(RESULTS_AMOUNT);
         const STOCK_SIZE = SimulationAPI.days_back; // amount of stock prices samples
         // pointers to arrays needed for simulations
@@ -106,6 +109,7 @@ export class SimulationAPI {
             exit_code = false;
         }
         finally {
+            // make sure to clean-up after simulations
             if (res_ptr != null)        this.module._free(res_ptr);
             if (stocks_ptr != null)     this.module._free(stocks_ptr);
             if (weights_ptr != null)    this.module._free(weights_ptr);    
