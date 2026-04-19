@@ -53,14 +53,16 @@ export default function SimulationsPage() {
     const [tickers_list, setTickersList] = useState([]);    
     const [simsResults, setSimsResults] = useState([]);
     const [simRunning, setSimRunning] = useState(false);
+    const asstesRef = useRef(assets);    
     const { simRun, simTerminate } = useSimulationWorker((e) => {
-        console.log("Message received by worker");
         setSimRunning(false);
         setSimsResults(e);
-        const new_assets = new SimAssetMap(assets);
-        setResultsAssets(new_assets);
-        console.log(resultsAssets);
+        setResultsAssets(new SimAssetMap(asstesRef.current));
     });
+
+    useEffect(() => {
+        asstesRef.current = assets;
+    }, [assets]);
 
     function toggleModalVisibility(vis) {
         setModalVisible(!modal_visible);
