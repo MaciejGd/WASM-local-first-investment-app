@@ -2,8 +2,11 @@ import { SimulationAPI } from "./wasm/SimulationAPI.js";
 import { useEffect, useState, useRef } from "react";
 
 /**
- * For the debug purposes we may want to run SimulationAPI sequencially.
+ * * For the debug purposes we may want to run SimulationAPI sequencially.
  * Because of that some kind of sequencial worker imitating WebWorker behavior should be introduced
+ * 
+ * @param {Function} onMessage callback to be executed on simulation end
+ * @returns 
  */
 export function useSequencialWorker(onMessage) {
     const [simAPI, setSimAPI] = useState(null);
@@ -29,7 +32,7 @@ export function useSequencialWorker(onMessage) {
 
 /**
  * Custom hook for managing Simulation WebWorker
- * @param {Function} onMessage 
+ * @param {Function} onMessage callback to be executed on simulation end
  * @returns returns pair of functions to be called on worker, run and terminate
  */
 export function useSimulationWorker(onMessage) {

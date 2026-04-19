@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { SimsAssetsPieChart } from "./SimsAssetsPieChart.jsx";
+import { SimsAssetsPieChart } from "../SimsAssetsPieChart.jsx";
 
 // Should show table with: Ticker -> Total investment cost -> percent of investment
 // and cricle graph chart at the right with percentages of each investments
@@ -32,7 +31,7 @@ function AssetTableHeader() {
 }
 
 /// Add assets as rows to the table
-function AssetTableBody({ assets, onSelectCb }) {
+function AssetTableBody({ assets }) {
     return (
         <tbody>
             {
@@ -41,8 +40,6 @@ function AssetTableBody({ assets, onSelectCb }) {
                                     ticker={data.ticker} 
                                     price={data.price} 
                                     percent={data.percent}
-                                    selected={data.selected}
-                                    onSelectCb = {onSelectCb}
                             />
                 })
             }
@@ -50,30 +47,21 @@ function AssetTableBody({ assets, onSelectCb }) {
     );
 }
 
-function AssetTable({ assets, onSelectCb }) {
+function AssetTable({ assets }) {
     return (
         <div className="sims_table_container">
             <table className="sims_asset_table">
                 <AssetTableHeader/>
-                <AssetTableBody assets={assets} onSelectCb={onSelectCb}/>
+                <AssetTableBody assets={assets}/>
             </table>
         </div>
     );
 }
 
-function AssetRow({ ticker, price, percent, selected, onSelectCb }) {
+function AssetRow({ ticker, price, percent }) {
     return (
         <tr className="sims_asset_row">
-            <td>
-                <div>
-                    <input type="checkbox" checked={selected} onChange={
-                        (e)=>onSelectCb(ticker, e.target.checked)
-                    }>                        
-                    </input>
-                    <span>{ticker}</span>
-                </div>
-            </td>
-            {/* <td>{ticker}</td> */}
+            <td>{ticker}</td>
             <td>{price}</td>
             <td>{percent}</td>
         </tr>
@@ -81,10 +69,10 @@ function AssetRow({ ticker, price, percent, selected, onSelectCb }) {
 }
 
 
-export default function AssetsPane({ assets, onSelectCb }) {
+export default function SimsResultsAssetsPane({ assets }) {
     return (
         <div className="sims_middle_pane">
-            <AssetTable assets={assets} onSelectCb={onSelectCb}></AssetTable>
+            <AssetTable assets={assets}></AssetTable>
             <SimsAssetsPieChart assets={assets}></SimsAssetsPieChart>
         </div>
     );

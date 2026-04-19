@@ -1,6 +1,9 @@
-
-
+import { SimsResultsPieChart } from "./SimsResultsPieChart.jsx";
+import "./results/SimsResultsAssetsTable.jsx";
+import SimsResultsAssetsPane from "./results/SimsResultsAssetsTable.jsx";
 /// Here should be another table showing the results of run simulations
+const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
+const PERCENTILES = 3; // we have three results showing in percentiles
 
 
 function SimResultsTableHeader() {
@@ -40,7 +43,7 @@ function SimResultsTableBody({ results }) {
         []  // Max-Upsides
     ];
     console.log(results);
-    for (var i = 0; i < 27; i++) {
+    for (var i = 0; i < result_row_size * percentiles.length; i++) {
         if (i >= results.length) break;
         percentiles[Math.floor(i/9)].push(results[i]);
     }
@@ -59,16 +62,22 @@ function SimResultsTableBody({ results }) {
                 }
             </tr>
             );
-            
+
         })}
     </tbody>
     );
 }
 
+function SimsResultsButtons({  }) {
+    return (
+        <div className="sims_results_buttons">
+            <button>Save Sim</button>
+            <button>Restore from saved</button>
+        </div>
+    );
+}
+
 function SimResultsTable({ results }) {
-    if (!results || results.length === 0) {
-        return (<></>);
-    }
     return (
         <table>
             <SimResultsTableHeader/>
@@ -78,9 +87,31 @@ function SimResultsTable({ results }) {
 }
 
 
-export default function SimsResults({ results }) {
+export default function SimsResults({ results, tickers, assets }) {
+    if (!results || results.length === 0) {
+        return (<></>);
+    }
+    // get all values from the specified index. These would be the CVaRs
+    const cvars = results.slice(PERCENTILES * PERCENTILE_SIZE + 1);
+
     return (
-        <SimResultsTable results={results}/>
+        <>
+        <h1>Simulation Results</h1>
+        <div className="sims_results_pane">
+            <SimsResultsButtons></SimsResultsButtons>
+            <SimsResultsAssetsPane assets={assets}></SimsResultsAssetsPane>
+            <SimResultsTable results={results}/>
+            <div className="sims_results_container">                            
+                <SimsResultsPieChart results={
+                    {
+                        tickers : tickers,
+                        var: results[PERCENTILES * PERCENTILE_SIZE],
+                        cvars: cvars,
+                    }
+                }></SimsResultsPieChart>
+            </div>
+        </div>
+        </>
         // we do not want to plot all simulations run in here to the end-user
     );
 }

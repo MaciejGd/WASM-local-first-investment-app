@@ -49,13 +49,17 @@ export default function SimulationsPage() {
     const [modal_visible, setModalVisible] = useState(false);
     const [asset_error, setAssetError] = useState(""); // error on asset passed to pop-up
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
-    const [tickers_list, setTickersList] = useState([]);
+    const [resultsAssets, setResultsAssets] = useState(new SimAssetMap());
+    const [tickers_list, setTickersList] = useState([]);    
     const [simsResults, setSimsResults] = useState([]);
     const [simRunning, setSimRunning] = useState(false);
     const { simRun, simTerminate } = useSimulationWorker((e) => {
         console.log("Message received by worker");
         setSimRunning(false);
         setSimsResults(e);
+        const new_assets = new SimAssetMap(assets);
+        setResultsAssets(new_assets);
+        console.log(resultsAssets);
     });
 
     function toggleModalVisibility(vis) {
@@ -147,7 +151,7 @@ export default function SimulationsPage() {
             <div className="page">
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={RunFinanceSimulations}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
-                <SimsResults results={simsResults}/>
+                <SimsResults results={simsResults} tickers={resultsAssets.getTickersArray()} assets={resultsAssets.toArray()}/>
             </div>
             {modal_visible &&
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} tickersList={tickers_list} />

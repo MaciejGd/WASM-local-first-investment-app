@@ -68,6 +68,12 @@ export class SimAssetMap {
         return array;
     }
 
+    getTickersArray() {
+        var array = Array.from(this.asset_map);
+        // get key of the map's entry, which is a ticker
+        return array.map((el)=> { return el[0]; }); 
+    }
+
     /**
      * Set selected for requested ticker
      * @param {string} ticker ticker to be selected
