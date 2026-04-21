@@ -18,20 +18,14 @@ const OPTIONS = {
 function transformResultsToPieData(payload) {
     // set tickers
     const labels = payload.tickers;
-    // set percentage of CVARs
-    const arr_sum = payload.cvars.reduce((a, b) => { return a + b; }, 0);
-    // throw divide by zero exception
-    if (arr_sum === 0) {
-        throw new Error("Sum of the array should not be equal to 0!!!");
-    }
-    const vcars = payload.cvars.map((el) => { return (el / arr_sum) * 100; }); 
+    const cvars = payload.cvars;
 
     return {
         labels: labels,
         datasets: [
         {
             label: 'Percentage share in risk:',
-            data: vcars,
+            data: cvars,
             backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(54, 162, 235, 0.2)',

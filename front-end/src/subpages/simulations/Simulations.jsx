@@ -49,20 +49,39 @@ export default function SimulationsPage() {
     const [modal_visible, setModalVisible] = useState(false);
     const [asset_error, setAssetError] = useState(""); // error on asset passed to pop-up
     const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
-    const [resultsAssets, setResultsAssets] = useState(new SimAssetMap());
+    const [resultsAssets, setResultsAssets] = useState(new SimAssetMap()); // assets to be passed to
+    const [simsAmount, setSimsAmount] = useState(0);
+    const [simsAmountResults, setSimsAmountResults] = useState(0);
+    const [simsTimepoints, setSimsTimepoints] = useState(0);
+    const [simsTimepointsResults, setSimsTimepointsResults] = useState(0);
+    const [simsResultsDate, setSimsResultsDate] = useState(null);
     const [tickers_list, setTickersList] = useState([]);    
     const [simsResults, setSimsResults] = useState([]);
     const [simRunning, setSimRunning] = useState(false);
-    const asstesRef = useRef(assets);    
+    const assetsRef = useRef(assets);    
+    const simsAmountRef = useRef(simsAmount);
+    const simsTimepointsRef = useRef(simsTimepoints);
+
     const { simRun, simTerminate } = useSimulationWorker((e) => {
         setSimRunning(false);
         setSimsResults(e);
-        setResultsAssets(new SimAssetMap(asstesRef.current));
+        setResultsAssets(new SimAssetMap(assetsRef.current));
+        setSimsTimepointsResults(simsTimepointsRef.current);
+        setSimsAmountResults(simsAmountRef.current);
+        setSimsResultsDate(new Date());
     });
 
     useEffect(() => {
-        asstesRef.current = assets;
+        assetsRef.current = assets;
     }, [assets]);
+
+    useEffect(() => {
+        simsTimepointsRef.current = simsTimepoints;
+    }, [simsTimepoints]);
+
+    useEffect(() => {
+        simsAmountRef.current = simsAmount;
+    }, [simsAmount]);
 
     function toggleModalVisibility(vis) {
         setModalVisible(!modal_visible);
@@ -72,8 +91,7 @@ export default function SimulationsPage() {
         // create new asset map
         var asset_map = new SimAssetMap(assets);
         // check if ticker is valid
-        if (!tickers_list.includes(ticker)) {
-            
+        if (!tickers_list.includes(ticker)) {            
             setAssetError("No such asset with this tickers in database!");
             return;
         }
@@ -136,6 +154,8 @@ export default function SimulationsPage() {
             times: times,
             sims: sims
         });
+        setSimsAmount(sims);
+        setSimsTimepoints(times);
     }
 
     // fetch list of possible tickers upon page load
@@ -153,7 +173,13 @@ export default function SimulationsPage() {
             <div className="page">
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={RunFinanceSimulations}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
-                <SimsResults results={simsResults} tickers={resultsAssets.getTickersArray()} assets={resultsAssets.toArray()}/>
+                <SimsResults results={simsResults} 
+                            tickers={resultsAssets.getTickersArray()} 
+                            assets={resultsAssets.toArray()}
+                            sims={simsAmountResults}
+                            timepoints={simsTimepointsResults}
+                            date={simsResultsDate}
+                />
             </div>
             {modal_visible &&
                 <AddAssetPopUp onClose={toggleModalVisibility} onAccept={onModalAccept} tickersList={tickers_list} />

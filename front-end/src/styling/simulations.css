@@ -64,7 +64,24 @@
   justify-content: center;
 }
 
-.sims_results_container {
+.sims_results_buttons {
+  display: flex;
+  align-items: top;
+  justify-content: top;
+  background-color: #ccc;
+  width: 80%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.sims_results_button {
+  padding: 10px;
+  margin: 10px;
+  margin-left: 2rem;
+  /* padding-left: 2rem; */
+}
+
+.sims_results_risk_container {
   width: 80%;
   display: flex;
   flex-direction: row;
@@ -77,6 +94,27 @@
   display: flex;
   justify-content: center;
 }
+
+.sims_results_table {
+  padding-top: 10px;
+  width: 80%;
+  background: darkgray;
+}
+
+.sims_results_section_desc {
+  background: darkgray;
+  width: 80%;
+  display: flex;
+  padding-left: 1rem;
+  margin-left: 1rem;
+  font-size: large;
+}
+
+.sims_results_desc_span {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
 
 .sims_slider {
 
