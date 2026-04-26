@@ -3,15 +3,17 @@ import "./results/SimsResultsAssetsTable.jsx";
 import SimsResultsAssetsPane from "./results/SimsResultsAssetsTable.jsx";
 import { SimResultsTable } from "./results/SimsReturnsResultsTable.jsx";
 import { SimRiskResultsTable } from "./results/SimsRiskResultsTable.jsx";
+import { useState } from "react";
+import { IndexedDbHandler } from "../../db/db.js"; // indexed db instance 
 /// Here should be another table showing the results of run simulations
 const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
 const PERCENTILES = 3; // we have three results showing in percentiles
 
 
-function SimsResultsButtons({  }) {
+function SimsResultsButtons({ saveSim }) {
     return (
         <div className="sims_results_buttons">
-            <button className="sims_results_button">Save Sim</button>
+            <button className="sims_results_button" onClick={saveSim}>Save Sim</button>
             <button className="sims_results_button">Restore from saved</button>
         </div>
     );
@@ -45,9 +47,28 @@ function SimsResultsRiskDescription() {
 }
 
 export default function SimsResults({ results, tickers, assets, date, sims, timepoints }) {
+    const [db_instance, setDbInstance] = useState(new IndexedDbHandler());
+
     if (!results || results.length === 0) {
         return (<></>);
     }
+
+    async function AddToHistory() {
+        try {
+            await db_instance.addSimsHistory({
+                results: results,
+                tickers: tickers,
+                assets: assets,
+                date: date,
+                sims: sims,
+                timepoints: timepoints
+            });
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     // get all values from the specified index. These would be the CVaRs
     const cvarsArr = results.slice(PERCENTILES * PERCENTILE_SIZE + 1);
     const VaR = (results[PERCENTILES * PERCENTILE_SIZE] * 100).toFixed(2); // Value at risk in percentages
@@ -64,7 +85,7 @@ export default function SimsResults({ results, tickers, assets, date, sims, time
         <>
         <h1>Simulation Results</h1>
         <div className="sims_results_pane">
-            <SimsResultsButtons></SimsResultsButtons>
+            <SimsResultsButtons saveSim={AddToHistory}></SimsResultsButtons>
             <SimsResultsAssetsDescription
                 date={date}
                 sims={sims}

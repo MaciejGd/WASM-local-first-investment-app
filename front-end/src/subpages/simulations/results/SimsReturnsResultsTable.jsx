@@ -64,7 +64,7 @@ function SimResultsTableBody({ results }) {
 export function SimResultsTable({ results }) {
     return (
         <div className="sims_results_table">
-            <table style={{ background: "white", width: "80%", paddingLeft: "2rem" }}>
+            <table style={{ width: "80%", paddingLeft: "2rem" }}>
                 <SimResultsTableHeader/>
                 <SimResultsTableBody results={results}/>
             </table>

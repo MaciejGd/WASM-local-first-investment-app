@@ -6,7 +6,7 @@ import { ArrowDownIcon  } from '../../IconLoader';
 import { ArrowUpIcon  } from '../../IconLoader';
 import { AssetsEntry, AssetsMap } from './StockAssets.js';
 import { AssetsTable } from './AssetsTable.jsx'
-import { db } from "../../db/db.js"; // indexed db instance 
+import { IndexedDbHandler } from "../../db/db.js"; // indexed db instance 
 
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
@@ -30,15 +30,17 @@ export default function StockPage() {
     const [modal_visible, setModalVisible] = useState(false);
     const [assets, setAssets] = useState(new AssetsMap());    
     const [assets_init, setAssetsInit] = useState([]);
+    const [db_instance, setDbInstance] = useState(new IndexedDbHandler());
     console.log(assets);
     // we wanna fetch data from db on page render
     useEffect(()=>{
-        const load_db_records = async () => {
-            const db_array = await db.wallet_assets.toArray();
+        const loadData = async () => {
+            const db_array = await db_instance.getWalletAssets(); // obtain ref to singleton obj
             const new_map = AssetsMap.createFromDB(db_array);
             setAssets(new_map);
-        }; 
-        load_db_records();
+        }
+        loadData();
+        
     },[]);
 
     function toggleModalVisibility() {
@@ -67,10 +69,7 @@ export default function StockPage() {
         // add new asset to the db
         var id = -1;
         try {
-            id = await db.wallet_assets.add({
-                ticker, quantity, price
-            });
-            console.log("Successfully added value to the db: ", id);
+            id = await db_instance.addWalletAsset(ticker, quantity, price);
         }
         catch (error) {
             console.log("Failed adding into the db");
@@ -121,12 +120,12 @@ export default function StockPage() {
         setAssets(new_map);
     }
 
+    // async function deleteSelected() {
     async function deleteSelected() {
         console.log("Delete selected callback");
         // remove selected elements from indexed db
         const selected_ids = assets.getSelectedIds();
-        await db.wallet_assets.bulkDelete(selected_ids);
-
+        await db_instance.deleteWalletAssets(selected_ids);
         const new_map = new AssetsMap(assets);        
         new_map.deleteSelected();        
         setAssets(new_map);
