@@ -1,6 +1,6 @@
 import { Dexie } from "dexie";
 import hash from "object-hash";
-
+import { DBEncryptor } from "./db_encryptor";
 /**
  * Singleton handler for DB interacations.
  */
@@ -10,11 +10,12 @@ export class IndexedDbHandler {
         if (IndexedDbHandler.instance) {
             return IndexedDbHandler.instance; // if already initialized
         }
+        this.encryptor = new DBEncryptor(); // initialize DB encryptor
         this.db = new Dexie("myDatabase");
         // database initialization
         this.db.version(1).stores({
             meta: "++id",
-            wallet_assets: "++id, ticker, quantity, price", // collection of assets compounding on wallet
+            wallet_assets: "++id", // collection of assets compounding on wallet
             sim_history: "++id" // collection of simulations run
         });
         this.version_id = 0;
@@ -47,7 +48,8 @@ export class IndexedDbHandler {
     async addSimsHistory(payload) {
         try {
             // add hash to payload
-            payload.hash = this.hashSimsHistory(payload);
+            var object_hash = this.hashSimsHistory(payload);
+            payload.hash = object_hash;
             console.log(payload.hash);
             // check if hash already in db
             var sims_stored = await this.db.sim_history.toArray();
@@ -90,11 +92,9 @@ export class IndexedDbHandler {
      * @param {*} price prcie of the stock to be added
      * @returns id of the appended asset
      */
-    async addWalletAsset(ticker, quantity, price) {
+    async addWalletAsset(payload) {
         try {
-            var ret = await this.db.wallet_assets.add({
-                ticker, quantity, price
-            });
+            var ret = await this.db.wallet_assets.add(payload);
             this._updateVersion();
             return ret;
         }
@@ -123,7 +123,7 @@ export class IndexedDbHandler {
      * @param {number} index of element to be retrieved 
      * @returns simulation history record
      */
-    async getGetSimResult(index) {
+    async getSimResult(index) {
         try {
             var results = this.db.sim_history.get(index); // get the sim result by the id
             this._updateVersion();
@@ -165,4 +165,3 @@ export class IndexedDbHandler {
     }
 
 };
-

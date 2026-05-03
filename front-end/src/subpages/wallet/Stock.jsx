@@ -69,7 +69,11 @@ export default function StockPage() {
         // add new asset to the db
         var id = -1;
         try {
-            id = await db_instance.addWalletAsset(ticker, quantity, price);
+            id = await db_instance.addWalletAsset({                
+                ticker: ticker, 
+                quantity: quantity, 
+                price: price
+            });
         }
         catch (error) {
             console.log("Failed adding into the db");
