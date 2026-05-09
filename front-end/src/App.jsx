@@ -20,6 +20,7 @@ import {
 } from './IconLoader.jsx';
 import { LogInPopUp } from './subpages/auth/Login.jsx';
 import { LogOutPopUp } from './subpages/auth/Logout.jsx';
+import SyncTest from './subpages/sync_test/Sync.jsx';
 
 
 function NavigationBar({ onLogOut }) {
@@ -43,6 +44,7 @@ function NavBar({onHideButtonClick, onLogOut, visible}) {
       <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/>{visible ? " Simulations " : ""}</NavLink>
       <NavLink className="navigationButton" to="/graphs"><GraphsIcon/>{visible ? " Graphs " : ""}</NavLink>
       <NavLink className="navigationButton" to="/settings"><SettingsIcon/>{visible ? " Settings " : ""}</NavLink>
+      <NavLink className="navigationButton" to="/sync"><SettingsIcon/>{visible ? " SyncTests " : ""}</NavLink>
       <button className="navigationButton" onClick={onLogOut}><LogOutIcon/>{visible ? " Logout " : ""}</button>
     </nav>
   );
@@ -73,8 +75,8 @@ export default function App() {
 
   return (
       <>
-        {/* {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>} */}
-        { !logged &&
+        {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>}
+        { logged &&
           <BrowserRouter>
             <div className="layout">
               <NavigationBar onLogOut={showLogOut}></NavigationBar>
@@ -87,6 +89,7 @@ export default function App() {
                   <Route path="/simulations" element={<SimulationsPage/>}></Route>
                   <Route path="/graphs" element={<GraphsPage/>}></Route>
                   <Route path="/settings" element={<SettingsPage/>}></Route>
+                  <Route path="/sync" element={<SyncTest></SyncTest>}></Route>
                 </Routes>
               {show_logout && <LogOutPopUp onClose={rejectLoggingOut} onAccept={acceptLogginOut}/>}
               </main>

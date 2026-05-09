@@ -156,12 +156,25 @@ export class IndexedDbHandler {
      */
     async deleteWalletAssets(selected_ids) {
         try {
-            await db.wallet_assets.bulkDelete(selected_ids);
+            await this.db.wallet_assets.bulkDelete(selected_ids);
             this._updateVersion();
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
+    /**
+     * Delete list of sims results specified by ids
+     * @param {*} selected_ids ids to be removed
+     */
+    async deleteSimsResults(selected_ids) {
+        try {
+            await this.db.sim_history.bulkDelete(selected_ids);
+            this._updateVersion();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
 };

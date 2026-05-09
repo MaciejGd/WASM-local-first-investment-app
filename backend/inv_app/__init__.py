@@ -1,5 +1,5 @@
 import os 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from .finance_api import finance_api
 
@@ -12,6 +12,8 @@ def create_app(test_config=None, instance_path=None):
     
     app.config.from_mapping(
         SECRET_KEY='dev',
+        SESSION_COOKIE_SAMESITE="None",
+        SESSION_COOKIE_SECURE=True,
         DATABASE=os.path.join(app.instance_path, 'application.sqlite') # TODO, change that with some proxy etc.
     )
     # load init configuration of the app
@@ -40,7 +42,12 @@ def create_app(test_config=None, instance_path=None):
     from . import finance
     app.register_blueprint(finance.bp)
 
+    # register sync endpoints
+    from . import sync
+    app.register_blueprint(sync.bp)
+
     # register CORS so that react app can access server
-    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"], 
+        supports_credentials=True)
 
     return app

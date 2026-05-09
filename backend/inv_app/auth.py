@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, jsonify, Response
+    Blueprint, flash, g, redirect, render_template, request, session, jsonify, Response, abort
 )
 
 from .db import db_proxy
@@ -58,11 +58,11 @@ def load_logged_in_user():
 
 # decorator for checking if user is logged in when launching a request
 def login_required(view):
-    @functools.wraps
-    def wrapped_view(**kwargs):
+    @functools.wraps(view)
+    def wrapped_view(*args, **kwargs):
         if g.user is None:
-            return jsonify({"returncode" : "ERROR"})
-        return view(**kwargs)
+            return abort(500, "Log in to retrieve data!")
+        return view(*args, **kwargs)
     
     return wrapped_view
 

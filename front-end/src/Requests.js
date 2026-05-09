@@ -2,8 +2,9 @@ export const RequestPOST = async(url, data) => {
     try {
         const response = await fetch(
             url,
-            {
+            {                
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'content-type': 'application/json',
                 },
@@ -27,6 +28,7 @@ export const RequestGET = async(url) => {
             url,
             {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'content-type' : 'application/json',
                 },
