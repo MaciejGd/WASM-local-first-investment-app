@@ -30,3 +30,11 @@ class DBHandler(ABC):
     @abstractmethod
     def get_username_data(self, db_handle, username: str):
         raise NotImplementedError
+    
+    @abstractmethod
+    def  reset_wallet_assets(self, db_handle, user_id: int) -> bool:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def add_wallet_asset(self, db_handle, user_id: int, ticker: str, quantity: float, price: float) -> bool:
+        raise NotImplementedError

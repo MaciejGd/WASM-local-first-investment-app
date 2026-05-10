@@ -16,6 +16,7 @@ class Operation {
 // API schema:
 class Synchronizer {
     static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push";
+    static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
     constructor() {
         // we have two basic actions to perform
         this.event_queue = []; // store all events to be propagated to the remote server
@@ -72,6 +73,17 @@ class Synchronizer {
 
     pollData() {
         RequestGET();
+    }
+
+    async purgeTable(table_name) {
+        try {
+            response = await RequestPOST(Synchronizer.PURGE_ENDPOINT, {"table_name" : table_name});
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
+        console.log(response);
     }
 };
 

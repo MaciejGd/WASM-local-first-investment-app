@@ -2,6 +2,7 @@ import functools
 
 from . import auth
 from .db import db_proxy
+from .sync_api import DBUpdater
 
 from flask import (
     Blueprint, jsonify, request, abort, session
@@ -19,31 +20,32 @@ def push_changes():
 
     post_json = request.get_json()
     # retrieve events data
-    id = post_json.get('id')
     table = post_json.get('table_name')
     payload = post_json.get('payload')
-    if payload in "None":
-        abort(500, "Payload should not be None!!!") # test throw
 
-    obj = { "msg" : f"received record: id:{id}, table:{table}, with some additiional payload: {payload}" }
+    updater = DBUpdater()    
+    if updater.add_record(session['user_id'], table, payload) == False:
+        abort(500, "Pushing chnges to remote failed")
 
-    return jsonify(obj)
-
-
+    return jsonify({"status" : "Properly pushed changes to remote"})
 
 
-@bp.route('/reset_table', methods=('GET',))
+
+
+@bp.route('/purge', methods=('POST',))
 @auth.login_required
 def reset_table():
     """
         Endpoint for purging user's table
     """
 
-    user_id = session['user_id'] # retrieve user id
-    try:
-        db_proxy.reset_user_wallet_table(user_id)
-    except:
+    post_json = request.get_json()
+    table = post_json.get("table_name")
+
+    updater = DBUpdater()
+    if not updater.purge_table(session['user_id'], table):
         abort(500, "Failed to purge table for the user")
     
     return jsonify(success=True)
+
 

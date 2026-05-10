@@ -49,12 +49,42 @@ class DBProxy(object):
         Get information about the user by his username 
         
         :param self: Description
-        :param username: Description
+        :param username: Username to be get from the db
         :type username: str
         """
 
         db = self.get_db()
         return self.db_handler.get_username_data(db, username)
+    
+
+    def reset_user_wallet_table(self, user_id: int) -> bool:
+        """
+        Reset wallet table for the user
+        
+        :param self: Description
+        :param user_id: id of the user that table should be purged
+        :type username: int
+        """
+
+        db = self.get_db()
+        return self.db_handler.reset_wallet_assets(db, user_id)
+    
+
+    def add_wallet_asset(self, user_id: int, ticker: str, quantity: float, price: float) -> bool:
+        """
+        Add new record to the user's wallet table
+
+        :param self:
+        :param user_id: id of the logged user
+        :param ticker: ticker of asset
+        :param quantity: amount of stock bought
+        :param price: cost of one stock at buy time 
+        """
+
+        db = self.get_db()
+        return self.db_handler.add_wallet_asset(db, user_id, ticker, quantity, price)
+    
+
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")
