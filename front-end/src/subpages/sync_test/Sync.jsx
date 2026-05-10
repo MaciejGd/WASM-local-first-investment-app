@@ -11,8 +11,8 @@ export default function SyncTest() {
         await sync.pushToRemote();
     }   
 
-    function test2() {
-
+    async function purge_events_table() {
+        await sync.purgeTable("events");
     }
 
     async function purge_wallet_assets() {
@@ -22,9 +22,9 @@ export default function SyncTest() {
     return (
     <>
         <h1>Sync Test</h1>
-        <button onClick={test1}>Reset table</button>
-        <button onClick={test2}>Push data</button>
+        <button onClick={test1}>Push data</button>        
         <button onClick={purge_wallet_assets}>Purge wallet assets</button>
+        <button onClick={purge_events_table}>Purge events</button>
     </>
     );
 }

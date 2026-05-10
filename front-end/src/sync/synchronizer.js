@@ -15,7 +15,7 @@ class Operation {
 // API schema: PUT JSON file to the output object, id, table_name, date, addition, payload if  
 // API schema:
 class Synchronizer {
-    static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push";
+    static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push_event";
     static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
     constructor() {
         // we have two basic actions to perform
@@ -24,19 +24,21 @@ class Synchronizer {
         
     }
 
-    addAdditionToEventQueue(id, table_name, payload) {
+    addAdditionToEventQueue(ulid, table_name, payload) {
         var add_object =  ({
-            id: id,
+            ulid: ulid,
             table_name: table_name,
+            type: "add",
             payload: payload,
         });
         this._addEventToQueue(add_object);
     }
 
-    addRemovalToEventQueue(id, table_name) {
+    addRemovalToEventQueue(ulid, table_name) {
         var rem_object = {
-            id: id,
+            ulid: ulid,
             table_name: table_name,
+            type: "remove",
             payload: null,
         };
         this._addEventToQueue(rem_object);
@@ -47,7 +49,7 @@ class Synchronizer {
      * @param {Object} object object to be pushed to the queue
      */
     _addEventToQueue(object) {
-        object.date = new Date();
+        object.timestamp = new Date();
         this.event_queue.push(object);
     }
 
@@ -76,6 +78,7 @@ class Synchronizer {
     }
 
     async purgeTable(table_name) {
+        var response = null;
         try {
             response = await RequestPOST(Synchronizer.PURGE_ENDPOINT, {"table_name" : table_name});
         }

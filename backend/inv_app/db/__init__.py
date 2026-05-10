@@ -57,7 +57,7 @@ class DBProxy(object):
         return self.db_handler.get_username_data(db, username)
     
 
-    def reset_user_wallet_table(self, user_id: int) -> bool:
+    def reset_collection(self, user_id: int, table_name: str) -> bool:
         """
         Reset wallet table for the user
         
@@ -67,7 +67,7 @@ class DBProxy(object):
         """
 
         db = self.get_db()
-        return self.db_handler.reset_wallet_assets(db, user_id)
+        return self.db_handler.reset_collection(db, user_id, table_name)
     
 
     def add_wallet_asset(self, user_id: int, ticker: str, quantity: float, price: float) -> bool:
@@ -84,7 +84,33 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.add_wallet_asset(db, user_id, ticker, quantity, price)
     
+    def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
+        """
+        Add new event record to the user's event table
 
+        :param user_id id of the user performing modifications
+        :param timestamp of the performed operation
+        :param table_name name of the table that we wanna modify
+        :param ulid unique identifier of the record added
+        :param type of the operation to be performed on db
+        """
+
+        db = self.get_db()
+        return self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
+    
+    def remove_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
+        """
+        Remove event record from the user's event table
+
+        :param user_id id of the user performing modifications
+        :param timestamp of the performed operation
+        :param table_name name of the table that we wanna modify
+        :param ulid unique identifier of the record added
+        :param type of the operation to be performed on db
+        """
+
+        db = self.get_db()
+        return self.db_handler.remove_event_record(db, user_id, timestamp, table_name, type, ulid)
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")

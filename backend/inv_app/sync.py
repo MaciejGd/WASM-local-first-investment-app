@@ -11,21 +11,24 @@ from flask import (
 bp = Blueprint('sync', __name__, url_prefix="/sync")
 
 
-@bp.route('/push', methods=('POST',))
+@bp.route('/push_event', methods=('POST',))
 @auth.login_required
 def push_changes():
     """
-        Enpoint for pushing changes made for user to its tables
+        Endpoint for pushing changes made for user to its tables
     """
 
     post_json = request.get_json()
     # retrieve events data
-    table = post_json.get('table_name')
+    ulid = post_json.get('ulid')
+    table_name = post_json.get('table_name')
+    timestamp = post_json.get('timestamp')    
+    type = post_json.get('type')
     payload = post_json.get('payload')
 
     updater = DBUpdater()    
-    if updater.add_record(session['user_id'], table, payload) == False:
-        abort(500, "Pushing chnges to remote failed")
+    if updater.process_event(session['user_id'], timestamp, table_name, type, ulid, payload) == False:
+        abort(500, "Pushing changes to remote failed")
 
     return jsonify({"status" : "Properly pushed changes to remote"})
 
