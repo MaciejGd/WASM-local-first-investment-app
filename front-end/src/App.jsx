@@ -21,6 +21,7 @@ import {
 import { LogInPopUp } from './subpages/auth/Login.jsx';
 import { LogOutPopUp } from './subpages/auth/Logout.jsx';
 import SyncTest from './subpages/sync_test/Sync.jsx';
+import { DBEncryptor } from './db/db_encryptor.js';
 
 
 function NavigationBar({ onLogOut }) {
@@ -56,8 +57,10 @@ export default function App() {
   const [logged, setLogged] = useState(false); // TODO - to be changed to false after changes
   const [show_logout, setShowLogout] = useState(false);
 
-  function setLoggedIn() {
+  function setLoggedIn(passwd) {
     setLogged(true);
+    // generate encryption key, based on password provided
+    DBEncryptor.generateKey(passwd, null);
   }
 
   function acceptLogginOut() {

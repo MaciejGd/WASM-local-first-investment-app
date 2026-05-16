@@ -52,3 +52,26 @@ def reset_table():
     return jsonify(success=True)
 
 
+@bp.route('/get_record/<table_name>/<ulid>', methods=('GET', ))
+@auth.login_required
+def get_record(table_name, ulid):
+    """
+    Testing endpoint for testing end-to-end frontend-backend connection
+
+    :param table_name: name of the table from which information should be taken
+    :param ulid: 
+    """
+
+    updater = DBUpdater()
+    record = updater.get_record(
+        compare_obj= {"ulid" : ulid},
+        table_name=table_name,
+        user_id=session["user_id"],
+    )
+    if record is None:
+        abort(500, "Failed to retrieve record with given ulid")
+    
+    return jsonify({"record" : record})
+
+    
+

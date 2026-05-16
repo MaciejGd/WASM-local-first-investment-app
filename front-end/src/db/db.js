@@ -1,6 +1,7 @@
 import { Dexie } from "dexie";
 import hash from "object-hash";
 import { DBEncryptor } from "./db_encryptor";
+import { sync } from "../sync/synchronizer";
 /**
  * Singleton handler for DB interacations.
  */
@@ -10,35 +11,15 @@ export class IndexedDbHandler {
         if (IndexedDbHandler.instance) {
             return IndexedDbHandler.instance; // if already initialized
         }
-        this.encryptor = new DBEncryptor(); // initialize DB encryptor
         this.db = new Dexie("myDatabase");
         // database initialization
         this.db.version(1).stores({
-            meta: "++id",
             wallet_assets: "++id", // collection of assets compounding on wallet
             sim_history: "++id" // collection of simulations run
         });
         this.version_id = 0;
-        this.initializeMeta(); // initialize metadata
         IndexedDbHandler.instance = this;
-    }
-
-    /**
-     * Initialize metadata of the db
-     */
-    async initializeMeta() {
-        var version = -1;
-        try {
-            version = await this.db.meta.orderBy("id").last(); // get first record from the db
-            if (version === undefined) {
-                version = await this.db.meta.add({"version" : 0});
-            }
-            await this.db.meta.update(0, version + 1);
-        }
-        catch (error) {
-            console.error(error);
-        }
-        this.version_id = version;        
+        DBEncryptor.setSalt(new Uint8Array(16)); // set salt
     }
 
     /**
@@ -58,9 +39,8 @@ export class IndexedDbHandler {
                     return false;
                 }
             }
-            await this.db.sim_history.add(payload);
-            this._updateVersion();
-        }
+            await this._addRecord(this.db.sim_history, payload);          
+        } 
         catch (error) {
             console.error(error);
             return false;
@@ -70,9 +50,9 @@ export class IndexedDbHandler {
     }
 
     /**
-     * 
-     * @param {*} payload 
-     * @returns 
+     * Produce hash of the simulation results record for faster comparisons
+     * @param {*} payload object to be hashed
+     * @returns hash of the input object
      */
     hashSimsHistory(payload) {
         const new_obj = {
@@ -94,13 +74,29 @@ export class IndexedDbHandler {
      */
     async addWalletAsset(payload) {
         try {
-            var ret = await this.db.wallet_assets.add(payload);
-            this._updateVersion();
+            var ret = await this._addRecord(this.db.wallet_assets, payload);
             return ret;
         }
         catch (error) {
             console.error(error);
         }
+    }
+
+    /**
+     * Should be used instead of plain add method of Dexie.js. This function
+     * appends metadata to the object that would be later used for encryption
+     * it updates the event queue and tries pushing changes to remote sync server
+     * @param table table that we are adding object into
+     * @param payload object to be extended with extra fields
+     */
+    async _addRecord(table, payload) {
+        var ulid = crypto.randomUUID();
+        // create final object that should be added to the Dexie.js db
+
+        DBEncryptor.generateKey();
+        sync.addAdditionToEventQueue(ulid, table, payload);
+        
+        await table.add(iv, payload);
     }
 
     /**
@@ -110,8 +106,12 @@ export class IndexedDbHandler {
     async getWalletAssets() {
         try {
             var arr = await this.db.wallet_assets.toArray(); // get assets from table in form of array
-            this._updateVersion();
-            return arr;
+            // merge data and id on return
+            return arr.map((v) => {
+                let obj = v.data;
+                obj.id = v.id;
+                return obj;
+            });
         }
         catch (error) {
             console.error(error);
@@ -126,24 +126,7 @@ export class IndexedDbHandler {
     async getSimResult(index) {
         try {
             var results = this.db.sim_history.get(index); // get the sim result by the id
-            this._updateVersion();
-            return results;
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    /**
-     * Update version of db. Should be called after each db operation.
-     */
-    async _updateVersion() {
-        try {
-            // increment version number
-            var current = await this.db.meta.orderBy("id").last();
-            await this.db.meta.update(this.version_id, {
-                version: (current?.version || 0) + 1
-            });
+            return results.data;
         }
         catch (error) {
             console.error(error);
@@ -157,7 +140,6 @@ export class IndexedDbHandler {
     async deleteWalletAssets(selected_ids) {
         try {
             await this.db.wallet_assets.bulkDelete(selected_ids);
-            this._updateVersion();
         }
         catch (error) {
             console.error(error);
@@ -171,7 +153,6 @@ export class IndexedDbHandler {
     async deleteSimsResults(selected_ids) {
         try {
             await this.db.sim_history.bulkDelete(selected_ids);
-            this._updateVersion();
         }
         catch (error) {
             console.error(error);

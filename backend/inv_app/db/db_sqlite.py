@@ -11,15 +11,6 @@ class SQLite3DB(db_handler.DBHandler):
     RESET_AUTOINCREMENT = "DELETE FROM SQLITE_SEQUENCE \
                             WHERE name=?; "
     VACUUM = "VACUUM;"
-    # create table if it does not already exists
-    CREATE_WALLET_ASSET_TABLE = "CREATE TABLE IF NOT EXISTS wallet_assets_{} \
-                    (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                     ticker TEXT NOT NULL, \
-                     quantity REAL NOT NULL, \
-                     price REAL NOT NULL); "
-    # insert record to the wallet asset table
-    ADD_WALLET_ASSET = "INSERT INTO wallet_assets_{} (ticker, quantity, price)\
-                    VALUES (?, ?, ?)"
 
     # create events table
     CREATE_EVENTS_TABLE = "CREATE TABLE IF NOT EXISTS {} \
@@ -27,7 +18,7 @@ class SQLite3DB(db_handler.DBHandler):
                         timestamp INTEGER NOT NULL, \
                          table_name TEXT NOT NULL, \
                          type TEXT NOT NULL, \
-                         ulid TEXT NOT NULL); "
+                         ulid TEXT UNIQUE NOT NULL); "
 
     APPLY_TIMESTAMP_INDEX = "CREATE INDEX IF NOT EXISTS idx_events_timestamp\
                             ON {}(timestamp);"
@@ -36,6 +27,16 @@ class SQLite3DB(db_handler.DBHandler):
                         VALUES (?, ?, ?, ?);"
 
     DELETE_EVENT_RECORD = "DELETE FROM {} WHERE timestamp=? AND table_name=? AND type=? AND ulid=?;"
+
+    # encrypted data 
+    CREATE_ENCRYPTED_TABLE = "CREATE TABLE IF NOT EXISTS {} \
+                                (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                    ulid TEXT UNIQUE NOT NULL, \
+                                    payload BLOB NOT NULL); "
+    
+    ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, payload) VALUES (?, ?);"
+    REMOVE_ENCRYPTE_RECORD = "DELETE FROM {} WHERE ulid=?;"
+    GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
 
     def __init__(self):
         pass
@@ -94,17 +95,6 @@ class SQLite3DB(db_handler.DBHandler):
         except:
             return False
 
-    def add_wallet_asset(self, db_handle, user_id: int, ticker: str, quantity: float, price: float) -> bool:
-        try:
-            # try creating table if not exists
-            db_handle.execute(SQLite3DB.CREATE_WALLET_ASSET_TABLE.format(user_id))
-            # run query for inserting into a table
-            db_handle.execute(SQLite3DB.ADD_WALLET_ASSET.format(user_id),
-                                (ticker, quantity, price,))
-            db_handle.commit() # commit changes
-            return True
-        except:
-            return False
 
 
     def add_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
@@ -131,3 +121,29 @@ class SQLite3DB(db_handler.DBHandler):
         except:
             return False
 
+    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> bool:
+        table = table_name + "_" + str(user_id)
+        # try creating table if not exists already and add record
+        try:
+            db_handle.execute(SQLite3DB.CREATE_ENCRYPTED_TABLE.format(table))
+            db_handle.execute(SQLite3DB.ADD_ENCRYPTED_RECORD.format(table), 
+                                (ulid, payload)
+                            )
+            
+            db_handle.commit()
+            return True
+        except:
+            return False
+        
+
+    def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
+        table = table_name + "_" + str(user_id)
+
+        try:
+            return db_handle.execute(
+                SQLite3DB.GET_ENCRYPTED_RECORD.format(table), 
+                (ulid,),    
+            ).fetchone()
+        except Exception as e:
+            print(e)
+            return None

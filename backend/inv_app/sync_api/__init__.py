@@ -1,5 +1,6 @@
 from collections import defaultdict
-from .table_handler import ITableHandler, WalletAssetTableHandler, EventTableHandler
+from .table_handler import ITableHandler, EncryptedTableHandler, EventTableHandler
+
 
 class DBUpdater:
     def __init__(self):
@@ -14,7 +15,7 @@ class DBUpdater:
         Initialize map of handlers for each table
         """
 
-        self.handlers["wallet_assets"] = WalletAssetTableHandler()
+        self.handlers["wallet_assets"] = EncryptedTableHandler()
         self.handlers["events"] = EventTableHandler()
 
 
@@ -53,13 +54,30 @@ class DBUpdater:
         if not ev_handler.add_record(user_id, event_obj):
             return False
 
-        if not op(user_id, table_name, payload):
+        if not op(user_id, ulid, table_name, payload):
            ev_handler.remove_record(user_id, event_obj) # remove event record if already added
-           return False        
+           return False
+        
         return True
 
+    def get_record(self, user_id, table_name, compare_obj):
+        """
+        Get record from the db
 
-    def add_record(self, user_id, table_name, payload) -> bool:
+        :param user_id: id of the user that owns the table
+        :param table_name: name of the table from which we should obtain data
+        :param compare_obj: params to be used for comparison
+        :return: true on success, false otherwise
+        """
+
+        handle = self.handlers.get(table_name)
+        if handle is None:
+            return None
+
+        return handle.get_record(user_id, table_name, compare_obj)
+
+
+    def add_record(self, user_id, ulid, table_name, payload) -> bool:
         """
         Add record to the table
 
@@ -71,10 +89,14 @@ class DBUpdater:
         handle = self.handlers.get(table_name)
         if handle is None:
             return False
-        return handle.add_record(user_id, payload)
+        return handle.add_record(user_id, {
+            "table_name" : table_name,
+            "ulid" : ulid, 
+            "payload" : payload
+            })
 
 
-    def remove_record(self, user_id, table_name, payload) -> bool:
+    def remove_record(self, user_id, ulid, table_name, payload) -> bool:
         """
         Remove record from table_name + user_id, specified by payload members
 
@@ -86,7 +108,7 @@ class DBUpdater:
         handle = self.handlers.get(table_name)
         if handle is None:
             return False
-        return handle.remove_record(user_id, payload)
+        return handle.remove_record(user_id, ulid, payload)
 
 
     def purge_table(self, user_id, table_name) -> bool:
@@ -101,4 +123,3 @@ class DBUpdater:
         if handle is None:
             return False
         return handle.purge_table(user_id, table_name)
-    

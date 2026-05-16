@@ -1,20 +1,9 @@
+import { DBEncryptor } from "../db/db_encryptor.js";
 import { RequestGET, RequestPOST } from "../Requests.js";
-
-
-class Operation {
-    constructor(deletion, addition) {
-        this.is_deletion = deletion;
-        this.is_addition = addition;
-    }
-}
-
-// incoming object: id, table name, addition + payload
-// pushing object: id, table name, addition + payload (we would sync based on that so that should be fine)
-
 
 // API schema: PUT JSON file to the output object, id, table_name, date, addition, payload if  
 // API schema:
-class Synchronizer {
+export class DBSynchronizer {
     static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push_event";
     static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
     constructor() {
@@ -24,32 +13,33 @@ class Synchronizer {
         
     }
 
-    addAdditionToEventQueue(ulid, table_name, payload) {
+    async addAdditionToEventQueue(ulid, table_name, payload) {
         var add_object =  ({
             ulid: ulid,
             table_name: table_name,
             type: "add",
             payload: payload,
         });
-        this._addEventToQueue(add_object);
+        await this._addEventToQueue(add_object);
     }
 
-    addRemovalToEventQueue(ulid, table_name) {
+    async addRemovalToEventQueue(ulid, table_name) {
         var rem_object = {
             ulid: ulid,
             table_name: table_name,
             type: "remove",
             payload: null,
         };
-        this._addEventToQueue(rem_object);
+        await this._addEventToQueue(rem_object);
     }
 
     /**
      * Append metadata to the object and push to the queue
      * @param {Object} object object to be pushed to the queue
      */
-    _addEventToQueue(object) {
+    async _addEventToQueue(object) {
         object.timestamp = new Date();
+        object.payload = await DBEncryptor.encrypt(object.payload); // encrypt payload before sending to server
         this.event_queue.push(object);
     }
 
@@ -62,25 +52,33 @@ class Synchronizer {
         var ev = this.event_queue[0];
         var response = null;
         try {
-            response = await RequestPOST(Synchronizer.PUSH_ENDPOINT, ev);
+            response = await RequestPOST(DBSynchronizer.PUSH_ENDPOINT, ev);
         }
         catch (error) {
             console.error(error);
-            return;
+            return false;
         }
         // here we should check for the response code        
         this.event_queue.shift(); // if succeeded do not forget to pop from the queue
         console.log(response);
+
+        return true;
     }
 
     pollData() {
         RequestGET();
+        // TODO remember 
     }
 
+    /**
+     * Testing function. Used for totally purging db
+     * @param {*} table_name name of the table to be purged
+     * @returns null
+     */
     async purgeTable(table_name) {
         var response = null;
         try {
-            response = await RequestPOST(Synchronizer.PURGE_ENDPOINT, {"table_name" : table_name});
+            response = await RequestPOST(DBSynchronizer.PURGE_ENDPOINT, {"table_name" : table_name});
         }
         catch (error) {
             console.log(error);
@@ -90,4 +88,4 @@ class Synchronizer {
     }
 };
 
-export var sync = new Synchronizer();
+export var sync = new DBSynchronizer();

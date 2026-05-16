@@ -70,19 +70,19 @@ class DBProxy(object):
         return self.db_handler.reset_collection(db, user_id, table_name)
     
 
-    def add_wallet_asset(self, user_id: int, ticker: str, quantity: float, price: float) -> bool:
+    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, payload: str) -> bool:
         """
-        Add new record to the user's wallet table
+        Add new data asset to the table specified by the table name and user_id
 
-        :param self:
-        :param user_id: id of the logged user
-        :param ticker: ticker of asset
-        :param quantity: amount of stock bought
-        :param price: cost of one stock at buy time 
+        :param table_name: name of the table to be modified. To be extended by user_id
+        :param user_id: id of the user which data would be modified
+        :param ulid: unique id of appended record
+        :param payload: payload to be added to table
         """
 
         db = self.get_db()
-        return self.db_handler.add_wallet_asset(db, user_id, ticker, quantity, price)
+        return self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, payload)
+    
     
     def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
         """
@@ -98,6 +98,7 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
     
+    
     def remove_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
         """
         Remove event record from the user's event table
@@ -111,6 +112,20 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.remove_event_record(db, user_id, timestamp, table_name, type, ulid)
+    
+
+    def get_encrypted_record(self, table_name: str, user_id: int, ulid: str):
+        """
+        Get record from encrypted collection, identified by user_id
+
+        :param table_name: name of the table to be modified
+        :param user_id: id of user owning modified table
+        :param ulid: unique identifier of the record
+        """
+
+        db = self.get_db()
+        return self.db_handler.get_encrypted_record(db, table_name, user_id, ulid)
+
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")

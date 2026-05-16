@@ -36,13 +36,17 @@ class DBHandler(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def add_wallet_asset(self, db_handle, user_id: int, ticker: str, quantity: float, price: float) -> bool:
-        raise NotImplementedError
-    
-    @abstractmethod
     def add_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
         raise NotImplementedError
         
     @abstractmethod
     def remove_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
         raise NotImplementedError

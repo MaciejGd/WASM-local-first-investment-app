@@ -37,7 +37,7 @@ export function LogInPopUp({ onClose, onAccept, onSuccess }) {
             )
             setLoginStatus(responseJson);
             setError(null);
-            onSuccess();
+            onSuccess(password);
         } catch (err) {
             setError(err.message);
             setLoginStatus(null);
