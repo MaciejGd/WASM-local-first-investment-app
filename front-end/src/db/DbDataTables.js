@@ -140,6 +140,7 @@ export class IndexedDbHandler {
      */
     async deleteWalletAssets(selected_ids) {
         try {
+            this.dispatchRemoveEvents(this.db.wallet_assets, selected_ids);
             await this.db.wallet_assets.bulkDelete(selected_ids);
         }
         catch (error) {
@@ -152,11 +153,20 @@ export class IndexedDbHandler {
      * @param {*} selected_ids ids to be removed
      */
     async deleteSimsResults(selected_ids) {
-        try {
-            await this.db.sim_history.bulkDelete(selected_ids);
+        try {            
+            this.dispatchRemoveEvents(this.db.sim_history, selected_ids);
+            await this.db.sim_history.bulkDelete(selected_ids);            
         }
         catch (error) {
             console.error(error);
         }
+    }
+
+    async dispatchRemoveEvents(table, selected_ids) {
+        const records = await table.bulkGet(selected_ids);
+        const table_name = this.table_to_name.get(table);
+        records.forEach(e => {
+            sync_worker.AddRemovalEvent(e.ulid, table_name);
+        });
     }
 };

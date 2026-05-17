@@ -103,6 +103,7 @@ export class DBSynchronizer {
 
     /**
      * Try pushing all events from the queue to the sync server
+     * TODO - add logic so that it is not possible to send request while other is being proceedz
      */
     async pushToRemote() {
         if (this.event_queue === undefined || await this.event_queue.empty()) {
