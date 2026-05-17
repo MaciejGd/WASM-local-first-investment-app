@@ -4,7 +4,7 @@ import SimsResultsAssetsPane from "./results/SimsResultsAssetsTable.jsx";
 import { SimResultsTable } from "./results/SimsReturnsResultsTable.jsx";
 import { SimRiskResultsTable } from "./results/SimsRiskResultsTable.jsx";
 import { useState } from "react";
-import { IndexedDbHandler } from "../../db/db.js"; // indexed db instance 
+import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance 
 /// Here should be another table showing the results of run simulations
 const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
 const PERCENTILES = 3; // we have three results showing in percentiles

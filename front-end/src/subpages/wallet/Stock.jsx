@@ -6,7 +6,7 @@ import { ArrowDownIcon  } from '../../IconLoader';
 import { ArrowUpIcon  } from '../../IconLoader';
 import { AssetsEntry, AssetsMap } from './StockAssets.js';
 import { AssetsTable } from './AssetsTable.jsx'
-import { IndexedDbHandler } from "../../db/db.js"; // indexed db instance 
+import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance 
 
 
 

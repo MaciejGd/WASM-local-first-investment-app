@@ -1,16 +1,73 @@
 import { DBEncryptor } from "../db/db_encryptor.js";
 import { RequestGET, RequestPOST } from "../Requests.js";
+import { getDBInstance } from "../db/db.js";
 
-// API schema: PUT JSON file to the output object, id, table_name, date, addition, payload if  
-// API schema:
+// From here we should somehow put events into a Dexie db so that events are being preserved between sessions and resistant to some
+// unexpected power outages and smth like this.
+// our issue is that actually the event queue should use some kind of dexie.db interface, and our og interface has  been craeted in another context
+// which is not accessible by our worker.
+
+/**
+ * Event queue that will be stored in the local IndexedDB instance.
+ */
+class PersistentEventQueue {
+    constructor(table_handle) {
+        this.table = table_handle;
+    }
+
+    /**
+     * Is queue empty
+     * @returns true if queue is empty, false otherwise
+     */
+    async empty() {
+        return await this.table.count() == 0;
+    }
+
+    /**
+     * Get oldest item from the queue
+     * @returns oldest item from the queue
+     */
+    async front() {
+        return await this.table.orderBy('id').first();
+    }
+
+    /**
+     * Remove oldest item from the queue and return it
+     * @returns deleted front item from the table
+     */
+    async pop() {
+        const item = await this.table.orderBy('id').first();
+
+        if (!item) {
+            // no items in the table
+            return null;
+        }
+        // delete item by its id
+        await this.table.delete(item.id);
+        return item;
+    }
+
+    /**
+     * Add new event's data to the queue
+     * @param {object} data data to be added to queue
+     */
+    async push(data) {
+        await this.table.add(data);
+    }
+};
+
+
+
 export class DBSynchronizer {
     static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push_event";
     static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
     constructor() {
         // we have two basic actions to perform
-        this.event_queue = []; // store all events to be propagated to the remote server
+        this.db_handle = getDBInstance(); // create db handle
+        // store all events to be propagated to the remote server
+        this.event_queue = new PersistentEventQueue(this.db_handle.out_events); 
         this.incoming_queue = [];
-        
+
     }
 
     async addAdditionToEventQueue(ulid, table_name, payload) {
@@ -40,7 +97,7 @@ export class DBSynchronizer {
     async _addEventToQueue(object) {
         object.timestamp = new Date();
         object.payload = await DBEncryptor.encrypt(object.payload); // encrypt payload before sending to server
-        this.event_queue.push(object);
+        await this.event_queue.push(object);
     }
 
 
@@ -48,12 +105,12 @@ export class DBSynchronizer {
      * Try pushing all events from the queue to the sync server
      */
     async pushToRemote() {
-        if (this.event_queue === undefined || this.event_queue.length == 0) {
+        if (this.event_queue === undefined || await this.event_queue.empty()) {
             return;
         }
 
         const push_event = async () => {
-            var ev = this.event_queue[0];
+            var ev = await this.event_queue.front();
             var response = null;
             try {
                 response = await RequestPOST(DBSynchronizer.PUSH_ENDPOINT, ev);
@@ -62,14 +119,15 @@ export class DBSynchronizer {
                 console.error(error);
                 return false;
             }
-            // here we should check for the response code        
-            this.event_queue.shift(); // if succeeded do not forget to pop from the queue
-            console.log(response);            
+            // here we should check for the response code
+            await this.event_queue.pop(); // if succeeded do not forget to pop from the queue
+            console.log(response);
 
             return true;
         };
 
-        while (this.event_queue.length != 0) {            
+        while ((await this.event_queue.empty()) === false) {
+            await new Promise(r => setTimeout(r, 2000));
             let ret = await push_event();
             if (ret == false) break;
         }
@@ -77,7 +135,7 @@ export class DBSynchronizer {
 
     pollData() {
         RequestGET();
-        // TODO remember 
+        // TODO remember
     }
 
     /**
