@@ -43,26 +43,36 @@ export class DBSynchronizer {
         this.event_queue.push(object);
     }
 
-    async pushToRemote() {
-        // we should go through changes history and possibly remove / add new records
-        // we are sure that id of our records would be different
-        // first keep a state
-        // we should open an endpoint 
-        // we should somehow place something about pushing the changes
-        var ev = this.event_queue[0];
-        var response = null;
-        try {
-            response = await RequestPOST(DBSynchronizer.PUSH_ENDPOINT, ev);
-        }
-        catch (error) {
-            console.error(error);
-            return false;
-        }
-        // here we should check for the response code        
-        this.event_queue.shift(); // if succeeded do not forget to pop from the queue
-        console.log(response);
 
-        return true;
+    /**
+     * Try pushing all events from the queue to the sync server
+     */
+    async pushToRemote() {
+        if (this.event_queue === undefined || this.event_queue.length == 0) {
+            return;
+        }
+
+        const push_event = async () => {
+            var ev = this.event_queue[0];
+            var response = null;
+            try {
+                response = await RequestPOST(DBSynchronizer.PUSH_ENDPOINT, ev);
+            }
+            catch (error) {
+                console.error(error);
+                return false;
+            }
+            // here we should check for the response code        
+            this.event_queue.shift(); // if succeeded do not forget to pop from the queue
+            console.log(response);            
+
+            return true;
+        };
+
+        while (this.event_queue.length != 0) {            
+            let ret = await push_event();
+            if (ret == false) break;
+        }
     }
 
     pollData() {

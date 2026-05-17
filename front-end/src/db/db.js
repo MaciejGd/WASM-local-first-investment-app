@@ -2,6 +2,7 @@ import { Dexie } from "dexie";
 import hash from "object-hash";
 import { DBEncryptor } from "./db_encryptor";
 import { sync } from "../sync/synchronizer";
+import { sync_worker } from "../sync/syncWorkerWrapper";
 /**
  * Singleton handler for DB interacations.
  */
@@ -17,9 +18,18 @@ export class IndexedDbHandler {
             wallet_assets: "++id", // collection of assets compounding on wallet
             sim_history: "++id" // collection of simulations run
         });
+        // assign name to each table object
+        this.initializeTableNames();
+
         this.version_id = 0;
         IndexedDbHandler.instance = this;
         DBEncryptor.setSalt(new Uint8Array(16)); // set salt
+    }
+
+    initializeTableNames() {
+        this.table_to_name = new Map();
+        this.table_to_name.set(this.db.wallet_assets, "wallet_assets");
+        this.table_to_name.set(this.db.sim_history, "sim_history");
     }
 
     /**
@@ -86,17 +96,20 @@ export class IndexedDbHandler {
      * Should be used instead of plain add method of Dexie.js. This function
      * appends metadata to the object that would be later used for encryption
      * it updates the event queue and tries pushing changes to remote sync server
-     * @param table table that we are adding object into
+     * @param table_name table that we are adding object into
      * @param payload object to be extended with extra fields
      */
     async _addRecord(table, payload) {
-        var ulid = crypto.randomUUID();
+        const ulid = crypto.randomUUID(); 
         // create final object that should be added to the Dexie.js db
-
-        DBEncryptor.generateKey();
-        sync.addAdditionToEventQueue(ulid, table, payload);
+        const table_name = this.table_to_name.get(table);
+        if (table_name == undefined) {
+            return;
+        }
+        sync_worker.AddAdditionEvent(ulid, table_name, payload); // TODO, should we somehow secure that???
         
-        await table.add(iv, payload);
+        payload.ulid = ulid;
+        await table.add(payload);
     }
 
     /**
@@ -106,12 +119,7 @@ export class IndexedDbHandler {
     async getWalletAssets() {
         try {
             var arr = await this.db.wallet_assets.toArray(); // get assets from table in form of array
-            // merge data and id on return
-            return arr.map((v) => {
-                let obj = v.data;
-                obj.id = v.id;
-                return obj;
-            });
+            return arr;
         }
         catch (error) {
             console.error(error);

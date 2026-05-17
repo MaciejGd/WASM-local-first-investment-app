@@ -9,6 +9,7 @@ import { AssetsTable } from './AssetsTable.jsx'
 import { IndexedDbHandler } from "../../db/db.js"; // indexed db instance 
 
 
+
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
     return (
         <div className="assets_table_buttons_container">
