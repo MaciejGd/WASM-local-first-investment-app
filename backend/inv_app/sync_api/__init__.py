@@ -96,11 +96,12 @@ class DBUpdater:
             })
 
 
-    def remove_record(self, user_id, ulid, table_name, payload) -> bool:
+    def remove_record(self, user_id, ulid, table_name, payload=None) -> bool:
         """
         Remove record from table_name + user_id, specified by payload members
 
         :param user_id: user which data we are erasing
+        :param ulid: unique identifier of the record to be removed
         :param table_name: table from which we wanna delete
         :param payload: object specifying fields to identify deleted object
         """
@@ -108,7 +109,10 @@ class DBUpdater:
         handle = self.handlers.get(table_name)
         if handle is None:
             return False
-        return handle.remove_record(user_id, ulid, payload)
+        return handle.remove_record(user_id, {
+            "ulid" : ulid,
+            "table_name" : table_name,
+        })
 
 
     def purge_table(self, user_id, table_name) -> bool:

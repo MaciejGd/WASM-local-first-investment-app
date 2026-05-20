@@ -18,7 +18,7 @@ class SQLite3DB(db_handler.DBHandler):
                         timestamp INTEGER NOT NULL, \
                          table_name TEXT NOT NULL, \
                          type TEXT NOT NULL, \
-                         ulid TEXT UNIQUE NOT NULL); "
+                         ulid TEXT NOT NULL); "
 
     APPLY_TIMESTAMP_INDEX = "CREATE INDEX IF NOT EXISTS idx_events_timestamp\
                             ON {}(timestamp);"
@@ -35,7 +35,7 @@ class SQLite3DB(db_handler.DBHandler):
                                     payload BLOB NOT NULL); "
     
     ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, payload) VALUES (?, ?);"
-    REMOVE_ENCRYPTE_RECORD = "DELETE FROM {} WHERE ulid=?;"
+    REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=?;"
     GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
 
     def __init__(self):
@@ -147,3 +147,17 @@ class SQLite3DB(db_handler.DBHandler):
         except Exception as e:
             print(e)
             return None
+        
+
+    def remove_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
+        table = table_name + "_" + str(user_id)
+
+        try:
+            cursor = db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
+            
+            db_handle.commit()
+
+            print(cursor.rowcount)
+            return True
+        except:
+            return False

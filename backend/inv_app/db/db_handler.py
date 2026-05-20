@@ -50,3 +50,7 @@ class DBHandler(ABC):
     @abstractmethod
     def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
         raise NotImplementedError
+    
+    @abstractmethod
+    def remove_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
+        raise NotImplementedError

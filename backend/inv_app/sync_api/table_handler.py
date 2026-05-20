@@ -49,7 +49,11 @@ class EncryptedTableHandler(ITableHandler):
         
 
     def remove_record(self, user_id, data) -> bool:
-        pass
+        (ulid, table_name) = self._unpack_remove_data(data)        
+        if ulid is None or table_name is None or user_id is None:
+            return False
+
+        return db_proxy.remove_encrypted_record(table_name, user_id, ulid)
 
 
     def get_record(self, user_id: int, table_name: str, compare_obj):
@@ -87,6 +91,12 @@ class EncryptedTableHandler(ITableHandler):
         ulid = data.get(self.ulid)
         payload = data.get(self.payload)
         return (table_name, ulid, payload)
+    
+
+    def _unpack_remove_data(self, data):
+        ulid = data.get("ulid")
+        table_name = data.get("table_name")
+        return (ulid, table_name)
 
 
 class EventTableHandler(ITableHandler):

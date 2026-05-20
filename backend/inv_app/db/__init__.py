@@ -127,6 +127,18 @@ class DBProxy(object):
         return self.db_handler.get_encrypted_record(db, table_name, user_id, ulid)
 
 
+    def remove_encrypted_record(self, table_name: str, user_id: int, ulid: str) -> bool:
+        """
+        Remove encrypted data record from collection
+
+        :param table_name: name of the table to be modified
+        :param user_id: id of the user owning the record
+        :param ulid: unique identifier of the element to be removed
+        """
+        
+        db = self.get_db()
+        return self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
+
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")
 
