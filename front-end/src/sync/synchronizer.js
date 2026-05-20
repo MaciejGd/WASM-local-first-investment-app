@@ -48,6 +48,14 @@ class PersistentEventQueue {
     }
 
     /**
+     * Get length of the persistent queue
+     * @returns length of the persistent queue
+     */
+    async length() {
+        return await this.table.count();
+    }
+
+    /**
      * Add new event's data to the queue
      * @param {object} data data to be added to queue
      */
@@ -67,6 +75,7 @@ export class DBSynchronizer {
         // store all events to be propagated to the remote server
         this.event_queue = new PersistentEventQueue(this.db_handle.out_events); 
         this.incoming_queue = [];
+        this.outgoing_events_pending = false;
 
     }
 
@@ -109,6 +118,13 @@ export class DBSynchronizer {
         if (this.event_queue === undefined || await this.event_queue.empty()) {
             return;
         }
+        if (this.outgoing_events_pending === true) {
+            // events already processed
+            return;
+        }
+
+
+        this.outgoing_events_pending = true;
 
         const push_event = async () => {
             var ev = await this.event_queue.front();
@@ -126,12 +142,12 @@ export class DBSynchronizer {
 
             return true;
         };
-
         while ((await this.event_queue.empty()) === false) {
-            await new Promise(r => setTimeout(r, 2000));
             let ret = await push_event();
             if (ret == false) break;
         }
+
+        this.outgoing_events_pending = false;
     }
 
     pollData() {

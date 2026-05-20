@@ -102,7 +102,8 @@ export class IndexedDbHandler {
         sync_worker.AddAdditionEvent(ulid, table_name, payload); // TODO, should we somehow secure that???
         
         payload.ulid = ulid;
-        await table.add(payload);
+        var id = await table.add(payload);
+        return id;
     }
 
     /**

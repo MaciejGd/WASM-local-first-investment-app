@@ -32,7 +32,6 @@ export default function StockPage() {
     const [assets, setAssets] = useState(new AssetsMap());    
     const [assets_init, setAssetsInit] = useState([]);
     const [db_instance, setDbInstance] = useState(new IndexedDbHandler());
-    console.log(assets);
     // we wanna fetch data from db on page render
     useEffect(()=>{
         const loadData = async () => {
