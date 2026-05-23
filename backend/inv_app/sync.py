@@ -27,10 +27,11 @@ def push_changes():
     payload = post_json.get('payload')
 
     updater = DBUpdater()    
-    if updater.process_event(session['user_id'], timestamp, table_name, type, ulid, payload) == False:
+    event_id = updater.process_event(session['user_id'], timestamp, table_name, type, ulid, payload)
+    if event_id == -1:
         abort(500, "Pushing changes to remote failed")
 
-    return jsonify({"status" : "Properly pushed changes to remote"})
+    return jsonify({"event_id" : event_id})
 
 
 
@@ -64,14 +65,39 @@ def get_record(table_name, ulid):
 
     updater = DBUpdater()
     record = updater.get_record(
-        compare_obj= {"ulid" : ulid},
-        table_name=table_name,
         user_id=session["user_id"],
+        payload={
+            "compare_obj" : ulid,
+            "table_name" : table_name
+        }
     )
     if record is None:
         abort(500, "Failed to retrieve record with given ulid")
     
     return jsonify({"record" : record})
 
-    
 
+# @bp.route('/pull_events/<event_id>', methods=('GET',))
+# @auth.login_required
+# def get_pending_events(event_id):
+#     last_event_id = event_id
+
+
+@bp.route('/pull_events_ids/<event_id>', methods=('GET',))
+@auth.login_required
+def pull_changes_amount(event_id):
+    user_id = session["user_id"]
+
+    updater = DBUpdater()
+    ids = updater.get_pending_events(user_id, event_id)
+    return jsonify({"pending_events" : ids})
+
+
+@bp.route('/pull_events/<event_id>', methods=('GET',))
+@auth.login_required
+def pull_changes(event_id):
+    user_id = session["user_id"]
+    updater = DBUpdater()
+
+    records = updater.get_events(user_id, event_id)
+    return jsonify(records)

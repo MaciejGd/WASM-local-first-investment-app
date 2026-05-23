@@ -27,16 +27,19 @@ class SQLite3DB(db_handler.DBHandler):
                         VALUES (?, ?, ?, ?);"
 
     DELETE_EVENT_RECORD = "DELETE FROM {} WHERE timestamp=? AND table_name=? AND type=? AND ulid=?;"
+    GET_EVENT_IDS_FROM = "SELECT * FROM {} WHERE id > ? ORDER BY id ASC;"
+    GET_EVENT_BY_ID = "SELECT * FROM {} WHERE id = ?;"
 
-    # encrypted data 
+    # encrypted data
     CREATE_ENCRYPTED_TABLE = "CREATE TABLE IF NOT EXISTS {} \
                                 (id INTEGER PRIMARY KEY AUTOINCREMENT, \
                                     ulid TEXT UNIQUE NOT NULL, \
                                     payload BLOB NOT NULL); "
-    
+
     ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, payload) VALUES (?, ?);"
     REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=?;"
     GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
+
 
     def __init__(self):
         pass
@@ -103,12 +106,13 @@ class SQLite3DB(db_handler.DBHandler):
             db_handle.execute(SQLite3DB.CREATE_EVENTS_TABLE.format(table))
             db_handle.execute(SQLite3DB.APPLY_TIMESTAMP_INDEX.format(table))
 
-            db_handle.execute(SQLite3DB.ADD_EVENT_RECORD.format(table), (timestamp, table_name, type, ulid))
+            cursor = db_handle.execute(SQLite3DB.ADD_EVENT_RECORD.format(table), (timestamp, table_name, type, ulid))
             db_handle.commit()
-            return True
+
+            return cursor.lastrowid
         except:
-            return False
-        
+            return -1
+
 
     def remove_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
         table = SQLite3DB.EVENTS_TABLE + str(user_id)
@@ -121,43 +125,70 @@ class SQLite3DB(db_handler.DBHandler):
         except:
             return False
 
-    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> bool:
+    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> int:
         table = table_name + "_" + str(user_id)
         # try creating table if not exists already and add record
         try:
             db_handle.execute(SQLite3DB.CREATE_ENCRYPTED_TABLE.format(table))
-            db_handle.execute(SQLite3DB.ADD_ENCRYPTED_RECORD.format(table), 
+            cursor = db_handle.execute(SQLite3DB.ADD_ENCRYPTED_RECORD.format(table),
                                 (ulid, payload)
                             )
-            
+
             db_handle.commit()
-            return True
+            return cursor.lastrowid
         except:
-            return False
-        
+            return -1
+
 
     def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
         table = table_name + "_" + str(user_id)
 
         try:
             return db_handle.execute(
-                SQLite3DB.GET_ENCRYPTED_RECORD.format(table), 
-                (ulid,),    
+                SQLite3DB.GET_ENCRYPTED_RECORD.format(table),
+                (ulid,),
             ).fetchone()
         except Exception as e:
             print(e)
             return None
-        
+
 
     def remove_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
         table = table_name + "_" + str(user_id)
 
         try:
             cursor = db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
-            
+
             db_handle.commit()
 
             print(cursor.rowcount)
             return True
         except:
             return False
+
+
+    def get_events_from_id(self, db_handle, user_id, last_event_id) -> list[int]:
+        table = SQLite3DB.EVENTS_TABLE + str(user_id)
+        try:
+            records = db_handle.execute(
+                self.GET_EVENT_IDS_FROM.format(table),
+                (last_event_id,),
+            ).fetchall()
+            ids = [row[0] for row in records]
+            return ids
+        except Exception as e:
+            return []
+
+
+    def get_event(self, db_handle, user_id, event_id):
+        table = SQLite3DB.EVENTS_TABLE + str(user_id)
+        try:
+            record = db_handle.execute(
+                self.GET_EVENT_BY_ID.format(table),
+                (event_id,),
+            ).fetchone()
+
+            return record
+        except Exception as e:
+            return None
+

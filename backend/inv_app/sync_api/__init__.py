@@ -5,9 +5,11 @@ from .table_handler import ITableHandler, EncryptedTableHandler, EventTableHandl
 class DBUpdater:
     def __init__(self):
         self.handlers = defaultdict(ITableHandler)
-        self.operations = {}
-        self._initHandlersMap()
+        self.operations = {}        
         self._initOperationsMap()
+        self.event_handler = EventTableHandler()
+        self.encrypted_table = EncryptedTableHandler()
+        self._initHandlersMap()
 
 
     def _initHandlersMap(self):
@@ -15,8 +17,8 @@ class DBUpdater:
         Initialize map of handlers for each table
         """
 
-        self.handlers["wallet_assets"] = EncryptedTableHandler()
-        self.handlers["events"] = EventTableHandler()
+        self.handlers["wallet_assets"] =  self.encrypted_table
+        self.handlers["events"] = self.event_handler
 
 
     def _initOperationsMap(self):
@@ -51,14 +53,16 @@ class DBUpdater:
             "type" : type,
             "ulid" : ulid
         }
-        if not ev_handler.add_record(user_id, event_obj):
-            return False
+
+        event_id = ev_handler.add_record(user_id, event_obj)
+        if event_id == -1:
+            return -1
 
         if not op(user_id, ulid, table_name, payload):
            ev_handler.remove_record(user_id, event_obj) # remove event record if already added
-           return False
+           return -1
         
-        return True
+        return event_id
 
     def get_record(self, user_id, table_name, compare_obj):
         """
@@ -74,7 +78,11 @@ class DBUpdater:
         if handle is None:
             return None
 
-        return handle.get_record(user_id, table_name, compare_obj)
+        return handle.get_record(user_id, 
+                    {
+                        "table_name" : table_name, 
+                        "compare_obj" : compare_obj
+                    })
 
 
     def add_record(self, user_id, ulid, table_name, payload) -> bool:
@@ -127,3 +135,49 @@ class DBUpdater:
         if handle is None:
             return False
         return handle.purge_table(user_id, table_name)
+    
+
+    def get_pending_events(self, user_id, last_event_id) -> list[int]:
+        """
+        Return list of events that happened from the last event
+
+        :param user_id: user firing the request
+        :param last_event_id: id of last event
+        """
+
+        return self.event_handler.get_events_from_id(user_id, last_event_id)
+    
+
+    def get_events(self, user_id, last_event_id):
+        """
+        Get all event's data 
+        """
+
+        ids = self.get_pending_events(user_id, last_event_id)
+
+        records = []
+        for id in ids:
+            event_obj = self.event_handler.get_record(user_id, {'compare_obj' : id})
+            event_dir = {
+                "id" : event_obj[0],
+                "timestamp" : event_obj[1],
+                "table_name" : event_obj[2],
+                "type" : event_obj[3],
+                "ulid" : event_obj[4],
+                "payload" : None,
+            }
+
+            if event_dir['type'] in "add":
+                encrypted_record = self.get_record(
+                    user_id, 
+                    event_dir['table_name'],
+                    event_dir['ulid']
+                )
+                # already removed from db so do not propagate event
+                if encrypted_record is None:
+                    continue
+                event_dir['payload'] = encrypted_record['payload']
+                # here we should fetch payload as well
+            records.append(event_dir)
+
+        return records

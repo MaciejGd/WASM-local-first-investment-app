@@ -70,7 +70,7 @@ class DBProxy(object):
         return self.db_handler.reset_collection(db, user_id, table_name)
     
 
-    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, payload: str) -> bool:
+    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, payload: str) -> int:
         """
         Add new data asset to the table specified by the table name and user_id
 
@@ -78,13 +78,14 @@ class DBProxy(object):
         :param user_id: id of the user which data would be modified
         :param ulid: unique id of appended record
         :param payload: payload to be added to table
+        :returns: id of added record on success, -1 otherwise
         """
 
         db = self.get_db()
         return self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, payload)
     
     
-    def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
+    def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> int:
         """
         Add new event record to the user's event table
 
@@ -93,6 +94,7 @@ class DBProxy(object):
         :param table_name name of the table that we wanna modify
         :param ulid unique identifier of the record added
         :param type of the operation to be performed on db
+        :returns: id of added record, -1 otherwise
         """
 
         db = self.get_db()
@@ -138,6 +140,24 @@ class DBProxy(object):
         
         db = self.get_db()
         return self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
+    
+
+    def get_events_from_id(self, user_id: int, last_event_id: int) -> list[int]:
+        """
+        Get list of ids from the id specified in argument
+        """
+
+        db = self.get_db()
+        return self.db_handler.get_events_from_id(db, user_id, last_event_id)
+    
+
+    def get_event(self, user_id: int, event_id: int): 
+        """
+        Get event record from the event collection, specified by event_id
+        """
+
+        db = self.get_db()
+        return self.db_handler.get_event(db, user_id, event_id)
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")

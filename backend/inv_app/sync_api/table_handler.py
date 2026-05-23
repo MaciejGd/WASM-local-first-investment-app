@@ -13,7 +13,7 @@ class ITableHandler(ABC):
         pass
 
     @abstractmethod
-    def add_record(self, user_id, data) -> bool:
+    def add_record(self, user_id, data) -> int:
         pass
 
     @abstractmethod
@@ -22,7 +22,7 @@ class ITableHandler(ABC):
 
     
     @abstractmethod
-    def get_record(self, user_id, table_name, compare_obj) -> bool:
+    def get_record(self, user_id: int, payload: dict) -> bool:
         pass
 
     def purge_table(self, user_id: int, table_name: str) -> bool:
@@ -40,7 +40,7 @@ class EncryptedTableHandler(ITableHandler):
         self.table_name = "table_name"
 
 
-    def add_record(self, user_id, data) -> bool:
+    def add_record(self, user_id, data) -> int:
         (table_name, ulid, payload) = self._unpack_data(data)
         if table_name is None or user_id is None or ulid is None or payload is None:
             return False
@@ -56,17 +56,21 @@ class EncryptedTableHandler(ITableHandler):
         return db_proxy.remove_encrypted_record(table_name, user_id, ulid)
 
 
-    def get_record(self, user_id: int, table_name: str, compare_obj):
-        ulid = compare_obj.get("ulid") # retrieve ulid from compare object
-        if ulid is None:
-            return False
-        
+    def get_record(self, user_id: int, payload: dict):
+        ulid = payload.get("compare_obj")
+        table_name = payload.get("table_name")
+        if ulid is None or table_name is None:
+            return None
+
         record = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        if record is None:
+            return None
         return_object = {
             "ulid": record["ulid"],
             "payload" : self._encode_payload(record["payload"]),
         }
         return return_object
+    
 
     def _encode_payload(self, msg):
         """
@@ -108,7 +112,7 @@ class EventTableHandler(ITableHandler):
         pass
 
 
-    def add_record(self, user_id, data):
+    def add_record(self, user_id, data) -> int:
         (timestamp, table_name, type, ulid) = self._unpack_data(data)
         if table_name is None or ulid is None or timestamp is None or type is None:
             return False
@@ -123,9 +127,16 @@ class EventTableHandler(ITableHandler):
         return db_proxy.remove_event_record(user_id, timestamp, table_name, type, ulid)
     
 
-    def get_record(self, user_id: int, table_name: str, compare_obj):
-        pass
+    def get_record(self, user_id: int, payload: dict):
+        event_id = payload.get("compare_obj")
+        if event_id is None:
+            return None
+        
+        return db_proxy.get_event(user_id, event_id)
 
+
+    def get_events_from_id(self, user_id, last_event_id) -> list[int]: 
+        return db_proxy.get_events_from_id(user_id, last_event_id)
 
     def _unpack_data(self, data):
         table_name = data.get(self.table_col)
