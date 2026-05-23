@@ -129,7 +129,8 @@ export default function StockPage() {
         console.log("Delete selected callback");
         // remove selected elements from indexed db
         const selected_ids = assets.getSelectedIds();
-        await db_instance.deleteWalletAssets(selected_ids);
+        await db_instance.deleteWalletAssets(selected_ids);        
+        // should deleete from local only if removing from db succeeded
         const new_map = new AssetsMap(assets);        
         new_map.deleteSelected();        
         setAssets(new_map);

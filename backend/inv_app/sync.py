@@ -90,7 +90,7 @@ def pull_changes_amount(event_id):
 
     updater = DBUpdater()
     ids = updater.get_pending_events(user_id, event_id)
-    return jsonify({"pending_events" : ids})
+    return jsonify(ids)
 
 
 @bp.route('/pull_events/<event_id>', methods=('GET',))

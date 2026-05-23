@@ -3,7 +3,7 @@ import { sync } from "../../sync/synchronizer"
 import { ulid } from "ulid";
 import { useState } from "react";
 import { RequestGET } from "../../Requests";
-
+import { sync_worker } from "../../sync/syncWorkerWrapper";
 
 export default function SyncTest() {
     const [ulids, setUlids] = useState([]);
@@ -20,9 +20,8 @@ export default function SyncTest() {
             "price": 1.4,
         }
         const ulid = crypto.randomUUID();
-        await sync.addAdditionToEventQueue(ulid, "wallet_assets", payload);
+        await AddAdditionEvent(ulid, "wallet_assets", payload);
         // add ulid to list on success
-        const ret = await sync.pushToRemote();
         if (ret == true) {
             AddUlid(ulid);
         }
@@ -48,11 +47,31 @@ export default function SyncTest() {
     }
 
     async function purge_events_table() {
-        await sync.purgeTable("events");
+        await sync_worker.purgeTable("events");
     }
 
     async function purge_wallet_assets() {
-        await sync.purgeTable("wallet_assets");
+        await sync_worker.purgeTable("wallet_assets");
+    }
+
+    async function get_events_from() {
+        var ev_endpoint = "http://127.0.0.1:5000/sync/pull_events/"
+        var response = null;
+        try {
+            response = await RequestGET(ev_endpoint + "74");
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
+        console.log(response);
+        for (let i = 0; i < response.length; i++) {
+            var event = response[i];
+            if (event.payload !== null) {
+                var payload = await DBEncryptor.decrypt(event.payload)
+                console.log(payload);
+            }
+        }
     }
 
     return (
@@ -62,6 +81,7 @@ export default function SyncTest() {
         <button onClick={purge_wallet_assets}>Purge wallet assets</button>
         <button onClick={purge_events_table}>Purge events</button>
         <button onClick={get_data}>Get data</button>
+        <button onClick={get_events_from}>Get events</button>
     </>
     );
 }

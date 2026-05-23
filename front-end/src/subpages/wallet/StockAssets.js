@@ -170,8 +170,8 @@ export class AssetsEntry {
      * @param {string} price price of the stock bought
      */
     insert(id, quantity, price) {
-        if (!Number.isNaN(id) && !Number.isNaN(quantity) && !Number.isNaN(price)) {
-            this._data.push(new AssetData(Number(id), Number(quantity), Number(price)));
+        if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
+            this._data.push(new AssetData(id, Number(quantity), Number(price)));
         }
         else {
             throw new Error("Either quantity or price is not a number, failed to update asset entry");
@@ -291,7 +291,7 @@ export class AssetsMap {
                 // if map entry does not exist, create brand new
                 mp.set(el.ticker, new AssetsEntry(el.ticker));
             }
-            mp.get(el.ticker).insert(el.id, el.price, el.quantity);
+            mp.get(el.ticker).insert(el.ulid, el.price, el.quantity);
         });  
         mp.countAssetsSummary(); // count assets summary after addition is done
         return mp;

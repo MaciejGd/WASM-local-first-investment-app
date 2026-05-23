@@ -121,7 +121,7 @@ export class IndexedDbHandler {
     }
 
     /**
-     * Retrieve element from the 
+     * Retrieve element from the list
      * @param {number} index of element to be retrieved 
      * @returns simulation history record
      */

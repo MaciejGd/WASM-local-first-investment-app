@@ -18,6 +18,7 @@ class DBUpdater:
         """
 
         self.handlers["wallet_assets"] =  self.encrypted_table
+        self.handlers["sim_history"] = self.encrypted_table
         self.handlers["events"] = self.event_handler
 
 
@@ -57,7 +58,7 @@ class DBUpdater:
         event_id = ev_handler.add_record(user_id, event_obj)
         if event_id == -1:
             return -1
-
+        # we should probably add everything in one take, so update both tables and commit both TODO
         if not op(user_id, ulid, table_name, payload):
            ev_handler.remove_record(user_id, event_obj) # remove event record if already added
            return -1

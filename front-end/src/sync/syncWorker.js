@@ -17,6 +17,9 @@ onmessage = async (e) => {
         // generate key based on password provided
         await DBEncryptor.generateKey(data.passwd, data.salt);
     }
+    else if (data.type == "purge") {
+        await sync.purgeTable(data.table_name);
+    }
 }
 
-setInterval(() => sync.pushToRemote(), 3000);
+setInterval(() => sync.pollData(), 7000);

@@ -61,6 +61,13 @@ export class SyncWorkerWrapper {
             table_name: table_name,
         });
     }
+
+    async purgeTable(table_name) {
+        this.worker.postMessage({
+            type: "purge",
+            table_name: table_name,
+        })
+    }
 };
 
 // global sync worker object

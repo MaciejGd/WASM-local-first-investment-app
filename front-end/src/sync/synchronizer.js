@@ -1,6 +1,7 @@
 import { DBEncryptor } from "../db/db_encryptor.js";
 import { RequestGET, RequestPOST } from "../Requests.js";
 import { getDBInstance } from "../db/db.js";
+import { SyncDBUpdater } from "./syncDBUpdater.js";
 
 // From here we should somehow put events into a Dexie db so that events are being preserved between sessions and resistant to some
 // unexpected power outages and smth like this.
@@ -65,15 +66,18 @@ class PersistentEventQueue {
 };
 
 
-
 export class DBSynchronizer {
     static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push_event";
     static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
+    static PULL_EVENTS_IDS = "http://127.0.0.1:5000/sync/pull_events_ids/";
+    static PULL_EVENTS = "http://127.0.0.1:5000/sync/pull_events/";
     constructor() {
         // we have two basic actions to perform
         this.db_handle = getDBInstance(); // create db handle
+        this.metadata = this.db_handle.metadata;
         // store all events to be propagated to the remote server
         this.event_queue = new PersistentEventQueue(this.db_handle.out_events); 
+        this.db_updater = new SyncDBUpdater(this.db_handle);
         this.incoming_queue = [];
         this.outgoing_events_pending = false;
 
@@ -139,6 +143,7 @@ export class DBSynchronizer {
             // here we should check for the response code
             await this.event_queue.pop(); // if succeeded do not forget to pop from the queue
             console.log(response);
+            this.db_updater.updateLastEventId(response.event_id);
 
             return true;
         };
@@ -150,9 +155,87 @@ export class DBSynchronizer {
         this.outgoing_events_pending = false;
     }
 
+    async refreshDb() {
+        // TODO -> implement that
+    }
+
+    /**
+     * Pull data from remote if last event id stored in local db does not match last remote
+     * @returns Null
+     */
+    async pullFromRemote() {
+        // at first poll the list of events to be updated 
+        // check how many events are actyually pending in the list
+        try {
+            var lastId = await this.db_updater.getLastEventId();
+            var ids = await RequestGET(DBSynchronizer.PULL_EVENTS_IDS + toString(lastId));
+            console.log(ids);
+            // here we should probably validate the data
+            if (ids.length == 0) {
+                console.log("No remote changes");
+                return true;
+
+            }
+            if (ids.length > 100) {
+                // We do not want to update in here any more. We would rather just pull the whole db from remote if amount of changes is great
+                console.log("Huge amount of changes, skip udpate");
+                return true;
+            }
+            // if checks passed, fetch changes from remote
+            var events = await RequestGET(DBSynchronizer.PULL_EVENTS + lastId);
+            await this.updatePendingEvents(events);
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
+    /**
+     * Add events from remote server to local IndexedDb instance.
+     * @param {Array} events array of pending events updated to remote server, to be added to local db
+     */
+    async updatePendingEvents(events) {         
+        console.log("In updating the events!");
+        var biggest_id = -1;
+        try {
+            for (let i = 0; i < events.length; i++) {
+                var event = events[i];
+                biggest_id = Math.max(biggest_id, event.id);
+                if (event.type == "remove") {
+                    await this.db_updater.removeRecord(event.ulid, event.table_name);
+                }
+                else if (event.type == "add") {
+                    var payload = await DBEncryptor.decrypt(event.payload);
+                    await this.db_updater.addRecord(event.ulid, event.table_name, payload);
+                }
+                else {
+                    console.error(`Not known event's type received: ${event.type}`);
+                }
+            }
+
+            if (biggest_id !== -1) {
+                console.log(`Updating last received id with: ${biggest_id}`);
+                await this.db_updater.updateLastEventId(biggest_id);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+
     pollData() {
-        RequestGET();
-        // TODO remember
+        if (this.outgoing_events_pending === true) {
+            return;
+        }
+        console.log("Polling events from remote!");
+
+        this.outgoing_events_pending = true;        
+        // first pull data from remote and sync
+        this.pullFromRemote();
+        // then push your changes to remote
+        this.pushToRemote();
+        this.outgoing_events_pending = false;
     }
 
     /**
@@ -170,6 +253,21 @@ export class DBSynchronizer {
             return;
         }
         console.log(response);
+    }
+
+    /**
+     * Save last event's id in the DB
+     * @param {int} id event id to be set in db
+     */
+    async set_last_event_timestamp(id) {
+        await this.metadata.put({
+            key: "lastEvent",
+            value: id,
+        });
+    }
+
+    async get_last_event_timestamp() {
+
     }
 };
 

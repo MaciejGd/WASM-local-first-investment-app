@@ -11,10 +11,11 @@ export function getDBInstance() {
 
     const db = new Dexie("myDatabase");
 
-    db.version(1).stores({
-        wallet_assets: "++id",
+    db.version(2).stores({
+        wallet_assets: "&ulid",
         sim_history: "++id",
         out_events: "++id",
+        metadata: "&key",
     });
 
     dbInstance = db;
