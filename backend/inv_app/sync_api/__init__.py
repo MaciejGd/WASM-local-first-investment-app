@@ -208,6 +208,7 @@ class DBUpdater:
                 if encrypted_record is None:
                     continue
                 event_dir['payload'] = encrypted_record['payload']
+                event_dir['hash'] = encrypted_record['hash']
                 # here we should fetch payload as well
             records.append(event_dir)
 

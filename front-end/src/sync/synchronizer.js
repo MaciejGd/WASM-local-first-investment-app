@@ -208,6 +208,7 @@ export class DBSynchronizer {
                 }
                 else if (event.type == "add") {
                     var payload = await DBEncryptor.decrypt(event.payload);
+                    payload.hash = event.hash;
                     await this.db_updater.addRecord(event.ulid, event.table_name, payload);
                 }
                 else {

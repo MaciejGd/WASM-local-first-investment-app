@@ -22,7 +22,7 @@ class ITableHandler(ABC):
 
     
     @abstractmethod
-    def get_record(self, user_id: int, payload: dict) -> bool:
+    def get_record(self, user_id: int, payload: dict):
         pass
 
     def purge_table(self, user_id: int, table_name: str) -> bool:
@@ -74,6 +74,7 @@ class EncryptedTableHandler(ITableHandler):
             return None
         return_object = {
             "ulid": record["ulid"],
+            "hash": record['hash'],
             "payload" : self._encode_payload(record["payload"]),
         }
         return return_object
@@ -188,4 +189,4 @@ class MetaTableHandler():
         row = db_proxy.get_encrypted_record(table_name, user_id, ulid)
         if not row:
             return None
-        return row[2] # hash is stored at second position
+        return row['hash'] # hash is stored at second position
