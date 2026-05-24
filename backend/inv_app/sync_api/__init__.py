@@ -1,40 +1,25 @@
-from collections import defaultdict
-from .table_handler import ( 
-    ITableHandler, 
-    EncryptedTableHandler, 
-    EventTableHandler,
-    MetaTableHandler,
-)
-
+from ..db import db_proxy
+import base64
 
 class DBUpdater:
     def __init__(self):
-        self.handlers = defaultdict(ITableHandler)
-        self.operations = {}        
-        self._initOperationsMap()
-        self.event_handler = EventTableHandler()
-        self.encrypted_table = EncryptedTableHandler()
-        self.meta_handler = MetaTableHandler()
-        self._initHandlersMap()
+        self.registered_tables = {"wallet_assets", "sim_history"}
 
 
-    def _initHandlersMap(self):
-        """
-        Initialize map of handlers for each table
-        """
-
-        self.handlers["wallet_assets"] =  self.encrypted_table
-        self.handlers["sim_history"] = self.encrypted_table
-        self.handlers["events"] = self.event_handler
+    def process_add_event(self, user_id, timestamp, table_name, type, ulid, hash, payload) -> int | None:
+        table_hash = self.reevaluate_hash(user_id, table_name, hash)
+        return db_proxy.add_data_record(user_id, timestamp, table_name, type, ulid, hash, table_hash, self._decode_payload(payload))
 
 
-    def _initOperationsMap(self):
-        """
-        Initialize map of available operations
-        """
-
-        self.operations["add"] = self.add_record
-        self.operations["remove"] = self.remove_record
+    def process_remove_event(self, user_id, timestamp, table_name, type, ulid):
+        # get hash of removed element
+        obj_hash = self.get_record_hash(user_id, table_name, ulid)
+        if obj_hash is None:
+            table_hash = None
+        else:
+            table_hash = self.reevaluate_hash(user_id, table_name, obj_hash)
+        
+        return db_proxy.remove_data_record(user_id, timestamp, table_name, type, ulid, table_hash)
 
 
     def process_event(self, user_id, timestamp, table_name, type, ulid, hash, payload):
@@ -50,122 +35,14 @@ class DBUpdater:
         :param payload: data to be added to table
         """
 
-        op = self.operations.get(type)
-        if op is None:
+        if table_name not in self.registered_tables:
             return False
-        
-        ev_handler = self.handlers.get("events")
-        event_obj = {
-            "timestamp" : timestamp,
-            "table_name" : table_name,
-            "type" : type,
-            "ulid" : ulid
-        }
 
-        event_id = ev_handler.add_record(user_id, event_obj)
-        if event_id == -1:
-            return -1
-        # we should probably add everything in one take, so update both tables and commit both TODO
-        if not op(user_id, ulid, table_name, hash, payload):
-           return -1
-        
-        return event_id
+        if type == "add":
+            return self.process_add_event(user_id, timestamp, table_name, type, ulid, hash, payload)
 
-    def get_record(self, user_id, table_name, compare_obj):
-        """
-        Get record from the db
-
-        :param user_id: id of the user that owns the table
-        :param table_name: name of the table from which we should obtain data
-        :param compare_obj: params to be used for comparison
-        :return: true on success, false otherwise
-        """
-
-        handle = self.handlers.get(table_name)
-        if handle is None:
-            return None
-
-        return handle.get_record(user_id, 
-                    {
-                        "table_name" : table_name, 
-                        "compare_obj" : compare_obj
-                    })
-
-
-    def add_record(self, user_id, ulid, table_name, hash, payload) -> bool:
-        """
-        Add record to the table
-
-        :param user_id: id of the user 
-        :param ulid: unique identifier of the record
-        :param table_name: name of the table to be modified
-        :param hash: hash of the record
-        :param payload: payload to be added to table
-        """
-
-        handle = self.handlers.get(table_name)
-        if handle is None:
-            return False
-        ret = handle.add_record(user_id, {
-            "table_name" : table_name,
-            "ulid" : ulid,
-            "hash": hash,
-            "payload" : payload
-            })
-
-        if not ret:
-            return False
-        
-        if not self.meta_handler.update_hash(user_id, table_name, hash):
-            return False
-        return True
-        
-
-    def remove_record(self, user_id, ulid, table_name, hash=None, payload=None) -> bool:
-        """
-        Remove record from table_name + user_id, specified by payload members
-
-        :param user_id: user which data we are erasing
-        :param ulid: unique identifier of the record to be removed
-        :param table_name: table from which we wanna delete
-        :param hash: object hash, by default None for removing
-        :param payload: object specifying fields to identify deleted object
-        """
-
-        handle = self.handlers.get(table_name)
-        if handle is None:
-            return False
-        
-        # get hash of removed element
-        obj_hash = self.meta_handler.get_record_hash(user_id, table_name, ulid)
-        if obj_hash is None:
-            # record already removed from the db, return True 
-            return True
-
-        ret = handle.remove_record(user_id, {
-            "ulid" : ulid,
-            "table_name" : table_name,
-        })
-        if not ret:
-            return False
-        
-        if not self.meta_handler.update_hash(user_id, table_name, obj_hash):
-            return False
-        return True
-
-
-    def purge_table(self, user_id, table_name) -> bool:
-        """
-        Purge table and reset auto-incrementation
-
-        :param user_id: id of the user whose table we wanna purge
-        :param table_name: table to be purged
-        """
-
-        handle = self.handlers.get(table_name)
-        if handle is None:
-            return False
-        return handle.purge_table(user_id, table_name)
+        elif type == "remove":
+            return self.process_remove_event(user_id, timestamp, table_name, type, ulid)
     
 
     def get_pending_events(self, user_id, last_event_id) -> list[int]:
@@ -176,19 +53,39 @@ class DBUpdater:
         :param last_event_id: id of last event
         """
 
-        return self.event_handler.get_events_from_id(user_id, last_event_id)
+        return db_proxy.get_events_from_id(user_id, last_event_id)
     
+
+    def get_event(self, user_id, event_id):
+        return db_proxy.get_event(user_id, event_id)
+    
+
+    def get_data_record(self, user_id: int, table_name: str, ulid: int) -> object | None:
+        """
+        Get record from encrypted table and process its content so it can be jsonified.
+        """
+
+        record = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        if record is None:
+            return None
+        obj = {
+            "ulid" : record['ulid'],
+            "hash" : record['hash'],
+            "payload" : self._encode_payload(record['payload'])
+        }
+        return obj
+
 
     def get_events(self, user_id, last_event_id):
         """
-        Get all event's data 
+        Get all event's data and return it as list
         """
 
         ids = self.get_pending_events(user_id, last_event_id)
 
         records = []
         for id in ids:
-            event_obj = self.event_handler.get_record(user_id, {'compare_obj' : id})
+            event_obj = self.get_event(user_id, id)
             event_dir = {
                 "id" : event_obj[0],
                 "timestamp" : event_obj[1],
@@ -199,7 +96,7 @@ class DBUpdater:
             }
 
             if event_dir['type'] in "add":
-                encrypted_record = self.get_record(
+                encrypted_record = self.get_data_record(
                     user_id, 
                     event_dir['table_name'],
                     event_dir['ulid']
@@ -213,3 +110,60 @@ class DBUpdater:
             records.append(event_dir)
 
         return records
+    
+
+    def _encode_payload(self, msg):
+        """
+        Encode encrypted payload so that it can be serializable
+
+        :param msg: encrypted payload to be encoded
+        """
+
+        encoded_payload = base64.b64encode(msg).decode("utf-8")
+        return encoded_payload
+    
+
+    def _decode_payload(self, payload):
+        """
+        Decode payload encoded as base64 string
+
+        :param payload: data to be decoded
+        """
+
+        return base64.b64decode(payload)
+    
+
+    def reevaluate_hash(self, user_id, table_name, hash):
+        """
+        Obtain hash of table and count new one by xoring with provided as arg
+        """
+
+        old_hash = db_proxy.get_collection_hash(user_id, table_name)
+        # count new hash using the old one
+        new_hash = self._xor_hashes(old_hash, hash)
+        return new_hash
+
+
+    def _xor_hashes(self, hash1: str, hash2: str) -> str:
+        """
+        Turn two hash strings into bytes, hash them and stransform back to string
+        """
+
+        # cover edge case in which hash is empty on init
+        if hash1 is None:
+            return hash2
+        
+        b1 = bytes.fromhex(hash1)
+        b2 = bytes.fromhex(hash2)
+
+        if len(b1) != len(b2):
+            raise ValueError("Hashes must be same length!")
+        xored = bytes(a ^ b for a,b in zip(b1,b2))
+        return xored.hex()
+    
+
+    def get_record_hash(self, user_id, table_name, ulid):
+        row = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        if not row:
+            return None
+        return row['hash'] # hash is stored at second position

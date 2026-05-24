@@ -46,14 +46,6 @@ export default function SyncTest() {
         return true;
     }
 
-    async function purge_events_table() {
-        await sync_worker.purgeTable("events");
-    }
-
-    async function purge_wallet_assets() {
-        await sync_worker.purgeTable("wallet_assets");
-    }
-
     async function get_events_from() {
         var ev_endpoint = "http://127.0.0.1:5000/sync/pull_events/"
         var response = null;
@@ -78,8 +70,6 @@ export default function SyncTest() {
     <>
         <h1>Sync Test</h1>
         <button onClick={test1}>Push data</button>        
-        <button onClick={purge_wallet_assets}>Purge wallet assets</button>
-        <button onClick={purge_events_table}>Purge events</button>
         <button onClick={get_data}>Get data</button>
         <button onClick={get_events_from}>Get events</button>
     </>

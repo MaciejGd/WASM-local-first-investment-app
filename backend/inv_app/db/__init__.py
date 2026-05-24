@@ -69,60 +69,6 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.reset_collection(db, user_id, table_name)
 
-
-    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, hash: str, payload: str) -> int:
-        """
-        Add new data asset to the table specified by the table name and user_id
-
-        :param table_name: name of the table to be modified. To be extended by user_id
-        :param user_id: id of the user which data would be modified
-        :param ulid: unique id of appended record
-        :param payload: payload to be added to table
-        :returns: id of added record on success, -1 otherwise
-        """
-
-        db = self.get_db()
-        return self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, hash, payload)
-
-
-    # def add_data_record(self, user_id, timestamp, table_name, type, ulid, obj_hash, new_hash, payload) -> bool:
-    #     db = self.get_db()
-
-    #     self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, obj_hash, payload)
-    #     self.add_encrypted_data_record(db, table_name, user_id, ulid, new_hash, payload)
-    #     self.update_collection_hash(obj_hash)
-
-    def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> int:
-        """
-        Add new event record to the user's event table
-
-        :param user_id id of the user performing modifications
-        :param timestamp of the performed operation
-        :param table_name name of the table that we wanna modify
-        :param ulid unique identifier of the record added
-        :param type of the operation to be performed on db
-        :returns: id of added record, -1 otherwise
-        """
-
-        db = self.get_db()
-        return self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
-
-
-    def remove_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
-        """
-        Remove event record from the user's event table
-
-        :param user_id id of the user performing modifications
-        :param timestamp of the performed operation
-        :param table_name name of the table that we wanna modify
-        :param ulid unique identifier of the record added
-        :param type of the operation to be performed on db
-        """
-
-        db = self.get_db()
-        return self.db_handler.remove_event_record(db, user_id, timestamp, table_name, type, ulid)
-
-
     def get_encrypted_record(self, table_name: str, user_id: int, ulid: str):
         """
         Get record from encrypted collection, identified by user_id
@@ -134,19 +80,6 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.get_encrypted_record(db, table_name, user_id, ulid)
-
-
-    def remove_encrypted_record(self, table_name: str, user_id: int, ulid: str) -> bool:
-        """
-        Remove encrypted data record from collection
-
-        :param table_name: name of the table to be modified
-        :param user_id: id of the user owning the record
-        :param ulid: unique identifier of the element to be removed
-        """
-
-        db = self.get_db()
-        return self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
 
 
     def get_events_from_id(self, user_id: int, last_event_id: int) -> list[int]:
@@ -179,18 +112,54 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.get_collection_hash(db, user_id, col_name)
 
-
-    def update_collection_hash(self, user_id, col_name, hash):
+    def add_data_record(self, user_id, timestamp, table_name, type, ulid, record_hash, table_hash, payload):
         """
-        Update hash for speciifed user's collection
+        Add data record to the dbs. Adds event as well as data and updates table hash.
+        After all operations are performed successfully, commits to the db.
 
-        :param user_id: id of the user owning collection
-        :param col_name: name of the collection
-        :param hash: new hash to be set for collection
+        :param user_id: id of the user owning the request
+        :param timestamp: timestamp of event
+        :param table_name: name of the table which is being modified
+        :param type: type of the operetation
+        :param ulid: unique identifier of the record
+        :param hash: hash of the record
+        :param payload: payload to be added to db
         """
 
         db = self.get_db()
-        return self.db_handler.update_collection_hash(db, user_id, col_name, hash)
+        event_id = self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
+        if event_id == -1:
+            return None
+        
+        rec_id = self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, record_hash, payload)
+        if rec_id == -1:
+            return None
+        
+        up_state = self.db_handler.update_collection_hash(db, user_id, table_name, table_hash)
+        if not up_state:
+            return None
+        return event_id
+    
+
+    def remove_data_record(self, user_id, timestamp, table_name, type, ulid, table_hash):
+        db = self.get_db()
+        event_id = self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
+        if event_id == -1:
+            return None
+        
+        if table_hash is None:
+            return event_id - 1
+        
+        rec_id = self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
+        if not rec_id:
+            return None
+
+        up_state = self.db_handler.update_collection_hash(db, user_id, table_name, table_hash)
+        if not up_state:
+            return None
+        return event_id
+        
+
     
 
 # initialize db proxy with wanted implementation, for now sqlite3

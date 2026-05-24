@@ -125,24 +125,11 @@ class SQLite3DB(db_handler.DBHandler):
 
             cursor = db_handle.execute(SQLite3DB.ADD_EVENT_RECORD.format(table), (timestamp, table_name, type, ulid))
 
-            db_handle.commit()
+            # db_handle.commit()
             return cursor.lastrowid
         except:
             db_handle.rollback()
             return -1
-
-
-    def remove_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
-        table = SQLite3DB.EVENTS_TABLE + str(user_id)
-
-        try:
-            db_handle.execute(SQLite3DB.DELETE_EVENT_RECORD.format(table),
-                                (timestamp, table_name, type, ulid))
-            db_handle.commit()
-            return True
-        except:
-            db_handle.rollback()
-            return False
 
 
     def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload) -> int:
@@ -153,7 +140,7 @@ class SQLite3DB(db_handler.DBHandler):
             cursor = db_handle.execute(SQLite3DB.ADD_ENCRYPTED_RECORD.format(table),
                                 (ulid, hash, payload,)
                             )
-            db_handle.commit()
+            # db_handle.commit()
             return cursor.lastrowid
         except:
             db_handle.rollback()
@@ -179,7 +166,7 @@ class SQLite3DB(db_handler.DBHandler):
 
         try:
             db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
-            db_handle.commit()
+            # db_handle.commit()
             return True
         except:
             db_handler.rollback()
@@ -220,8 +207,10 @@ class SQLite3DB(db_handler.DBHandler):
             db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
             db_handle.execute(SQLite3DB.UPDATE_META.format(table),  (table_record, hash,))
             db_handle.commit()
+            return True
         except Exception as e: 
             db_handle.rollback()
+            return False
 
 
     def get_collection_hash(self, db_handle, user_id, table_name):

@@ -29,29 +29,10 @@ def push_changes():
 
     updater = DBUpdater()    
     event_id = updater.process_event(session['user_id'], timestamp, table_name, type, ulid, obj_hash, payload)
-    if event_id == -1:
+    if event_id == None:
         abort(500, "Pushing changes to remote failed")
 
     return jsonify({"event_id" : event_id})
-
-
-
-
-@bp.route('/purge', methods=('POST',))
-@auth.login_required
-def reset_table():
-    """
-        Endpoint for purging user's table
-    """
-
-    post_json = request.get_json()
-    table = post_json.get("table_name")
-
-    updater = DBUpdater()
-    if not updater.purge_table(session['user_id'], table):
-        abort(500, "Failed to purge table for the user")
-    
-    return jsonify(success=True)
 
 
 @bp.route('/get_record/<table_name>/<ulid>', methods=('GET', ))

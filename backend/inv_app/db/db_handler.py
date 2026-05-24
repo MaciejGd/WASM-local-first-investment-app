@@ -38,10 +38,6 @@ class DBHandler(ABC):
     @abstractmethod
     def add_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> int:
         raise NotImplementedError
-        
-    @abstractmethod
-    def remove_event_record(self, db_handle, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
-        raise NotImplementedError
     
     @abstractmethod
     def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload) -> int:
@@ -63,7 +59,6 @@ class DBHandler(ABC):
     def get_event(self, db_handler, user_id, last_event_id):
         raise NotImplementedError
     
-
     @abstractmethod
     def get_collection_hash(self, db_handle, user_id: int, collection_name: str) -> str:
         raise NotImplementedError
