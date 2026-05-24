@@ -44,7 +44,7 @@ class DBHandler(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> int:
+    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload) -> int:
         raise NotImplementedError
 
     @abstractmethod
@@ -61,4 +61,14 @@ class DBHandler(ABC):
     
     @abstractmethod
     def get_event(self, db_handler, user_id, last_event_id):
+        raise NotImplementedError
+    
+
+    @abstractmethod
+    def get_collection_hash(self, db_handle, user_id: int, collection_name: str) -> str:
+        raise NotImplementedError
+    
+
+    @abstractmethod
+    def update_collection_hash(self, db_handle, user_id: int, collection_name: str, hash: str):
         raise NotImplementedError

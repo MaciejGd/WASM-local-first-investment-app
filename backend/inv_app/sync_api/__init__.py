@@ -1,5 +1,10 @@
 from collections import defaultdict
-from .table_handler import ITableHandler, EncryptedTableHandler, EventTableHandler
+from .table_handler import ( 
+    ITableHandler, 
+    EncryptedTableHandler, 
+    EventTableHandler,
+    MetaTableHandler,
+)
 
 
 class DBUpdater:
@@ -9,6 +14,7 @@ class DBUpdater:
         self._initOperationsMap()
         self.event_handler = EventTableHandler()
         self.encrypted_table = EncryptedTableHandler()
+        self.meta_handler = MetaTableHandler()
         self._initHandlersMap()
 
 
@@ -31,7 +37,7 @@ class DBUpdater:
         self.operations["remove"] = self.remove_record
 
 
-    def process_event(self, user_id, timestamp, table_name, type, ulid, payload):
+    def process_event(self, user_id, timestamp, table_name, type, ulid, hash, payload):
         """
         Process incoming user's event
 
@@ -40,6 +46,7 @@ class DBUpdater:
         :param table_name: name of the table to be modified
         :param type: type of the event, either "add" or "remove"
         :param ulid: unique record identifier
+        :param hash: hashed object for fast compliance check
         :param payload: data to be added to table
         """
 
@@ -59,8 +66,7 @@ class DBUpdater:
         if event_id == -1:
             return -1
         # we should probably add everything in one take, so update both tables and commit both TODO
-        if not op(user_id, ulid, table_name, payload):
-           ev_handler.remove_record(user_id, event_obj) # remove event record if already added
+        if not op(user_id, ulid, table_name, hash, payload):
            return -1
         
         return event_id
@@ -86,42 +92,66 @@ class DBUpdater:
                     })
 
 
-    def add_record(self, user_id, ulid, table_name, payload) -> bool:
+    def add_record(self, user_id, ulid, table_name, hash, payload) -> bool:
         """
         Add record to the table
 
         :param user_id: id of the user 
+        :param ulid: unique identifier of the record
         :param table_name: name of the table to be modified
+        :param hash: hash of the record
         :param payload: payload to be added to table
         """
 
         handle = self.handlers.get(table_name)
         if handle is None:
             return False
-        return handle.add_record(user_id, {
+        ret = handle.add_record(user_id, {
             "table_name" : table_name,
-            "ulid" : ulid, 
+            "ulid" : ulid,
+            "hash": hash,
             "payload" : payload
             })
 
+        if not ret:
+            return False
+        
+        if not self.meta_handler.update_hash(user_id, table_name, hash):
+            return False
+        return True
+        
 
-    def remove_record(self, user_id, ulid, table_name, payload=None) -> bool:
+    def remove_record(self, user_id, ulid, table_name, hash=None, payload=None) -> bool:
         """
         Remove record from table_name + user_id, specified by payload members
 
         :param user_id: user which data we are erasing
         :param ulid: unique identifier of the record to be removed
         :param table_name: table from which we wanna delete
+        :param hash: object hash, by default None for removing
         :param payload: object specifying fields to identify deleted object
         """
 
         handle = self.handlers.get(table_name)
         if handle is None:
             return False
-        return handle.remove_record(user_id, {
+        
+        # get hash of removed element
+        obj_hash = self.meta_handler.get_record_hash(user_id, table_name, ulid)
+        if obj_hash is None:
+            # record already removed from the db, return True 
+            return True
+
+        ret = handle.remove_record(user_id, {
             "ulid" : ulid,
             "table_name" : table_name,
         })
+        if not ret:
+            return False
+        
+        if not self.meta_handler.update_hash(user_id, table_name, obj_hash):
+            return False
+        return True
 
 
     def purge_table(self, user_id, table_name) -> bool:

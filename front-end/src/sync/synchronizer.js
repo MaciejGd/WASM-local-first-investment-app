@@ -83,11 +83,12 @@ export class DBSynchronizer {
 
     }
 
-    async addAdditionToEventQueue(ulid, table_name, payload) {
+    async addAdditionToEventQueue(ulid, table_name, hash, payload) {
         var add_object =  ({
             ulid: ulid,
             table_name: table_name,
             type: "add",
+            hash: hash,
             payload: payload,
         });
         await this._addEventToQueue(add_object);
@@ -98,6 +99,7 @@ export class DBSynchronizer {
             ulid: ulid,
             table_name: table_name,
             type: "remove",
+            hash: null, // we should not need the hash for removing, it can be retrieved from the DB
             payload: null,
         };
         await this._addEventToQueue(rem_object);
@@ -168,7 +170,7 @@ export class DBSynchronizer {
         // check how many events are actyually pending in the list
         try {
             var lastId = await this.db_updater.getLastEventId();
-            var ids = await RequestGET(DBSynchronizer.PULL_EVENTS_IDS + toString(lastId));
+            var ids = await RequestGET(DBSynchronizer.PULL_EVENTS_IDS + lastId.toString());
             console.log(ids);
             // here we should probably validate the data
             if (ids.length == 0) {

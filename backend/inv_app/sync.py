@@ -24,10 +24,11 @@ def push_changes():
     table_name = post_json.get('table_name')
     timestamp = post_json.get('timestamp')    
     type = post_json.get('type')
+    obj_hash = post_json.get('hash')
     payload = post_json.get('payload')
 
     updater = DBUpdater()    
-    event_id = updater.process_event(session['user_id'], timestamp, table_name, type, ulid, payload)
+    event_id = updater.process_event(session['user_id'], timestamp, table_name, type, ulid, obj_hash, payload)
     if event_id == -1:
         abort(500, "Pushing changes to remote failed")
 

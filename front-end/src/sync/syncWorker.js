@@ -8,7 +8,7 @@ onmessage = async (e) => {
     const data = e.data;
     // TODO, should we handle exceptions in here???
     if (data.type == "add") {
-        await sync.addAdditionToEventQueue(data.ulid, data.table_name, data.payload);
+        await sync.addAdditionToEventQueue(data.ulid, data.table_name, data.hash, data.payload);
     }
     else if (data.type == "del") {
         await sync.addRemovalToEventQueue(data.ulid, data.table_name);

@@ -6,6 +6,7 @@ from flask import current_app
 class SQLite3DB(db_handler.DBHandler):
     WALLET_TABLE = "wallet_assets_"
     EVENTS_TABLE = "events_"
+    META_TABLE = "meta_"
     # delet from table name ... WHERE name='table name'
     RESET_TABLE = "DELETE FROM {};"
     RESET_AUTOINCREMENT = "DELETE FROM SQLITE_SEQUENCE \
@@ -34,12 +35,27 @@ class SQLite3DB(db_handler.DBHandler):
     CREATE_ENCRYPTED_TABLE = "CREATE TABLE IF NOT EXISTS {} \
                                 (id INTEGER PRIMARY KEY AUTOINCREMENT, \
                                     ulid TEXT UNIQUE NOT NULL, \
+                                    hash TEXT NOT NULL, \
                                     payload BLOB NOT NULL); "
 
-    ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, payload) VALUES (?, ?);"
+    ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, hash, payload) VALUES (?, ?, ?);"
     REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=?;"
     GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
 
+    # update meta table
+    CREATE_META_TABLE = "CREATE TABLE IF NOT EXISTS {} \
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                            table_name TEXT UNIQUE NOT NULL,\
+                            hash TEXT NOT NULL);"
+    
+    UPDATE_META = "INSERT INTO {} (table_name, hash)\
+                    VALUES (?, ?)\
+                    ON CONFLICT(table_name)\
+                    DO UPDATE SET\
+                        table_name=excluded.table_name,\
+                        hash=excluded.hash;"
+
+    GET_META = "SELECT * FROM {} WHERE table_name = ?;"
 
     def __init__(self):
         pass
@@ -96,6 +112,7 @@ class SQLite3DB(db_handler.DBHandler):
             )
             return True
         except:
+            db_handle.rollback()
             return False
 
 
@@ -107,10 +124,11 @@ class SQLite3DB(db_handler.DBHandler):
             db_handle.execute(SQLite3DB.APPLY_TIMESTAMP_INDEX.format(table))
 
             cursor = db_handle.execute(SQLite3DB.ADD_EVENT_RECORD.format(table), (timestamp, table_name, type, ulid))
-            db_handle.commit()
 
+            db_handle.commit()
             return cursor.lastrowid
         except:
+            db_handle.rollback()
             return -1
 
 
@@ -123,20 +141,22 @@ class SQLite3DB(db_handler.DBHandler):
             db_handle.commit()
             return True
         except:
+            db_handle.rollback()
             return False
 
-    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, payload) -> int:
+
+    def add_encrypted_data_record(self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload) -> int:
         table = table_name + "_" + str(user_id)
         # try creating table if not exists already and add record
         try:
             db_handle.execute(SQLite3DB.CREATE_ENCRYPTED_TABLE.format(table))
             cursor = db_handle.execute(SQLite3DB.ADD_ENCRYPTED_RECORD.format(table),
-                                (ulid, payload)
+                                (ulid, hash, payload,)
                             )
-
             db_handle.commit()
             return cursor.lastrowid
         except:
+            db_handle.rollback()
             return -1
 
 
@@ -144,12 +164,13 @@ class SQLite3DB(db_handler.DBHandler):
         table = table_name + "_" + str(user_id)
 
         try:
-            return db_handle.execute(
+            val = db_handle.execute(
                 SQLite3DB.GET_ENCRYPTED_RECORD.format(table),
                 (ulid,),
             ).fetchone()
-        except Exception as e:
-            print(e)
+            return val
+        except:
+            db_handle.rollback()
             return None
 
 
@@ -157,13 +178,11 @@ class SQLite3DB(db_handler.DBHandler):
         table = table_name + "_" + str(user_id)
 
         try:
-            cursor = db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
-
+            db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
             db_handle.commit()
-
-            print(cursor.rowcount)
             return True
         except:
+            db_handler.rollback()
             return False
 
 
@@ -177,8 +196,9 @@ class SQLite3DB(db_handler.DBHandler):
             ids = [row[0] for row in records]
             return ids
         except Exception as e:
+            db_handle.rollback()
             return []
-
+        
 
     def get_event(self, db_handle, user_id, event_id):
         table = SQLite3DB.EVENTS_TABLE + str(user_id)
@@ -192,3 +212,23 @@ class SQLite3DB(db_handler.DBHandler):
         except Exception as e:
             return None
 
+
+    def update_collection_hash(self, db_handle, user_id, table_name, hash):
+        table = SQLite3DB.META_TABLE + str(user_id)
+        table_record = table_name + "_" + str(user_id) # table which record should be updated
+        try:    
+            db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
+            db_handle.execute(SQLite3DB.UPDATE_META.format(table),  (table_record, hash,))
+            db_handle.commit()
+        except Exception as e: 
+            db_handle.rollback()
+
+
+    def get_collection_hash(self, db_handle, user_id, table_name):
+        table = SQLite3DB.META_TABLE + str(user_id)
+        table_record = table_name + "_" + str(user_id)
+        try:
+            hash = db_handle.execute(SQLite3DB.GET_META.format(table), (table_record,))
+            return hash.fetchone()[2]
+        except:
+            db_handle.rollback()

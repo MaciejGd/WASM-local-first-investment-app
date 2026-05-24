@@ -1,9 +1,9 @@
 from . import (
-    db_handler, 
+    db_handler,
     db_sqlite
 )
 
-import click 
+import click
 from flask import current_app, g
 
 class DBProxy(object):
@@ -17,7 +17,7 @@ class DBProxy(object):
                                         db_path=current_app.config['DATABASE']
                                     )
         return g.db
-    
+
     def close_db(self, e=None):
         # show exception if occurs
         if e is not None:
@@ -34,7 +34,7 @@ class DBProxy(object):
     def get_user_data(self, id: int):
         """
         Get information about the user specified with user_id from DB
-        
+
         :param self: Description
         :param id: Description
         :type id: int id of user that we want get info about
@@ -42,12 +42,12 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.get_user_data(db, id)
-    
-    
+
+
     def get_username_data(self, username: str):
         """
-        Get information about the user by his username 
-        
+        Get information about the user by his username
+
         :param self: Description
         :param username: Username to be get from the db
         :type username: str
@@ -55,12 +55,12 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.get_username_data(db, username)
-    
+
 
     def reset_collection(self, user_id: int, table_name: str) -> bool:
         """
         Reset wallet table for the user
-        
+
         :param self: Description
         :param user_id: id of the user that table should be purged
         :type username: int
@@ -68,9 +68,9 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.reset_collection(db, user_id, table_name)
-    
 
-    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, payload: str) -> int:
+
+    def add_encrypted_data_record(self, table_name: str, user_id: int, ulid: int, hash: str, payload: str) -> int:
         """
         Add new data asset to the table specified by the table name and user_id
 
@@ -82,9 +82,16 @@ class DBProxy(object):
         """
 
         db = self.get_db()
-        return self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, payload)
-    
-    
+        return self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, hash, payload)
+
+
+    # def add_data_record(self, user_id, timestamp, table_name, type, ulid, obj_hash, new_hash, payload) -> bool:
+    #     db = self.get_db()
+
+    #     self.db_handler.add_encrypted_data_record(db, table_name, user_id, ulid, obj_hash, payload)
+    #     self.add_encrypted_data_record(db, table_name, user_id, ulid, new_hash, payload)
+    #     self.update_collection_hash(obj_hash)
+
     def add_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> int:
         """
         Add new event record to the user's event table
@@ -99,8 +106,8 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.add_event_record(db, user_id, timestamp, table_name, type, ulid)
-    
-    
+
+
     def remove_event_record(self, user_id: int, timestamp: int, table_name: str, type: str, ulid: str) -> bool:
         """
         Remove event record from the user's event table
@@ -114,7 +121,7 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.remove_event_record(db, user_id, timestamp, table_name, type, ulid)
-    
+
 
     def get_encrypted_record(self, table_name: str, user_id: int, ulid: str):
         """
@@ -137,10 +144,10 @@ class DBProxy(object):
         :param user_id: id of the user owning the record
         :param ulid: unique identifier of the element to be removed
         """
-        
+
         db = self.get_db()
         return self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
-    
+
 
     def get_events_from_id(self, user_id: int, last_event_id: int) -> list[int]:
         """
@@ -149,15 +156,42 @@ class DBProxy(object):
 
         db = self.get_db()
         return self.db_handler.get_events_from_id(db, user_id, last_event_id)
-    
 
-    def get_event(self, user_id: int, event_id: int): 
+
+    def get_event(self, user_id: int, event_id: int):
         """
         Get event record from the event collection, specified by event_id
         """
 
         db = self.get_db()
         return self.db_handler.get_event(db, user_id, event_id)
+
+
+    def get_collection_hash(self, user_id: int, col_name: str) -> str:
+        """
+        Get hash of the user's collection
+
+        :param user_id: id of the user owning the table
+        :param col_name: name of the collection we want hash from
+        :returns: hash for the specified collection
+        """
+
+        db = self.get_db()
+        return self.db_handler.get_collection_hash(db, user_id, col_name)
+
+
+    def update_collection_hash(self, user_id, col_name, hash):
+        """
+        Update hash for speciifed user's collection
+
+        :param user_id: id of the user owning collection
+        :param col_name: name of the collection
+        :param hash: new hash to be set for collection
+        """
+
+        db = self.get_db()
+        return self.db_handler.update_collection_hash(db, user_id, col_name, hash)
+    
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")
@@ -175,4 +209,4 @@ def init_app(app):
     app.teardown_appcontext(db_proxy.close_db)
     app.cli.add_command(init_db_command)
 
-    
+

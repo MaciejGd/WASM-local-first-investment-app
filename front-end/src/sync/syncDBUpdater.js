@@ -5,13 +5,6 @@
 export class SyncDBUpdater {
     constructor(db_handle) {
         this.db_handle = db_handle;
-        this._initTableMap();
-    }
-
-    _initTableMap() {
-        this.table_map = new Map();
-        this.table_map.set("wallet_assets", this.db_handle.wallet_assets);
-        this.table_map.set("sim_history", this.db_handle.sim_history);
     }
 
     /**
@@ -22,7 +15,7 @@ export class SyncDBUpdater {
      */
     async addRecord(ulid, table_name, payload) {
         try {
-            var table_handle = this.table_map.get(table_name);
+            var table_handle = this.db_handle.table(table_name);
             // insert ulid inside payload
             payload.ulid = ulid;
             await table_handle.put(payload);
@@ -39,7 +32,7 @@ export class SyncDBUpdater {
      */
     async removeRecord(ulid, table_name) {
         try {
-            var table_handle = this.table_map.get(table_name);
+            var table_handle = this.db_handle.table(table_name);
             await table_handle.where("ulid").equals(ulid).delete();
         }
         catch (error) {

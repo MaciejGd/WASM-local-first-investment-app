@@ -99,11 +99,26 @@ export class IndexedDbHandler {
         if (table_name == undefined) {
             return;
         }
-        sync_worker.AddAdditionEvent(ulid, table_name, payload); // TODO, should we somehow secure that???
-        
+        var obj_hash = await this.hashRecord(payload, ulid);
+        sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
         payload.ulid = ulid;
+        payload.hash = obj_hash; // hash the payload and pack along the original payload 
         var id = await table.add(payload);
         return id;
+    }
+
+    /**
+     * Hash object appended to the db
+     * @param {object} payload payload to be hashed
+     * @param {string} ulid ulid to be hashed
+     * @returns hash of created object
+     */
+    async hashRecord(payload, ulid) {
+        const obj_hash = {
+            ulid: ulid,
+            payload: payload,
+        };
+        return await hash(obj_hash);
     }
 
     /**

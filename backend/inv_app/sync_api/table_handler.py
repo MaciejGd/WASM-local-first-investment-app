@@ -38,14 +38,21 @@ class EncryptedTableHandler(ITableHandler):
         self.ulid = "ulid"
         self.payload = "payload"
         self.table_name = "table_name"
+        self.hash = "hash"
 
 
     def add_record(self, user_id, data) -> int:
-        (table_name, ulid, payload) = self._unpack_data(data)
-        if table_name is None or user_id is None or ulid is None or payload is None:
+        (table_name, ulid, hash, payload) = self._unpack_data(data)
+        if table_name is None or user_id is None or ulid is None or payload is None or hash is None:
             return False
 
-        return db_proxy.add_encrypted_data_record(table_name, user_id, ulid, self._decode_payload(payload))
+        return db_proxy.add_encrypted_data_record(
+                            table_name, 
+                            user_id, 
+                            ulid, 
+                            hash, 
+                            self._decode_payload(payload)
+                        )
         
 
     def remove_record(self, user_id, data) -> bool:
@@ -94,7 +101,8 @@ class EncryptedTableHandler(ITableHandler):
         table_name = data.get(self.table_name)
         ulid = data.get(self.ulid)
         payload = data.get(self.payload)
-        return (table_name, ulid, payload)
+        hash = data.get(self.hash)
+        return (table_name, ulid, hash, payload)
     
 
     def _unpack_remove_data(self, data):
@@ -144,3 +152,40 @@ class EventTableHandler(ITableHandler):
         timestamp = data.get(self.timestamp_col)
         type = data.get(self.type_col)
         return (timestamp, table_name, type, ulid)
+    
+
+class MetaTableHandler():
+    def update_hash(self, user_id, table_name, hash):
+        # what we need to do in here:
+        # 1) get actual hash from the table
+        # 2) xor it with our new hash
+        # 3) put new hash to db
+        old_hash = db_proxy.get_collection_hash(user_id, table_name)
+        # count new hash using the old one
+        new_hash = self._xor_hashes(old_hash, hash)
+        db_proxy.update_collection_hash(user_id, table_name, new_hash)
+        return True
+
+    def _xor_hashes(self, hash1: str, hash2: str) -> str:
+        """
+        Turn two hash strings into bytes, hash them and stransform back to string
+        """
+
+        # cover edge case in which hash is empty on init
+        if hash1 is None:
+            return hash2
+        
+        b1 = bytes.fromhex(hash1)
+        b2 = bytes.fromhex(hash2)
+
+        if len(b1) != len(b2):
+            raise ValueError("Hashes must be same length!")
+        xored = bytes(a ^ b for a,b in zip(b1,b2))
+        return xored.hex()
+    
+
+    def get_record_hash(self, user_id, table_name, ulid):
+        row = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        if not row:
+            return None
+        return row[2] # hash is stored at second position

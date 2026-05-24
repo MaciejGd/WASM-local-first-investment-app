@@ -38,13 +38,15 @@ export class SyncWorkerWrapper {
      * Add event with new data addition to event's queue
      * @param {string} ulid unique identifier of added record
      * @param {string} table_name name of the table to be modified
+     * @param {string} hash hash of the object for checking object compliance
      * @param {object} payload data to be added to db
      */
-    async AddAdditionEvent(ulid, table_name, payload) {
+    async AddAdditionEvent(ulid, table_name, hash, payload) {
         this.worker.postMessage({
             type: "add",
             ulid: ulid,
             table_name: table_name,
+            hash: hash,
             payload: payload,
         });
     }

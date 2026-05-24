@@ -22,3 +22,8 @@ export function getDBInstance() {
 
     return dbInstance;
 }
+
+
+export function updateValue(table) {
+
+}
