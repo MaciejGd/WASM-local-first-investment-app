@@ -5,17 +5,16 @@
 UNIT_TEST(SimulationOutputs, Constructor) {
     SimulationOutput out(2, 3);
     CHECK_EQUAL(out.output.size(), 2);
-    CHECK_EQUAL(out.output[0].second.rows(), 3);
-    CHECK_EQUAL(out.output[0].second.cols(), 1);
-    CHECK_EQUAL(out.output[0].second[0][0], 0.0);
+    CHECK_EQUAL(out.output[0].second.size(), 3);
+    CHECK_EQUAL(out.output[0].second[0], 0.0);
 }
 
 UNIT_TEST(SimulationOutputs, Sort) {
     std::vector<double> res = {2.0, 3.0, 1.0};
-    std::vector<CMatrix<double>> mats = {
-        CMatrix<double>(1,2),
-        CMatrix<double>(2,3),
-        CMatrix<double>(1,5)
+    std::vector<std::vector<double>> mats = {
+        {1,2,3},
+        {4,2,1},
+        {3,3,3}
     };
     SimulationOutput out(3, 3);
     for (int i = 0; i < res.size(); i++) {
@@ -34,10 +33,10 @@ UNIT_TEST(SimulationOutputs, Sort) {
 
 UNIT_TEST(SimulationOutputs, Getters) {
     std::vector<double> res = {2.0, 3.0, 1.0};
-    std::vector<CMatrix<double>> mats = {
-        CMatrix<double>(1,2),
-        CMatrix<double>(2,3),
-        CMatrix<double>(1,5)
+    std::vector<std::vector<double>> mats = {
+        {1,2,3},
+        {4,2,1},
+        {3,3,3}
     };
     SimulationOutput out(3, 3);
     for (int i = 0; i < res.size(); i++) {
@@ -58,10 +57,10 @@ UNIT_TEST(SimulationOutputs, Getters) {
 
 UNIT_TEST(SimulationOutputs, Setters) {
     std::vector<double> res = {2.0, 3.0, 1.0};
-    std::vector<CMatrix<double>> mats = {
-        CMatrix<double>(1,2),
-        CMatrix<double>(2,3),
-        CMatrix<double>(1,5)
+    std::vector<std::vector<double>> mats = {
+        {1,2,3},
+        {4,2,1},
+        {3,3,3}
     };
     SimulationOutput out(3, 3);
     for (int i = 0; i < res.size(); i++) {

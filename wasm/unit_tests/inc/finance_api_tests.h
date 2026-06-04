@@ -330,7 +330,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationStockChanges) {
     for (int i = 0; i < stocks_changes.size(); i++) {
         double sum = 0.0;
         for (int j = 0; j < 3; j++) {
-            sum += (weights[j] * stocks_changes[i][j][0]);
+            sum += (weights[j] * stocks_changes[i][j]);
         }
         CHECK_EQUAL_FLOAT(sum, expected_results[i]);
     }

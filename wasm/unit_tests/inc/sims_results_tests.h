@@ -201,9 +201,9 @@ UNIT_TEST(SimsResultsTests, SetVAR) {
         output.output[i].first = returns[i];
         auto& mat = output.output[i].second;
         auto expected = stock_changes_mats[i];
-        mat[0][0] = expected[0];
-        mat[1][0] = expected[1];
-        mat[2][0] = expected[2];
+        mat[0] = expected[0];
+        mat[1] = expected[1];
+        mat[2] = expected[2];
     }
     output.sort(); // crutial for counting!!!
     res.t_SetVAR(output, weights);
