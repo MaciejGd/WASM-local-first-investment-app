@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <random>
+#include <thread>
 #include <cmath>
 #include "../linalg/matrix_special.h"
 #include "./random_generator.h"
@@ -111,27 +112,96 @@ public:
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
-        // run simulation TODO - introduce multithreading in here so Simulation is sped up
+        // run simulation TODO - introduce multithreading in here so Simulation is sped u
+        // for (int i = 0; i < sims; i++) {
+        //     for (int j = 1; j < time+1; j++) {
+        //         // generate random samples
+        //         CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
+        //         // add means + randoms generated with probability equivalent to covariance matrix
+        //         auto motion = means + (cholesky * random_samples);
+        //         sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
+        //         // turn into a simple returns space
+        //         auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
+        //             return std::exp(el) - 1;
+        //         });
+        //         // store returns as we need upsides and drawdowns
+        //         sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
+        //         // update minimal drawdown
+        //         drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
+        //         upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
+        //     }
+        // }
+        // return sim_out;
+        // FAST PATH: Use raw arrays instead of matrices for per-simulation data
+        // Preallocate cumulative log returns as vector (not matrix)
         for (int i = 0; i < sims; i++) {
-            for (int j = 1; j < time+1; j++) {
-                // generate random samples
-                CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
-                // add means + randoms generated with probability equivalent to covariance matrix
-                auto motion = means + (cholesky * random_samples);
-                sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
-                // turn into a simple returns space
-                auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
-                    return std::exp(el) - 1;
-                });
-                // store returns as we need upsides and drawdowns
-                sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
-                // update minimal drawdown
-                drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
-                upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
+            std::vector<double> cumLogReturns(m_stocks, 0.0);
+            std::vector<double> expReturns(m_stocks);  // reuse buffer
+            std::vector<double> motion(m_stocks);      // reuse for Cholesky output
+            for (int j = 0; j < time; j++) {                
+                // 1. Generate random normals (returns vector, not matrix)
+                auto randNormals = m_rand_gen->GenerateRandomSamples(m_stocks);
+                
+                // 2. Compute motion = means + cholesky * randNormals
+                //    Inline this as vector operations (avoid matrix allocation)
+                for (int k = 0; k < m_stocks; k++) {
+                    double sum = 0.0;
+                    // skip upper triangle as cholesky is lower triangular
+                    for (int l = 0; l <= k; l++) {
+                        sum += cholesky[k][l] * randNormals[l][0];
+                    }
+                    motion[k] = means[k][0] + sum;  // add mean
+                    cumLogReturns[k] += motion[k];
+                }
+                
+                // 3. Portfolio return = dot_product(weights, exp(cumLogReturns) - 1)
+                //    Inline exp and dot product
+                double portfolioRet = 0.0;
+                for (int k = 0; k < m_stocks; k++) {
+                    expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
+                    portfolioRet += m_weights[0][k] * expReturns[k];
+                }
+                
+                sim_out.SetRet(i, portfolioRet);
+                drawdowns[i] = std::min(drawdowns[i], portfolioRet);
+                upsides[i] = std::max(upsides[i], portfolioRet);
             }
+            
+            // Store final cumulative log returns (only once at the end, not every iteration)
+            sim_out.SetStocksChange(i, cumLogReturns);
         }
         return sim_out;
     }
+
+    // void RunThreadSim(
+    //     int start,
+    //     int end,
+    //     vector<double> &drawdown, 
+    //     vector<double> &upsides, 
+    //     SimulationOutput& sim_out, 
+    //     int time, 
+    //     CMatrixLowerTriangular<double>& cholesky, 
+    //     CMatrix<double>& means
+    // ) {
+    //     for (int i = start; i < end; i++) {
+    //         for (int j = 1; j < time+1; j++) {
+    //             // generate random samples
+    //             CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
+    //             // add means + randoms generated with probability equivalent to covariance matrix
+    //             auto motion = means + (cholesky * random_samples);
+    //             sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
+    //             // turn into a simple returns space
+    //             auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
+    //                 return std::exp(el) - 1;
+    //             });
+    //             // store returns as we need upsides and drawdowns
+    //             sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
+    //             // update minimal drawdown
+    //             drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
+    //             upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
+    //         }
+    //     }
+    // }
 
     /// @brief Random generator setter
     /// @param rand_gen unique_ptr to IRandomGenerator instance

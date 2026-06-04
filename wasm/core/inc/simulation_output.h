@@ -5,12 +5,12 @@
 using namespace linalg::primitives;
 
 struct SimulationOutput {
-    using output_pair = std::pair<double, CMatrix<double>>;
+    using output_pair = std::pair<double, std::vector<double>>;
     // create one vector with the values
     std::vector<output_pair> output;
 
     SimulationOutput(size_t sims, size_t weights) {
-        output = std::vector<output_pair>(sims, {0.0, CMatrix<double>(weights, 1, 0.0)});
+        output = std::vector<output_pair>(sims, {0.0, std::vector<double>(weights, 0.0)});
     }
 
     /// @brief Sort simulation outputs
@@ -30,7 +30,7 @@ struct SimulationOutput {
     /// @brief Get stock changes of particular simulation specified by idx
     /// @param idx sim index we want to retrieve
     /// @return CMatrix object with stocks change for specified idx
-    inline CMatrix<double> GetStocksChange(size_t idx) {
+    inline std::vector<double> GetStocksChange(size_t idx) {
         return output[idx].second;
     }
 
@@ -46,8 +46,8 @@ struct SimulationOutput {
 
     /// @brief Get vector of stocks changes
     /// @return vector of stock changes
-    inline std::vector<CMatrix<double>> GetStocksChanges() {
-        std::vector<CMatrix<double>> changes(output.size(), CMatrix<double>());
+    inline std::vector<std::vector<double>> GetStocksChanges() {
+        std::vector<std::vector<double>> changes(output.size());
         for (size_t i = 0; i < changes.size(); i++) {
             changes[i] = output[i].second;
         }
@@ -65,7 +65,7 @@ struct SimulationOutput {
     /// @brief Set Matrix of stock change at specified index
     /// @param idx index to be set
     /// @param mat new matrix to be set at index
-    inline void SetStocksChange(size_t idx, const CMatrix<double>& mat) {
+    inline void SetStocksChange(size_t idx, std::vector<double> mat) {
         CHECK_OUT_OF_RANGE(idx, output.size());
         output[idx].second = mat;
     };
