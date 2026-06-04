@@ -286,6 +286,9 @@ export class AssetsMap {
      */
     static createFromDB(assets) {
         const mp = new AssetsMap();
+        if (assets === undefined || assets.length === 0) {
+            return mp;
+        }
         assets.forEach((el)=>{
             if (mp.get(el.ticker) === undefined) {
                 // if map entry does not exist, create brand new

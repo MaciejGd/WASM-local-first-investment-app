@@ -1,3 +1,4 @@
+import { putDataToDb } from "../db/db";
 
 /**
  * Minimal IndexedDb updater for Synchronizer Worker
@@ -18,7 +19,8 @@ export class SyncDBUpdater {
             var table_handle = this.db_handle.table(table_name);
             // insert ulid inside payload
             payload.ulid = ulid;
-            await table_handle.put(payload);
+            // await table_handle.put(payload);
+            await putDataToDb(this.db_handle, table_name, payload);
         }
         catch (error) {
             console.log(error);

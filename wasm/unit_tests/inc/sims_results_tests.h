@@ -214,7 +214,6 @@ UNIT_TEST(SimsResultsTests, SetVAR) {
         sum += buff[i+28];
     }   
     CHECK_NEAR(sum, ES, 0.000001);
-    // TODO - uncomment that
     for (int i = 0; i < buff.size(); i++) {
         CHECK_NEAR(buff[i], expected_results[i], 0.000001);
     }

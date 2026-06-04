@@ -1,6 +1,6 @@
 import hash from "object-hash";
 import { sync_worker } from "../sync/syncWorkerWrapper";
-import { getDBInstance } from "./db";
+import { getDBInstance, putDataToDb } from "./db";
 
 /**
  * Singleton handler for DB interacations with tables holding user's data.
@@ -103,7 +103,10 @@ export class IndexedDbHandler {
         sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
         payload.ulid = ulid;
         payload.hash = obj_hash; // hash the payload and pack along the original payload 
-        var id = await table.add(payload);
+        // var id = await table.add(payload); TODO check if that works
+        var id = await putDataToDb(this.db, table_name, payload);
+
+        // after adding, update hash for the table
         return id;
     }
 

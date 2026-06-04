@@ -78,7 +78,7 @@ class DBUpdater:
 
     def get_events(self, user_id, last_event_id):
         """
-        Get all event's data and return it as list
+        Get all event's data and return it as list 
         """
 
         ids = self.get_pending_events(user_id, last_event_id)
