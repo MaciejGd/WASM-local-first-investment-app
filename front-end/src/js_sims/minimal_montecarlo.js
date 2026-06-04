@@ -64,16 +64,6 @@ export function choleskyDecomposition(matrix) {
     return L;
 }
 
-export function multiplyLowerTriangular(matrix, vector) {
-    return matrix.map((row, i) => {
-        let sum = 0;
-        for (let j = 0; j <= i; j++) {
-            sum += row[j] * vector[j];
-        }
-        return sum;
-    });
-}
-
 export function gaussianRandom() {
     let u = 0;
     let v = 0;
@@ -117,6 +107,8 @@ export function runSimulation({ priceSeries, weights, time, sims, randomSamplePr
 
     for (let i = 0; i < sims; i++) {
         const cumulativeLogChange = Array(stocks).fill(0);
+        const motion = Array(stocks).fill(0);
+        const simpleReturns = Array(stocks).fill(0);
         for (let t = 0; t < time; t++) {
             const randomNormals = randomSampleProvider(stocks, i, t);
             if (!Array.isArray(randomNormals) && !(randomNormals instanceof Float64Array)) {
@@ -128,15 +120,21 @@ export function runSimulation({ priceSeries, weights, time, sims, randomSamplePr
             if (randomNormals.some(v => Number.isNaN(v))) {
                 throw new Error('Random sample provider returned NaN values.');
             }
-            const correlated = multiplyLowerTriangular(cholesky, randomNormals);
-            const motion = correlated.map((value, idx) => means[idx] + value);
-
-            for (let s = 0; s < stocks; s++) {
-                cumulativeLogChange[s] += motion[s];
+            for (var k = 0; k < stocks; k++) {
+                var sum = 0.0;
+                for (var l = 0; l <= k; l++) {
+                    sum += cholesky[k][l] * randomNormals[l];
+                }
+                motion[k] = means[k] + sum
+                cumulativeLogChange[k] += motion[k]
             }
 
-            const simpleReturns = cumulativeLogChange.map(x => Math.exp(x) - 1);
-            const portfolioReturn = simpleReturns.reduce((sum, r, idx) => sum + r * weights[idx], 0);
+            var portfolioReturn = 0.0;
+            for (var k = 0; k < stocks; k++) {
+                simpleReturns[k] = Math.exp(cumulativeLogChange[k]) - 1;
+                portfolioReturn += simpleReturns[k] * weights[k]; 
+            }
+
             if (Number.isNaN(portfolioReturn)) {
                 throw new Error('Portfolio return became NaN during simulation. Check input prices and random sample provider.');
             }
@@ -147,14 +145,12 @@ export function runSimulation({ priceSeries, weights, time, sims, randomSamplePr
             upsides[i] = Math.max(upsides[i], portfolioReturn);
         }
     }
-    console.log("outputs before sort: ", outputs);
+
     const sortedOutputs = [...outputs].sort((a, b) => a.ret - b.ret);
     const bufferLength = 9 * 3 + 1 + weights.length;
     const buffer = Array(bufferLength).fill(0);
 
     const returnsPercentiles = getPercentiles(sortedOutputs.map(o => o.ret));
-    console.log("Returns", outputs)
-    console.log("Drawdowns", drawdowns)
     const drawdownsPercentiles = getPercentiles(drawdowns);
     const upsidesPercentiles = getPercentiles(upsides);
 

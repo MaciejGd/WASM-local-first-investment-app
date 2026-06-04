@@ -251,7 +251,7 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     auto outputs = mont.Simulate(5, 5, drawdowns, upsides);
     // validate output
     auto results = outputs.GetRets();
-    for (int i = 0; i < results.size(); i++) {
+    for (int i = 0; i < results.size(); i++) {        
         CHECK_EQUAL_FLOAT(expected_results[i], results[i]);
     }
 }

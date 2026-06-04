@@ -112,38 +112,16 @@ public:
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
-        // run simulation TODO - introduce multithreading in here so Simulation is sped u
-        // for (int i = 0; i < sims; i++) {
-        //     for (int j = 1; j < time+1; j++) {
-        //         // generate random samples
-        //         CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
-        //         // add means + randoms generated with probability equivalent to covariance matrix
-        //         auto motion = means + (cholesky * random_samples);
-        //         sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
-        //         // turn into a simple returns space
-        //         auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
-        //             return std::exp(el) - 1;
-        //         });
-        //         // store returns as we need upsides and drawdowns
-        //         sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
-        //         // update minimal drawdown
-        //         drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
-        //         upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
-        //     }
-        // }
-        // return sim_out;
-        // FAST PATH: Use raw arrays instead of matrices for per-simulation data
-        // Preallocate cumulative log returns as vector (not matrix)
+        // run simulation TODO - introduce multithreading in here so Simulation is sped u        
         for (int i = 0; i < sims; i++) {
             std::vector<double> cumLogReturns(m_stocks, 0.0);
             std::vector<double> expReturns(m_stocks);  // reuse buffer
             std::vector<double> motion(m_stocks);      // reuse for Cholesky output
             for (int j = 0; j < time; j++) {                
-                // 1. Generate random normals (returns vector, not matrix)
+                // 1. Generate vector of random normals
                 auto randNormals = m_rand_gen->GenerateRandomSamples(m_stocks);
                 
                 // 2. Compute motion = means + cholesky * randNormals
-                //    Inline this as vector operations (avoid matrix allocation)
                 for (int k = 0; k < m_stocks; k++) {
                     double sum = 0.0;
                     // skip upper triangle as cholesky is lower triangular
@@ -155,7 +133,6 @@ public:
                 }
                 
                 // 3. Portfolio return = dot_product(weights, exp(cumLogReturns) - 1)
-                //    Inline exp and dot product
                 double portfolioRet = 0.0;
                 for (int k = 0; k < m_stocks; k++) {
                     expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
