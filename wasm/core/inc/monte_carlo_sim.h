@@ -107,38 +107,39 @@ public:
         // transform prices to returns
         auto returns = m_TransformPriceToReturns();
         // count mean values for prices
-        auto means = GetMeanMatrix(returns.data(), returns.rows(), returns.cols());
+        auto means = GetMeanVector(returns.data(), returns.rows(), returns.cols());
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
         // run simulation TODO - introduce multithreading in here so Simulation is sped u        
         std::vector<double> cumLogReturns(m_stocks, 0.0);
-        std::vector<double> expReturns(m_stocks);  // reuse buffer
-        std::vector<double> motion(m_stocks);      // reuse for Cholesky output
         std::vector<double> randNormals(m_stocks, 0.0);
+        // we will use pointers to data so that vectorization can happen
+        const double* means_ptr = means.data();
+        const double* weights_ptr = m_weights.data();
+        const double* cholsky_ptr = cholesky.data();
         for (int i = 0; i < sims; i++) {
             std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
             for (int j = 0; j < time; j++) {                
                 // 1. Generate vector of random normals
                 m_rand_gen->FullfillVectorWithRandoms(randNormals);
-                
+                double portfolioRet = 0.0;
                 // 2. Compute motion = means + cholesky * randNormals
+                #pragma omp simd // compiler hint for loops optimization
                 for (int k = 0; k < m_stocks; k++) {
                     double sum = 0.0;
                     // skip upper triangle as cholesky is lower triangular
-                    for (int l = 0; l <= k; l++) {
-                        sum += cholesky.at(k,l) * randNormals[l];
+                    for (int l = 0; l <= k; l++) {                        
+                        sum += cholsky_ptr[k*m_stocks + l] * randNormals[l];
                     }
-                    motion[k] = means.at(k,0) + sum;  // add mean
-                    cumLogReturns[k] += motion[k];
-                }
-                
-                // 3. Portfolio return = dot_product(weights, exp(cumLogReturns) - 1)
-                double portfolioRet = 0.0;
-                for (int k = 0; k < m_stocks; k++) {
-                    expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
-                    portfolioRet += m_weights.at(0,k) * expReturns[k];
+                    // add means value + sum of floating to cumLogReturns
+                    cumLogReturns[k] += means_ptr[k] + sum;; 
+                    // multiply normalized cumLogReturns by weights to get portfolio return
+                    // double v = std::exp(cumLogReturns[k]) - 1.0;
+                    // double v = fast_exp(cumLogReturns[k]) - 1.0;
+                    double v = std::exp2(1.44269504089 * cumLogReturns[k]) - 1;
+                    portfolioRet += weights_ptr[k] * (v);
                 }
                 
                 sim_out.SetRet(i, portfolioRet);
@@ -172,7 +173,6 @@ protected:
                 if (current == 0) {
                     throw std::logic_error("Stock price provided cannot be equal to zero!!!");
                 }
-                // result[i][j] = (current - prev) / prev;
                 result[i][j] = std::log(current / prev);
                 prev = current;
             }
@@ -194,6 +194,17 @@ protected:
             std::logic_error("Sum of stock prices weights should be equal to one!");
         }
     }
+private:
+    inline double fast_exp(double x)
+{
+    const double a = 1.0;
+    const double b = 1.0;
+    const double c = 0.5;
+    const double d = 0.1666666667;
+    const double e = 0.0416666667;
+
+    return a + x*(b + x*(c + x*(d + x*e)));
+}
 };
 
 } // end of finance_api namespace

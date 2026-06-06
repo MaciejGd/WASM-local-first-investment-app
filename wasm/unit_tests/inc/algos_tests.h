@@ -124,7 +124,7 @@ UNIT_TEST(MeanTestsCBuffers, MeanTestNullptr) {
     CHECK_THROW(auto ret = Mean(arr, size), std::invalid_argument);
 }
 
-UNIT_TEST(GetMeanMatrix, CorrectMeanReturns) {
+UNIT_TEST(GetMeanVector, CorrectMeanReturns) {
     using namespace linalg::algorithms;
     using namespace linalg::primitives;
     // let set 3 chunks, 4 elements each
@@ -132,12 +132,9 @@ UNIT_TEST(GetMeanMatrix, CorrectMeanReturns) {
     size_t chunks_size = 4;
     size_t chunks_amount = 3;
     
-    vector<vector<double>> expected_mat = {{2.5},
-                                    {6.5},
-                                    {10.5}
-                                };
+    vector<double> expected_mat = {2.5, 6.5, 10.5};
     auto expected_matrix = CMatrix(expected_mat);
-    auto result_matrix = GetMeanMatrix(arr, chunks_amount, chunks_size);
+    auto result_matrix = GetMeanVector(arr, chunks_amount, chunks_size);
     CHECK_EQUAL(expected_matrix, result_matrix);
 }
 

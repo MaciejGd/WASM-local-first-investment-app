@@ -81,6 +81,10 @@ export function getPercentiles(data) {
     return Array.from({ length: 9 }, (_, i) => sorted[(i + 1) * percentiles - 1]);
 }
 
+function fast_exp(x) {
+    return 1.0 + x + 0.5*x*x + 0.16666666*x*x*x;
+}
+
 export function runSimulation({ priceSeries, weights, time, sims, randomSampleProvider }) {
     const stocks = priceSeries.length;
     if (weights.length !== stocks) {
@@ -105,10 +109,10 @@ export function runSimulation({ priceSeries, weights, time, sims, randomSamplePr
     const drawdowns = Array(sims).fill(0);
     const upsides = Array(sims).fill(0);
 
+    const cumulativeLogChange = Array(stocks).fill(0);
+    const motion = Array(stocks).fill(0);
     for (let i = 0; i < sims; i++) {
         const cumulativeLogChange = Array(stocks).fill(0);
-        const motion = Array(stocks).fill(0);
-        const simpleReturns = Array(stocks).fill(0);
         for (let t = 0; t < time; t++) {
             const randomNormals = randomSampleProvider(stocks, i, t);
             if (!Array.isArray(randomNormals) && !(randomNormals instanceof Float64Array)) {
@@ -120,19 +124,15 @@ export function runSimulation({ priceSeries, weights, time, sims, randomSamplePr
             if (randomNormals.some(v => Number.isNaN(v))) {
                 throw new Error('Random sample provider returned NaN values.');
             }
+            var portfolioReturn = 0.0;
             for (var k = 0; k < stocks; k++) {
                 var sum = 0.0;
                 for (var l = 0; l <= k; l++) {
                     sum += cholesky[k][l] * randomNormals[l];
                 }
-                motion[k] = means[k] + sum
-                cumulativeLogChange[k] += motion[k]
-            }
-
-            var portfolioReturn = 0.0;
-            for (var k = 0; k < stocks; k++) {
-                simpleReturns[k] = Math.exp(cumulativeLogChange[k]) - 1;
-                portfolioReturn += simpleReturns[k] * weights[k]; 
+                cumulativeLogChange[k] += means[k] + sum
+                // portfolioReturn += weights[k] * (fast_exp(cumulativeLogChange[k]) - 1);
+                portfolioReturn += weights[k] * (Math.exp(cumulativeLogChange[k]) - 1); 
             }
 
             if (Number.isNaN(portfolioReturn)) {

@@ -124,11 +124,11 @@ double Mean(T* buffer, size_t size) {
 /// @param chunks_amount amount of chunks for which mean values should be counted
 /// @return Matrix of dimensions: chunks_amount x 1
 template<typename T>
-CMatrix<double> GetMeanMatrix(T* buffer, size_t chunks_amount, size_t chunk_size) {
-    CMatrix<double> res(chunks_amount, 1);
+std::vector<double> GetMeanVector(T* buffer, size_t chunks_amount, size_t chunk_size) {
+    std::vector<double> res(chunks_amount, 0);
     // iterate through chunks and count mean value for each
     for (size_t i = 0; i < chunks_amount; i++, buffer += chunk_size) {
-        res[i][0] = Mean(buffer, chunk_size);
+        res[i] = Mean(buffer, chunk_size);
     }
     return res;
 };
