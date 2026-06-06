@@ -176,6 +176,7 @@ public:
         std::vector<double> cumLogReturns(m_stocks, 0.0);
         std::vector<double> expReturns(m_stocks);  // reuse buffer
         std::vector<double> motion(m_stocks);      // reuse for Cholesky output
+        // auto randNormals = random_generator->GenerateRandomSamples(m_stocks);
         for (int i = start; i < end; i++) {
             std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
             for (int j = 0; j < time; j++) {
