@@ -107,7 +107,7 @@ public:
         // transform prices to returns
         auto returns = m_TransformPriceToReturns();
         // count mean values for prices
-        auto means = GetMeanMatrix(returns.data(), returns.rows(), returns.cols());
+        auto means = GetMeanVector(returns.data(), returns.rows(), returns.cols());
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
@@ -129,6 +129,8 @@ public:
 
         std::vector<std::thread> workers;
         int start = 0;
+        const double* chl = cholesky.data();
+        const double* mn = means.data();        
         for (int t = 0; t < threads; t++) {
             int extra = (t < remainder) ? 1 : 0;
             int end = start + chunk + extra;
@@ -144,8 +146,8 @@ public:
                 std::ref(upsides),
                 std::ref(sim_out),
                 time,
-                std::ref(cholesky),
-                std::ref(means),
+                chl,
+                mn,
                 std::move(gens[t])
             );
 
@@ -158,8 +160,6 @@ public:
         return sim_out;
     }
 
-    inline static std::mutex lck;
-
     void RunThreadSim(
         int start,
         int end,
@@ -167,38 +167,32 @@ public:
         std::vector<double> &upsides,
         SimulationOutput& sim_out,
         int time,
-        const CMatrixLowerTriangular<double>& cholesky,
-        const CMatrix<double>& means,
+        const double* cholesky,
+        const double* means,
         std::unique_ptr<IRandomGenerator> random_generator
     ) {
-        std::lock_guard<std::mutex> lock(lck);
+        const double* weights_ptr = m_weights.data();
         size_t chunk_size = end - start;
         std::vector<double> cumLogReturns(m_stocks, 0.0);
-        std::vector<double> expReturns(m_stocks);  // reuse buffer
-        std::vector<double> motion(m_stocks);      // reuse for Cholesky output
-        // auto randNormals = random_generator->GenerateRandomSamples(m_stocks);
+        std::vector<double> randNormals(m_stocks, 0.0);
+
         for (int i = start; i < end; i++) {
             std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
             for (int j = 0; j < time; j++) {
                 // 1. Generate vector of random normals
-                auto randNormals = random_generator->GenerateRandomSamples(m_stocks);
-
+                double portfolioRet = 0.0;
+                random_generator->FullfillVectorWithRandoms(randNormals);
+                double* rands_ptr = randNormals.data();
                 // 2. Compute motion = means + cholesky * randNormals
                 for (int k = 0; k < m_stocks; k++) {
                     double sum = 0.0;
                     // skip upper triangle as cholesky is lower triangular
                     for (int l = 0; l <= k; l++) {
-                        sum += cholesky.at(k,l) * randNormals.at(l,0);
+                        sum += cholesky[k*m_stocks + l] * rands_ptr[l];
                     }
-                    motion[k] = means.at(k,0) + sum;  // add mean
-                    cumLogReturns[k] += motion[k];
-                }
-
-                // 3. Portfolio return = dot_product(weights, exp(cumLogReturns) - 1)
-                double portfolioRet = 0.0;
-                for (int k = 0; k < m_stocks; k++) {
-                    expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
-                    portfolioRet += m_weights[0][k] * expReturns[k];
+                    cumLogReturns[k] += means[k] + sum;
+                    double v = std::exp2(1.44269504089 * cumLogReturns[k]) - 1.0;
+                    portfolioRet += weights_ptr[k] * v;
                 }
 
                 sim_out.SetRet(i, portfolioRet);

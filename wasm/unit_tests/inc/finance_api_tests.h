@@ -185,7 +185,6 @@ public:
     }
 
     linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) override {
-        std::lock_guard<std::mutex> lck(s_lock);
         if (vec_cnt > data.size()) {
             throw std::logic_error("vector count outside of the bounds");
         }
@@ -199,6 +198,16 @@ public:
         std::cout << std::endl;
         return mat;
     }
+
+    inline void FullfillVectorWithRandoms(std::vector<double>& vec) {
+        if (vec_cnt > data.size()) {
+            throw std::logic_error("vector count outside of the bounds");
+        }
+        auto curr_vec = data[vec_cnt++];
+        for (int i = 0; i < 3; i++) {            
+            vec[i] = curr_vec[i];
+        }
+    };
 
     std::unique_ptr<IRandomGenerator> createNewInstance() override {
         return std::make_unique<TestRandomGenerator>();

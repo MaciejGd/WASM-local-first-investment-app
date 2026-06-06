@@ -12,6 +12,8 @@ public:
 
     /// @brief Create a new instance of the class
     virtual std::unique_ptr<IRandomGenerator> createNewInstance() = 0;
+
+    virtual inline void FullfillVectorWithRandoms(std::vector<double>& vec) = 0;
 };
 
 /// @brief Implementation of IRandomGenerator designed to be used in MonteCarlo sims
@@ -40,6 +42,12 @@ public:
         }
         return samples;
     };
+
+    inline void FullfillVectorWithRandoms(std::vector<double>& vec) {
+        for (int i = 0; i < vec.size(); i++) {
+            vec[i] = linalg::algorithms::InverseNormal(GenerateRandom());
+        }
+    }
 
     std::unique_ptr<IRandomGenerator> createNewInstance() override {
         return std::make_unique<CRandomGenerator>();

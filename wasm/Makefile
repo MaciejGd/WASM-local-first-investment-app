@@ -1,7 +1,7 @@
 make build_threading:
 	cd /d "E:\magisterka\code\main_code_repo\investment-app\wasm\core" && \
 	em++ \
-	-Os -msimd128 -ffast-math -fno-math-errno \
+	-O3 -msimd128 -ffast-math -fno-math-errno \
 	 -sUSE_PTHREADS=1 \
 	 -sPTHREAD_POOL_SIZE=10 \
 	 -s EXPORT_ES6 \
@@ -17,3 +17,7 @@ make build_threading:
 make update_wasm:
 	copy /Y "E:\magisterka\code\main_code_repo\investment-app\wasm\core\main.js" "E:\magisterka\code\main_code_repo\investment-app\front-end\src\subpages\simulations\wasm\main.js"
 	copy /Y "E:\magisterka\code\main_code_repo\investment-app\wasm\core\main.wasm" "E:\magisterka\code\main_code_repo\investment-app\front-end\src\subpages\simulations\wasm\main.wasm"
+
+make all:
+	make build_threading
+	make update_wasm

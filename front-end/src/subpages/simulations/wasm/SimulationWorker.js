@@ -30,8 +30,8 @@ onmessage = async (e) => {
 
         // const results = simAPI.runSimulation(stockData, weights, times, sims);
         
-        const results = measureWasm(stockData, weights, times, sims);
-        // const results = measureJS(stockData, weights, times, sims);
+        // const results = measureWasm(stockData, weights, times, sims);
+        const results = measureJS(stockData, weights, times, sims);
 
         postMessage(results);
     }
@@ -39,18 +39,38 @@ onmessage = async (e) => {
 
 function measureWasm(stockData, weights, times, sims) {
     console.log("WASM simulation starting");
-    const start = performance.now();
-    const results = simAPI.runSimulation(stockData, weights, times, sims);
-    const end = performance.now();
-    console.log(`WASM simulation took ${end - start} milliseconds.`);
+    var res = [];
+    for (var i = 0; i < 10; i++) {
+        const start = performance.now();
+        const results = simAPI.runSimulation(stockData, weights, times, sims);
+        const end = performance.now();
+        console.log(`WASM simulation took ${end - start} milliseconds.`);
+        res.push(end - start);
+    }
+    console.log('Run simulations 10 times, results: ', res);
+    print_benchmark_tests(res);
     return results;
 }
 
 function measureJS(stockData, weights, times, sims) {
     console.log("Running JS simulation...");
-    const start = performance.now();
-    const results = runSimulations(stockData, weights, times, sims);
-    const end = performance.now();
-    console.log(`JS simulation took ${end - start} milliseconds.`);
+    var res = [];
+    for (var i = 0; i < 10; i++) {
+        const start = performance.now();
+        var results = runSimulations(stockData, weights, times, sims);
+        const end = performance.now();
+        console.log(`JS simulation took ${end - start} milliseconds.`);
+        res.push(end - start);
+    }
+    console.log('Run simulations 10 times, results: ', res);
+    print_benchmark_tests(res);
     return results;
+}
+
+function print_benchmark_tests(res) {
+    var result_str = "";
+    for (var i = 0; i < res.length; i++) {
+        result_str += res[i] + "\n";
+    }
+    console.log(result_str);
 }
