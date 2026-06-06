@@ -9,6 +9,9 @@ public:
 
     /// @brief Generate matrix of pseudo-random generated values
     virtual linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) = 0;
+
+    /// @brief Create a new instance of the class
+    virtual std::unique_ptr<IRandomGenerator> createNewInstance() = 0;
 };
 
 /// @brief Implementation of IRandomGenerator designed to be used in MonteCarlo sims
@@ -30,11 +33,15 @@ public:
     /// @brief Generate vector of pseudo-random samples generated with Gaussian distribution
     /// @param size number of vector columns
     /// @return CMatrix<double> filled with pseudo-random values
-    inline linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) {
+    inline linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) override {
         linalg::primitives::CMatrix<double> samples(size, 1);
         for (int i = 0; i < samples.rows(); i++) {
             samples[i][0] = linalg::algorithms::InverseNormal(GenerateRandom());
         }
         return samples;
     };
+
+    std::unique_ptr<IRandomGenerator> createNewInstance() override {
+        return std::make_unique<CRandomGenerator>();
+    }
 };

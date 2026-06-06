@@ -2,6 +2,8 @@
 #include "../test_source/tests_runner.h"
 #include "../../core/inc/monte_carlo_sim.h"
 #include <array>
+#include <mutex>
+#include <thread>
 
 using namespace finance_api;
 
@@ -145,21 +147,66 @@ class TestRandomGenerator : public IRandomGenerator {
         {-0.927214, 0.240567, 0.245048}
     };
     int vec_cnt = 0; // counter to keep track of already used values
+    static inline int s_instance_counter = 0; // static counter of instances
+    int gen_counter = 0; // counter of current thread. Each thread should return certain values
+    static inline std::mutex s_lock;    
 public:
-    TestRandomGenerator(): IRandomGenerator() {};
+    TestRandomGenerator(): IRandomGenerator() {
+        // ensure thread safe static modification
+        std::lock_guard<std::mutex> lck(s_lock);
+        // obtain number of active threads that will be used during computations
+        size_t threads = 10;
+
+        size_t chunk = s_sims / threads;
+        size_t remainder = s_sims % threads;
+
+        gen_counter = (TestRandomGenerator::s_instance_counter - 1);
+        TestRandomGenerator::s_instance_counter++;
+        if (chunk == 0) {
+            vec_cnt = TestRandomGenerator::s_times * gen_counter; // each thread should capture "s_times" points
+            return;
+        }
+        else {
+            vec_cnt = TestRandomGenerator::s_times * gen_counter * chunk; // each thread should capture "s_times" points
+        }
+        if (remainder == 0) return;
+        if (gen_counter < remainder) {
+            vec_cnt += (TestRandomGenerator::s_times * gen_counter);
+        }
+        else {
+            vec_cnt += (TestRandomGenerator::s_times * remainder);
+        }
+    };
+
+    static inline void preconfigTestGenerator(size_t times, size_t sims) {
+        TestRandomGenerator::s_times = times;
+        TestRandomGenerator::s_sims = sims;
+        TestRandomGenerator::s_instance_counter = 0;
+    }
 
     linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) override {
+        std::lock_guard<std::mutex> lck(s_lock);
         if (vec_cnt > data.size()) {
             throw std::logic_error("vector count outside of the bounds");
         }
         auto curr_vec = data[vec_cnt++];
         linalg::primitives::CMatrix<double> mat(size, 1);
-        for (int i = 0; i < 3; i++) {
+        std::cout << "For gen: " << gen_counter << ": ";
+        for (int i = 0; i < 3; i++) {            
             mat[i][0] = curr_vec[i];
+            std::cout << curr_vec[i] << ", ";
         }
-
+        std::cout << std::endl;
         return mat;
     }
+
+    std::unique_ptr<IRandomGenerator> createNewInstance() override {
+        return std::make_unique<TestRandomGenerator>();
+    }
+
+    // NEEDS to be set prior generator creation!!!
+    static inline int s_times; // number of timepoints to be checked for each thread
+    static inline int s_sims;
 };
 
 
@@ -243,6 +290,7 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
 
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 5); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
@@ -271,6 +319,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationUpsides) {
                                             6.184586353453597};
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 5); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
@@ -294,6 +343,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationDrawdown) {
     std::vector<double> expected_results = {-0.12610791746510455, 0, 0, 0, 0};
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 5); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
@@ -319,6 +369,7 @@ UNIT_TEST(MonteCarloSimulator, SimulationStockChanges) {
 
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 5); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
@@ -345,6 +396,7 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationInvalidBuffer) {
     double weights[] = {0.5, 0.25, 0.25};
     double* buff = nullptr;
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 5); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));
@@ -369,6 +421,7 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationValid) {
 
     std::array<double, 31> buff{};
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    TestRandomGenerator::preconfigTestGenerator(5, 20); // we want to simulate 5 timepoints
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
     mont.SetRandomGenerator(std::move(rand_gen));

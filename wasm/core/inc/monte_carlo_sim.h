@@ -112,73 +112,103 @@ public:
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
         auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
-        // run simulation TODO - introduce multithreading in here so Simulation is sped u        
-        for (int i = 0; i < sims; i++) {
-            std::vector<double> cumLogReturns(m_stocks, 0.0);
-            std::vector<double> expReturns(m_stocks);  // reuse buffer
-            std::vector<double> motion(m_stocks);      // reuse for Cholesky output
-            for (int j = 0; j < time; j++) {                
+
+        // size_t threads = std::thread::hardware_concurrency();
+        // if (threads == 0) { threads = 4; }
+
+        size_t threads = 10;
+
+        size_t chunk = sims / threads;
+        int remainder = sims % threads;
+
+        // create random generator for each thread (random gen is not thread safe!!!)
+        std::vector<std::unique_ptr<IRandomGenerator>> gens;
+        for (int i = 0; i < threads; i++) {
+            gens.emplace_back(m_rand_gen->createNewInstance());
+        }
+
+        std::vector<std::thread> workers;
+        int start = 0;
+        for (int t = 0; t < threads; t++) {
+            int extra = (t < remainder) ? 1 : 0;
+            int end = start + chunk + extra;
+            if (start == end) {
+                break;
+            }
+            workers.emplace_back(
+                &MonteCarloSimulator::RunThreadSim,
+                this,
+                start,
+                end,
+                std::ref(drawdowns),
+                std::ref(upsides),
+                std::ref(sim_out),
+                time,
+                std::ref(cholesky),
+                std::ref(means),
+                std::move(gens[t])
+            );
+
+            start = end;
+        }
+
+        for (auto& th: workers) {
+            th.join();
+        }
+        return sim_out;
+    }
+
+    inline static std::mutex lck;
+
+    void RunThreadSim(
+        int start,
+        int end,
+        std::vector<double> &drawdowns,
+        std::vector<double> &upsides,
+        SimulationOutput& sim_out,
+        int time,
+        const CMatrixLowerTriangular<double>& cholesky,
+        const CMatrix<double>& means,
+        std::unique_ptr<IRandomGenerator> random_generator
+    ) {
+        std::lock_guard<std::mutex> lock(lck);
+        size_t chunk_size = end - start;
+        std::vector<double> cumLogReturns(m_stocks, 0.0);
+        std::vector<double> expReturns(m_stocks);  // reuse buffer
+        std::vector<double> motion(m_stocks);      // reuse for Cholesky output
+        for (int i = start; i < end; i++) {
+            std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
+            for (int j = 0; j < time; j++) {
                 // 1. Generate vector of random normals
-                auto randNormals = m_rand_gen->GenerateRandomSamples(m_stocks);
-                
+                auto randNormals = random_generator->GenerateRandomSamples(m_stocks);
+
                 // 2. Compute motion = means + cholesky * randNormals
                 for (int k = 0; k < m_stocks; k++) {
                     double sum = 0.0;
                     // skip upper triangle as cholesky is lower triangular
                     for (int l = 0; l <= k; l++) {
-                        sum += cholesky[k][l] * randNormals[l][0];
+                        sum += cholesky.at(k,l) * randNormals.at(l,0);
                     }
-                    motion[k] = means[k][0] + sum;  // add mean
+                    motion[k] = means.at(k,0) + sum;  // add mean
                     cumLogReturns[k] += motion[k];
                 }
-                
+
                 // 3. Portfolio return = dot_product(weights, exp(cumLogReturns) - 1)
                 double portfolioRet = 0.0;
                 for (int k = 0; k < m_stocks; k++) {
                     expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
                     portfolioRet += m_weights[0][k] * expReturns[k];
                 }
-                
+
                 sim_out.SetRet(i, portfolioRet);
                 drawdowns[i] = std::min(drawdowns[i], portfolioRet);
                 upsides[i] = std::max(upsides[i], portfolioRet);
             }
-            
+
             // Store final cumulative log returns (only once at the end, not every iteration)
             sim_out.SetStocksChange(i, cumLogReturns);
         }
-        return sim_out;
     }
-
-    // void RunThreadSim(
-    //     int start,
-    //     int end,
-    //     vector<double> &drawdown, 
-    //     vector<double> &upsides, 
-    //     SimulationOutput& sim_out, 
-    //     int time, 
-    //     CMatrixLowerTriangular<double>& cholesky, 
-    //     CMatrix<double>& means
-    // ) {
-    //     for (int i = start; i < end; i++) {
-    //         for (int j = 1; j < time+1; j++) {
-    //             // generate random samples
-    //             CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
-    //             // add means + randoms generated with probability equivalent to covariance matrix
-    //             auto motion = means + (cholesky * random_samples);
-    //             sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
-    //             // turn into a simple returns space
-    //             auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
-    //                 return std::exp(el) - 1;
-    //             });
-    //             // store returns as we need upsides and drawdowns
-    //             sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
-    //             // update minimal drawdown
-    //             drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
-    //             upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
-    //         }
-    //     }
-    // }
 
     /// @brief Random generator setter
     /// @param rand_gen unique_ptr to IRandomGenerator instance
