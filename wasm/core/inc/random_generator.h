@@ -9,6 +9,8 @@ public:
 
     /// @brief Generate matrix of pseudo-random generated values
     virtual linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) = 0;
+
+    virtual void FullfillVectorWithRandoms(std::vector<double>& vec) = 0;
 };
 
 /// @brief Implementation of IRandomGenerator designed to be used in MonteCarlo sims
@@ -36,5 +38,11 @@ public:
             samples[i][0] = linalg::algorithms::InverseNormal(GenerateRandom());
         }
         return samples;
+    };
+
+    void FullfillVectorWithRandoms(std::vector<double>& vec) {
+        for (int i = 0; i < vec.size(); i++) {
+            vec[i] = linalg::algorithms::InverseNormal(GenerateRandom());
+        }
     };
 };

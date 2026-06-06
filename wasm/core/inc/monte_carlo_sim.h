@@ -113,22 +113,24 @@ public:
         auto cholesky = CholeskyFactorization(covariance);
         auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
         // run simulation TODO - introduce multithreading in here so Simulation is sped u        
+        std::vector<double> cumLogReturns(m_stocks, 0.0);
+        std::vector<double> expReturns(m_stocks);  // reuse buffer
+        std::vector<double> motion(m_stocks);      // reuse for Cholesky output
+        std::vector<double> randNormals(m_stocks, 0.0);
         for (int i = 0; i < sims; i++) {
-            std::vector<double> cumLogReturns(m_stocks, 0.0);
-            std::vector<double> expReturns(m_stocks);  // reuse buffer
-            std::vector<double> motion(m_stocks);      // reuse for Cholesky output
+            std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
             for (int j = 0; j < time; j++) {                
                 // 1. Generate vector of random normals
-                auto randNormals = m_rand_gen->GenerateRandomSamples(m_stocks);
+                m_rand_gen->FullfillVectorWithRandoms(randNormals);
                 
                 // 2. Compute motion = means + cholesky * randNormals
                 for (int k = 0; k < m_stocks; k++) {
                     double sum = 0.0;
                     // skip upper triangle as cholesky is lower triangular
                     for (int l = 0; l <= k; l++) {
-                        sum += cholesky[k][l] * randNormals[l][0];
+                        sum += cholesky.at(k,l) * randNormals[l];
                     }
-                    motion[k] = means[k][0] + sum;  // add mean
+                    motion[k] = means.at(k,0) + sum;  // add mean
                     cumLogReturns[k] += motion[k];
                 }
                 
@@ -136,7 +138,7 @@ public:
                 double portfolioRet = 0.0;
                 for (int k = 0; k < m_stocks; k++) {
                     expReturns[k] = std::exp(cumLogReturns[k]) - 1.0;
-                    portfolioRet += m_weights[0][k] * expReturns[k];
+                    portfolioRet += m_weights.at(0,k) * expReturns[k];
                 }
                 
                 sim_out.SetRet(i, portfolioRet);
@@ -149,36 +151,6 @@ public:
         }
         return sim_out;
     }
-
-    // void RunThreadSim(
-    //     int start,
-    //     int end,
-    //     vector<double> &drawdown, 
-    //     vector<double> &upsides, 
-    //     SimulationOutput& sim_out, 
-    //     int time, 
-    //     CMatrixLowerTriangular<double>& cholesky, 
-    //     CMatrix<double>& means
-    // ) {
-    //     for (int i = start; i < end; i++) {
-    //         for (int j = 1; j < time+1; j++) {
-    //             // generate random samples
-    //             CMatrix<double> random_samples = m_rand_gen->GenerateRandomSamples(m_stocks);
-    //             // add means + randoms generated with probability equivalent to covariance matrix
-    //             auto motion = means + (cholesky * random_samples);
-    //             sim_out.SetStocksChange(i, sim_out.GetStocksChange(i) + motion); // sum up motions for particular stock
-    //             // turn into a simple returns space
-    //             auto simple_return = sim_out.GetStocksChange(i).Map([](const auto& el){
-    //                 return std::exp(el) - 1;
-    //             });
-    //             // store returns as we need upsides and drawdowns
-    //             sim_out.SetRet(i, (m_weights * simple_return)[0][0]);
-    //             // update minimal drawdown
-    //             drawdowns[i] = std::min(drawdowns[i], sim_out.GetRet(i));
-    //             upsides[i] = std::max(upsides[i], sim_out.GetRet(i));
-    //         }
-    //     }
-    // }
 
     /// @brief Random generator setter
     /// @param rand_gen unique_ptr to IRandomGenerator instance

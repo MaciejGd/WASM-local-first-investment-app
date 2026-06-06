@@ -206,8 +206,6 @@ public:
     /// @param x col index
     /// @return value at (y,x) coordinates
     const T& at(uint32_t y, uint32_t x) const {
-        CHECK_OUT_OF_RANGE(y, m_rows-1);
-        CHECK_OUT_OF_RANGE(x, m_cols-1);
         return m_mat[y * m_cols + x];
     }
 

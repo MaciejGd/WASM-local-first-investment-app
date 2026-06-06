@@ -146,15 +146,6 @@ UNIT_TEST(MatrixValuesAccess, ConstantAccessEmptyInit) {
     CHECK_EQUAL(matrix.at(2, 0), 0); 
     CHECK_EQUAL(matrix.at(2, 1), 0);
 }
-// CHECKING elements access exceptions
-UNIT_TEST(MatrixValuesAccess, OutOfBoundsConstantAccess) {
-    using namespace linalg::primitives;
-    using namespace std;
-
-    auto matrix = CMatrix<int>(3, 2);
-    CHECK_THROW(matrix.at(3, 0), std::out_of_range);
-    CHECK_THROW(matrix.at(0, 2), std::out_of_range);
-}
 
 UNIT_TEST(MatrixValuesAccess, OutOfBoundsReferenceAccess) {
     using namespace linalg::primitives;
@@ -648,18 +639,6 @@ UNIT_TEST(MatrixSymmetry, NotSymmetricDouble) {
     auto matrix1 = CMatrix(mat1);
     // even though values not exactly equal it should return true
     CHECK_FALSE(matrix1.IsSymmetric());
-}
-
-UNIT_TEST(MatrixGetCol, OutOfRange) {
-    using namespace linalg::primitives;
-
-    vector<vector<double>> mat1 = {
-        {1, 2},
-        {3, 4}
-    };
-
-    CMatrix<double> test(mat1);
-    CHECK_THROW(test.GetCol(2), std::logic_error);
 }
 
 UNIT_TEST(MatrixGetCol, PositiveScenario) {

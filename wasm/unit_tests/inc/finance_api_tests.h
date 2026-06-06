@@ -145,6 +145,7 @@ class TestRandomGenerator : public IRandomGenerator {
         {-0.927214, 0.240567, 0.245048}
     };
     int vec_cnt = 0; // counter to keep track of already used values
+    int vec_small = 0;
 public:
     TestRandomGenerator(): IRandomGenerator() {};
 
@@ -159,6 +160,16 @@ public:
         }
 
         return mat;
+    }
+
+    virtual void FullfillVectorWithRandoms(std::vector<double>& vec) override {
+        if (vec_cnt > data.size()) {
+            throw std::logic_error("vector count outside of the bounds");
+        }
+        auto curr_vec = data[vec_cnt++];
+        for (int i = 0; i < vec.size(); i++) {
+            vec[i] = curr_vec[i];
+        }
     }
 };
 

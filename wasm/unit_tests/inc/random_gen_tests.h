@@ -31,3 +31,25 @@ UNIT_TEST(RandomGen, GenerateRandomSamples) {
         CHECK_EQUAL_FLOAT(expected_output[i], samples[i][0]);
     }
 }
+
+
+UNIT_TEST(RandomGen, FullfillVectorWithRandoms) {    
+    double buf[] = { 1 };
+    size_t stock_size = 2;
+    size_t stocks = 4;
+    // compare output we values expected for below seed
+    size_t seed = 45;
+    std::vector<double> expected_output = {-0.5113973095176207,
+                                            0.4440026648946756,
+                                            -0.20153917455817283,
+                                            1.7196552083405074};
+    // set random generator with predefined seed
+    auto gen = CRandomGenerator();
+    gen.SetSeed(seed);
+    std::vector<double> samples(expected_output.size());
+    gen.FullfillVectorWithRandoms(samples);
+    // confirm results are correct
+    for (int i = 0; i < samples.size(); i++) {
+        CHECK_EQUAL_FLOAT(expected_output[i], samples[i]);
+    }
+}
