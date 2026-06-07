@@ -29,8 +29,9 @@ onmessage = async (e) => {
         
 
         // const results = simAPI.runSimulation(stockData, weights, times, sims);
-        
-        const results = measureWasm(stockData, weights, times, sims);
+
+        const results = measureWasmThreading(stockData, weights, times, sims);
+        // const results = measureWasm(stockData, weights, times, sims);
         // const results = measureJS(stockData, weights, times, sims);
 
         postMessage(results);
@@ -40,7 +41,16 @@ onmessage = async (e) => {
 function measureWasm(stockData, weights, times, sims) {
     console.log("WASM simulation starting");
     const start = performance.now();
-    const results = simAPI.runSimulation(stockData, weights, times, sims);
+    const results = simAPI.runSimulationSerialized(stockData, weights, times, sims);
+    const end = performance.now();
+    console.log(`WASM simulation took ${end - start} milliseconds.`);
+    return results;
+}
+
+function measureWasmThreading(stockData, weights, times, sims) {
+    console.log("WASM simulation starting");
+    const start = performance.now();
+    const results = simAPI.runSimulationMultithreading(stockData, weights, times, sims);
     const end = performance.now();
     console.log(`WASM simulation took ${end - start} milliseconds.`);
     return results;

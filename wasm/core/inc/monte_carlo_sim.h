@@ -11,6 +11,8 @@
 
 namespace finance_api {
 
+inline size_t s_threads = 10;
+
 using namespace linalg::algorithms;
 using namespace linalg::primitives;
 using namespace linalg::utils;
@@ -90,6 +92,8 @@ public:
         return true;
     }
 
+
+
     /// @brief Run Monte Carlo simulation
     /// @param time number of timestamps that simulation would run for
     /// @param sims number of simulations to be performed
@@ -153,11 +157,144 @@ public:
         return sim_out;
     }
 
+
+    /// @brief Run Monte Carlo simulation
+    /// @param time number of timestamps that simulation would run for
+    /// @param sims number of simulations to be performed
+    /// @param buff c-style array for results
+    /// @return True on success, False otherwise
+    bool RunSimulationMultithreading(int32_t time, int32_t sims, double* buff) {
+        if (buff == nullptr) {
+            return false;
+        }
+
+        std::vector<double> drawdowns(sims, 0); // count the minimum possible value of the wallet
+        std::vector<double> upsides(sims, 0); // maximumm upsides
+        // initialize output
+        SimulationOutput sim_out = SimulationOutput(sims, m_weights.cols());
+        // transform prices to returns
+        auto returns = m_TransformPriceToReturns();
+        // count mean values for prices
+        auto means = GetMeanVector(returns.data(), returns.rows(), returns.cols());
+        // count Cholesky decomposition for returns data
+        auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
+        auto cholesky = CholeskyFactorization(covariance);
+        auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
+
+        // divide the whole task to the threads
+        size_t threads = s_threads;
+        size_t chunk = sims / threads;
+        int remainder = sims % threads;
+
+        // create random generator for each thread (random gen is not thread safe!!!)
+        std::vector<std::unique_ptr<IRandomGenerator>> gens;
+        for (int i = 0; i < threads; i++) {
+            gens.emplace_back(m_rand_gen->createNewInstance());
+        }
+
+        std::vector<std::thread> workers;
+        int start = 0;
+        const double* chl = cholesky.data();
+        const double* mn = means.data();        
+        // run threads tasks
+        for (int t = 0; t < threads; t++) {
+            int extra = (t < remainder) ? 1 : 0;
+            int end = start + chunk + extra;
+            if (start == end) {
+                break;
+            }
+            workers.emplace_back(
+                &MonteCarloSimulator::RunThreadSim,
+                this,
+                start,
+                end,
+                std::ref(drawdowns),
+                std::ref(upsides),
+                std::ref(sim_out),
+                time,
+                chl,
+                mn,
+                std::move(gens[t])
+            );
+
+            start = end;
+        }
+
+        for (auto& th: workers) {
+            th.join();
+        }
+        // update the output buffer with results
+        m_results = std::make_unique<SimsResults>(buff);
+        if (m_results) {
+            m_results->SetSimOutput(sim_out, m_weights);
+            m_results->SetDrawdowns(drawdowns);
+            m_results->SetUpsides(upsides);
+        }
+
+        return true;
+    }
+
+    /// @brief Simulation task to be executed by delegated thread
+    /// @param start starting sim index
+    /// @param end ending sim index
+    /// @param drawdowns vector of drawdowns
+    /// @param upsides vector of results upsides
+    /// @param time number of timepoints simulated
+    /// @param cholesky c-style array with Cholesky matrix values
+    /// @param means c-style array with means values for stocks
+    /// @param random_generator random number genrator
+    /// @returns 
+    void RunThreadSim(
+        int start,
+        int end,
+        std::vector<double> &drawdowns,
+        std::vector<double> &upsides,
+        SimulationOutput& sim_out,
+        int time,
+        const double* cholesky,
+        const double* means,
+        std::unique_ptr<IRandomGenerator> random_generator
+    ) {
+        const double* weights_ptr = m_weights.data();
+        size_t chunk_size = end - start;
+        std::vector<double> cumLogReturns(m_stocks, 0.0);
+        std::vector<double> randNormals(m_stocks, 0.0);
+
+        for (int i = start; i < end; i++) {
+            std::fill(cumLogReturns.begin(), cumLogReturns.end(), 0.0);
+            for (int j = 0; j < time; j++) {
+                // 1. Generate vector of random normals
+                double portfolioRet = 0.0;
+                random_generator->FullfillVectorWithRandoms(randNormals);
+                double* rands_ptr = randNormals.data();
+                // 2. Compute motion = means + cholesky * randNormals
+                for (int k = 0; k < m_stocks; k++) {
+                    double sum = 0.0;
+                    // skip upper triangle as cholesky is lower triangular
+                    for (int l = 0; l <= k; l++) {
+                        sum += cholesky[k*m_stocks + l] * rands_ptr[l];
+                    }
+                    cumLogReturns[k] += means[k] + sum;
+                    double v = std::exp2(1.44269504089 * cumLogReturns[k]) - 1.0;
+                    portfolioRet += weights_ptr[k] * v;
+                }
+
+                sim_out.SetRet(i, portfolioRet);
+                drawdowns[i] = std::min(drawdowns[i], portfolioRet);
+                upsides[i] = std::max(upsides[i], portfolioRet);
+            }
+
+            // Store final cumulative log returns (only once at the end, not every iteration)
+            sim_out.SetStocksChange(i, cumLogReturns);
+        }
+    }
+
     /// @brief Random generator setter
     /// @param rand_gen unique_ptr to IRandomGenerator instance
     void SetRandomGenerator(std::unique_ptr<IRandomGenerator> rand_gen) {
         m_rand_gen = std::move(rand_gen);
     }
+
 protected:
     /// @brief Transform input prices to logarithmic returns
     /// @return 2D doubles vector of returns
@@ -194,6 +331,10 @@ protected:
             std::logic_error("Sum of stock prices weights should be equal to one!");
         }
     }
+
+
+    /// @brief Number of threads to be used for multithreaded scenario
+    // static inline size_t s_threads = 10;
 private:
     inline double fast_exp(double x)
 {

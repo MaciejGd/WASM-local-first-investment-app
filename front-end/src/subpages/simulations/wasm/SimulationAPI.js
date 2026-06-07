@@ -63,9 +63,10 @@ export class SimulationAPI {
      * @param {Array} stock_weights list of weights of particular inverstments
      * @param {number} time number of simulated timepoints
      * @param {number} sims number of simulations to be run
+     * @param {function} cb wasm module's function to be executed
      * @returns 
      */
-    runSimulation(stock_prices, stock_weights, time, sims) {
+    simulationCaller(stock_prices, stock_weights, time, sims, cb) {
         if (this.module === undefined) {
             return null;
         }
@@ -80,7 +81,6 @@ export class SimulationAPI {
         const STOCKS_AMOUNT = weights.length;
         // we should take into consideration that CVAR for each asset should be added to the results
         const RESULTS_AMOUNT = SimulationAPI.RESULTS_BASE + stock_weights.length;
-        console.log("Results amount: ", RESULTS_AMOUNT);
         var RESULTS = new Float64Array(RESULTS_AMOUNT);
         const STOCK_SIZE = SimulationAPI.days_back; // amount of stock prices samples
         // pointers to arrays needed for simulations
@@ -96,10 +96,10 @@ export class SimulationAPI {
             this.module.HEAPF64.set(stocks, stocks_ptr / stocks.BYTES_PER_ELEMENT); // set works in float units, not in bytes so need to divide by 8
             this.module.HEAPF64.set(weights, weights_ptr / weights.BYTES_PER_ELEMENT);            
             // run main function utilizing buffers
-            this.module._runSimulations(stocks_ptr, weights_ptr,
-                                        STOCKS_AMOUNT, STOCK_SIZE,
-                                        time, sims,
-                                        res_ptr);
+            cb(stocks_ptr, weights_ptr,
+                STOCKS_AMOUNT, STOCK_SIZE,
+                time, sims,
+                res_ptr);
             // fill results array with simulation results
             RESULTS = this.module.HEAPF64.subarray(res_ptr / RESULTS.BYTES_PER_ELEMENT, 
                                             res_ptr / RESULTS.BYTES_PER_ELEMENT + RESULTS.length).slice();
@@ -114,8 +114,31 @@ export class SimulationAPI {
             if (stocks_ptr != null)     this.module._free(stocks_ptr);
             if (weights_ptr != null)    this.module._free(weights_ptr);    
         }        
-        console.log("Results: ", RESULTS);
         return RESULTS;
+    }
+
+    /**
+     * Run serialized version of WASM Monte Carlo simulations
+     * @param {*} stock_prices prices for given stocks
+     * @param {*} stock_weights weights of particular stocks
+     * @param {*} time timepoints to be simulated
+     * @param {*} sims number of simulations to be performed
+     * @returns results of the simulation in the form of array
+     */
+    runSimulationSerialized(stock_prices, stock_weights, time, sims) {
+        return this.simulationCaller(stock_prices, stock_weights, time, sims, (...args) => this.module._runSimulations(...args));
+    }
+
+    /**
+     * Run multi-threading version of WASM Monte Carlo simulations
+     * @param {*} stock_prices prices for given stocks
+     * @param {*} stock_weights weights of particular stocks
+     * @param {*} time timepoints to be simulated
+     * @param {*} sims number of simulations to be performed
+     * @returns results of the simulation in the form of array
+     */
+    runSimulationMultithreading(stock_prices, stock_weights, time, sims) {
+        return this.simulationCaller(stock_prices, stock_weights, time, sims, (...args) => this.module._runMultithreadingSimulations(...args));
     }
 
 }

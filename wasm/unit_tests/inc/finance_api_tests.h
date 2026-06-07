@@ -23,6 +23,7 @@ public:
 
 class TestRandomGenerator : public IRandomGenerator {
     // vector of example random values
+public:
     static inline std::vector<std::vector<double>> data = {
         {-0.19, -0.01, -1.37},
         {0.02, 0.57, 2.14},
@@ -144,6 +145,7 @@ class TestRandomGenerator : public IRandomGenerator {
         {0.925075, 0.178276, -1.28287},
         {-0.927214, 0.240567, 0.245048}
     };
+private:
     int vec_cnt = 0; // counter to keep track of already used values
     int vec_small = 0;
 public:
@@ -171,6 +173,86 @@ public:
             vec[i] = curr_vec[i];
         }
     }
+
+    std::unique_ptr<IRandomGenerator> createNewInstance() override {
+        return std::make_unique<TestRandomGenerator>();
+    }
+};
+
+/// Randoms generator mock for multithreading function
+class TestRandomGenThreading : public IRandomGenerator {
+    int vec_cnt = 0; // counter to keep track of already used values
+    static inline int s_instance_counter = 0; // static counter of instances
+    int gen_counter = 0; // counter of current thread. Each thread should return certain values
+    static inline std::mutex s_lock;
+public:
+    TestRandomGenThreading(): IRandomGenerator() {
+        // ensure thread safe static modification
+        std::lock_guard<std::mutex> lck(s_lock);
+        // obtain number of active threads that will be used during computations
+        size_t threads = finance_api::s_threads;
+
+        size_t chunk = s_sims / threads;
+        size_t remainder = s_sims % threads;
+
+        gen_counter = (TestRandomGenThreading::s_instance_counter - 1);
+        TestRandomGenThreading::s_instance_counter++;
+        if (chunk == 0) {
+            vec_cnt = TestRandomGenThreading::s_times * gen_counter; // each thread should capture "s_times" points
+            std::cout << "Gen counter: " << gen_counter << " | vec_cnt: " << vec_cnt << std::endl;
+            return;
+        }
+        else {
+            vec_cnt = TestRandomGenThreading::s_times * gen_counter * chunk; // each thread should capture "s_times" points
+            std::cout << "Gen counter: " << gen_counter << " | vec_cnt: " << vec_cnt << std::endl;
+        }
+        if (remainder == 0) return;
+        if (gen_counter < remainder) {
+            vec_cnt += (TestRandomGenThreading::s_times * gen_counter);
+        }
+        else {
+            vec_cnt += (TestRandomGenThreading::s_times * remainder);
+        }
+        std::cout << "Gen counter: " << gen_counter << " | vec_cnt: " << vec_cnt << std::endl;
+    };
+
+    static inline void preconfigTestGenerator(size_t times, size_t sims) {
+        TestRandomGenThreading::s_times = times;
+        TestRandomGenThreading::s_sims = sims;
+        TestRandomGenThreading::s_instance_counter = 0;
+    }
+
+    linalg::primitives::CMatrix<double> GenerateRandomSamples(size_t size) override {
+        if (vec_cnt > TestRandomGenerator::data.size()) {
+            throw std::logic_error("vector count outside of the bounds");
+        }
+        auto curr_vec = TestRandomGenerator::data[vec_cnt++];
+        linalg::primitives::CMatrix<double> mat(size, 1);
+        for (int i = 0; i < 3; i++) {
+            mat[i][0] = curr_vec[i];
+            std::cout << curr_vec[i] << ", ";
+        }
+        std::cout << std::endl;
+        return mat;
+    }
+
+    inline void FullfillVectorWithRandoms(std::vector<double>& vec) {
+        if (vec_cnt > TestRandomGenerator::data.size()) {
+            throw std::logic_error("vector count outside of the bounds");
+        }
+        auto curr_vec = TestRandomGenerator::data[vec_cnt++];
+        for (int i = 0; i < 3; i++) {
+            vec[i] = curr_vec[i];
+        }
+    };
+
+    std::unique_ptr<IRandomGenerator> createNewInstance() override {
+        return std::make_unique<TestRandomGenThreading>();
+    }
+
+    // NEEDS to be set prior generator creation!!!
+    static inline int s_times; // number of timepoints to be checked for each thread
+    static inline int s_sims;
 };
 
 
@@ -253,6 +335,7 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     std::vector<double> expected_results = {3.71337462, 2.99464877, 7.54594324, 5.05260566, 6.18458635};
 
 
+
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
     std::unique_ptr<TestRandomGenerator> rand_gen = std::make_unique<TestRandomGenerator>();
 
@@ -262,7 +345,7 @@ UNIT_TEST(MonteCarloSimulator, Simulation) {
     auto outputs = mont.Simulate(5, 5, drawdowns, upsides);
     // validate output
     auto results = outputs.GetRets();
-    for (int i = 0; i < results.size(); i++) {        
+    for (int i = 0; i < results.size(); i++) {
         CHECK_EQUAL_FLOAT(expected_results[i], results[i]);
     }
 }
@@ -275,10 +358,10 @@ UNIT_TEST(MonteCarloSimulator, SimulationUpsides) {
     size_t stock_size = 5;
     double weights[] = {0.5, 0.25, 0.25};
 
-    std::vector<double> expected_results = {3.713374615272557, 
-                                            2.9946487739656593, 
-                                            7.5459432366090065, 
-                                            5.052605659459024, 
+    std::vector<double> expected_results = {3.713374615272557,
+                                            2.9946487739656593,
+                                            7.5459432366090065,
+                                            5.052605659459024,
                                             6.184586353453597};
 
     auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
@@ -384,6 +467,53 @@ UNIT_TEST(MonteCarloSimulator, RunSimulationValid) {
 
     mont.SetRandomGenerator(std::move(rand_gen));
     mont.RunSimulation(5, 20, buff.data());
+    for (int i = 0; i < 29; i++) {
+        CHECK_EQUAL_FLOAT(buff[i], expected_results[i]);
+    }
+}
+
+/// THREADING SOLUTION TESTS
+UNIT_TEST(MonteCarloSimulator, RunSimulationInvalidBufferThreading) {
+    int price[] = {7,4,2,1,2,
+                    1,2,5,4,4,
+                    10,9,5,7,2};
+    size_t stocks = 3;
+    size_t stock_size = 5;
+    double weights[] = {0.5, 0.25, 0.25};
+    double* buff = nullptr;
+    auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    // configure random generator
+    TestRandomGenThreading::preconfigTestGenerator(5,5);
+    std::unique_ptr<TestRandomGenThreading> rand_gen = std::make_unique<TestRandomGenThreading>();
+
+    mont.SetRandomGenerator(std::move(rand_gen));
+    CHECK_EQUAL(mont.RunSimulation(5, 5, buff), false);
+}
+
+UNIT_TEST(MonteCarloSimulator, RunSimulationValidThreading) {
+    int price[] = {7,4,5,1,2,
+                1,2,5,4,7,
+                10,9,5,7,4};
+    size_t stocks = 3;
+    size_t stock_size = 5;
+    double weights[] = {0.5, 0.25, 0.25};
+
+    std::array<double, 31> expected_results = {
+            -0.0954805060374801,0.03668832290704804,0.18820470642450823,0.32892596324010703,1.4004578802956584,2.4679858821746303,3.713374615272557,5.052605659459024,6.184586353453597, // returns
+            -0.3919309424359614,-0.2878297492506418,-0.2522299061951612,-0.19379420054502533,-0.17375368115258444,0,0,0,0, // DRAWDOWNS
+            0.03668832290704804,0.13788667070476263,0.32232207972891425,0.32892596324010703,1.4004578802956584,2.7574889736371064,3.713374615272557,5.052605659459024,6.184586353453597, // UPSIDES
+            -0.2923375735491905, // VAR
+            -0.49237985, 0.2473031, -0.04726082 // CVARS
+        };
+
+    std::array<double, 31> buff{};
+    auto mont = MonteCarloSimulator(price, stocks, stock_size, weights);
+    // configure random generator
+    TestRandomGenThreading::preconfigTestGenerator(5,20);
+    std::unique_ptr<TestRandomGenThreading> rand_gen = std::make_unique<TestRandomGenThreading>();
+
+    mont.SetRandomGenerator(std::move(rand_gen));
+    mont.RunSimulationMultithreading(5, 20, buff.data());
     for (int i = 0; i < 29; i++) {
         CHECK_EQUAL_FLOAT(buff[i], expected_results[i]);
     }
