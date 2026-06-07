@@ -169,7 +169,6 @@ export default function SimulationsPage() {
 
     return (
         <>
-            <h1>Simulations!!!</h1>
             <div className="page">
                 <SimulationsOptionsPane addAsset={toggleModalVisibility} deleteSelectedCb={deleteSelected} onRunSim={RunFinanceSimulations}/>
                 <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset}/>
