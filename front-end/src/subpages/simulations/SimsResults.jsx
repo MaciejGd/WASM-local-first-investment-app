@@ -83,7 +83,7 @@ export default function SimsResults({ results, tickers, assets, date, sims, time
 
     return (
         <>
-        <h1>Simulation Results</h1>
+        <h2>Simulation Results</h2>
         <div className="sims_results_pane">
             <SimsResultsButtons saveSim={AddToHistory}></SimsResultsButtons>
             <SimsResultsAssetsDescription

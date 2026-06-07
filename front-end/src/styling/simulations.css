@@ -1,128 +1,248 @@
+:root {
+  --sim-bg: #0b111f;
+  --sim-panel: rgba(17, 24, 42, 0.95);
+  --sim-panel-soft: rgba(23, 33, 58, 0.95);
+  --sim-border: rgba(255, 255, 255, 0.08);
+  --sim-text: #edf2ff;
+  --sim-muted: #9ca7c8;
+  --sim-accent: #5ea8ff;
+  --sim-accent-strong: #71c3ff;
+  --sim-shadow: 0 28px 90px rgba(0, 0, 0, 0.25);
+}
+
 .page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  /* background-color: purple; */
+  gap: 1.5rem;
+  padding: 2rem 1rem 3rem;
+  background: radial-gradient(circle at top left, rgba(94, 168, 255, 0.12), transparent 22%),
+    linear-gradient(180deg, #09101d 0%, #08101b 100%);
+  color: var(--sim-text);
+}
+
+.page h1,
+.page h2 {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+  color: var(--sim-text);
+  letter-spacing: 0.01em;
 }
 
 .sims_options_pane {
-  display: flex;
-  background-color: #ccc;
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  background: var(--sim-panel);
+  border: 1px solid var(--sim-border);
+  border-radius: 24px;
+  padding: 1.25rem;
+  box-shadow: var(--sim-shadow);
 }
-
 
 .sims_middle_pane {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 2fr 1fr;
-  justify-content: center;
-  align-items: center;
-  width: 80%;
-  gap: 30px;
-  background-color: dimgray;
-}
-
-.sims_results_down_pane {
-  display: flex;
-
-}
-
-/* .sims_table_container {
   width: 100%;
-  max-height: 500px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-} */
-
-.sims_table_container .sims_asset_table {
-  width: 90%;
-  border-collapse: "serparate";
-  border-spacing: 0;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.7fr) minmax(260px, 1fr);
+  gap: 1rem;
+  align-items: start;
 }
 
-.sims_table_container .sims_table_container.thead.th {
-  position: sticky;
-  top: 1px;
-  z-index: 1;
-  background-color: white;
-  color: black;
-  border: 1px solid #ccc;
-} 
-
-
-.sims_pie_chart {
-  width: 50%;
-  display: flex;
-  justify-content: center;
+.sims_pie_chart,
+.sims_results_pie_chart {
+  width: 100%;
+  max-width: 380px;
+  min-width: 260px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
 }
 
-.sims_results_pane {
-  display: flex;
-  flex-direction: column;
+.sims_pie_chart canvas,
+.sims_results_pie_chart canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 360px;
+}
+
+.sims_slider {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.sims_slider input[type="range"] {
+  width: 100%;
+  accent-color: var(--sim-accent);
+}
+
+.sims_slider input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--sim-text);
+  outline: none;
+}
+
+.sims_slider input:focus {
+  border-color: rgba(94, 168, 255, 0.7);
+  box-shadow: 0 0 0 4px rgba(94, 168, 255, 0.12);
+}
+
+.sims_run_button,
+.sims_results_button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, var(--sim-accent), var(--sim-accent-strong));
+  box-shadow: 0 18px 40px rgba(94, 168, 255, 0.18);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+
+.sims_run_button:hover,
+.sims_results_button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.sims_results_button:nth-child(2) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sim-text);
+  box-shadow: none;
 }
 
 .sims_results_buttons {
+  width: 100%;
   display: flex;
-  align-items: top;
-  justify-content: top;
-  background-color: #ccc;
-  width: 80%;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.75rem 0;
 }
 
-.sims_results_button {
-  padding: 10px;
-  margin: 10px;
-  margin-left: 2rem;
-  /* padding-left: 2rem; */
+.sims_results_pane {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--sim-panel);
+  border: 1px solid var(--sim-border);
+  border-radius: 30px;
+  padding: 1.5rem;
+  box-shadow: var(--sim-shadow);
 }
 
-.sims_results_risk_container {
-  width: 80%;
+.sims_results_section_desc {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sims_results_desc_span {
+  display: block;
+  color: var(--sim-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sims_table_container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sims_table_container .sims_asset_table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.sims_asset_table th,
+.sims_asset_table td {
+  padding: 1rem 1.1rem;
+  text-align: left;
+  color: var(--sim-text);
+}
+
+.sims_asset_table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(13, 21, 38, 0.95);
+  color: var(--sim-accent);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.sims_asset_table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sims_asset_table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sims_asset_table tbody tr:hover {
+  background: rgba(94, 168, 255, 0.08);
+}
+
+.sims_pie_chart,
+.sims_results_pie_chart {
+  width: 100%;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
 }
 
-.sims_results_pie_chart {
-  width: 20%;
-  display: flex;
-  justify-content: center;
+.sims_results_risk_container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
 }
 
-.sims_results_table {
-  padding-top: 10px;
-  width: 80%;
-  background: darkgray;
+@media (max-width: 980px) {
+  .sims_results_risk_container,
+  .sims_middle_pane,
+  .sims_options_pane {
+    grid-template-columns: 1fr;
+  }
+
+  .sims_results_section_desc {
+    grid-template-columns: 1fr;
+  }
 }
 
-.sims_results_section_desc {
-  background: darkgray;
-  width: 80%;
-  display: flex;
-  padding-left: 1rem;
-  margin-left: 1rem;
-  font-size: large;
-}
-
-.sims_results_desc_span {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-
-.sims_slider {
-
-}
-
-.sims_run_button {
-  background-color: rgb(59, 59, 59);
-  border-radius: 10px;
-  border-color: white;
-  margin-left: 5px;
+@media (max-width: 640px) {
+  .sims_options_pane,
+  .sims_results_pane,
+  .page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

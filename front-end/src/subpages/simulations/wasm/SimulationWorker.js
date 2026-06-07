@@ -42,7 +42,7 @@ function measureWasm(stockData, weights, times, sims) {
     var res = [];
     for (var i = 0; i < 10; i++) {
         const start = performance.now();
-        const results = simAPI.runSimulation(stockData, weights, times, sims);
+        var results = simAPI.runSimulation(stockData, weights, times, sims);
         const end = performance.now();
         console.log(`WASM simulation took ${end - start} milliseconds.`);
         res.push(end - start);

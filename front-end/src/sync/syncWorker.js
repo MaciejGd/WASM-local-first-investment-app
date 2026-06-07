@@ -5,6 +5,7 @@ import { DBSynchronizer } from "./synchronizer";
 const sync = new DBSynchronizer();
 
 onmessage = async (e) => {
+    console.log("Received data!");
     const data = e.data;
     // TODO, should we handle exceptions in here???
     if (data.type == "add") {
