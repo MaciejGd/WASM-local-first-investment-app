@@ -100,9 +100,7 @@ class DBUpdater:
     def get_event(self, user_id, event_id):
         return db_proxy.get_event(user_id, event_id)
 
-    def get_data_record(
-        self, user_id: int, table_name: str, ulid: int
-    ) -> object | None:
+    def get_data_record(self, user_id: int, table_name: str, ulid: str) -> dict | None:
         """
         Get record from encrypted table and process its content so it can be jsonified.
         """
@@ -179,7 +177,7 @@ class DBUpdater:
         new_hash = self._xor_hashes(old_hash, hash)
         return new_hash
 
-    def _xor_hashes(self, hash1: str, hash2: str) -> str:
+    def _xor_hashes(self, hash1: str | None, hash2: str) -> str:
         """
         Turn two hash strings into bytes, hash them and stransform back to string
         """

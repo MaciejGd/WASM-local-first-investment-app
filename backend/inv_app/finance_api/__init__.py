@@ -1,5 +1,4 @@
 from .mongo_handler import MongoHandler
-import json
 
 uri = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.0"
 
@@ -12,7 +11,7 @@ class FinanceDataAPI:
         self.stock_info_col = "StockInfo"
         self.stock_markers_col = "StockMarkers"
 
-    def get_stocks_prices(self, tickers) -> dict:
+    def get_stocks_prices(self, tickers) -> list:
         tickers_data = []
         for ticker in tickers:
             doc = self.get_stock_prices(ticker)
@@ -24,6 +23,8 @@ class FinanceDataAPI:
             doc = self.db_handler.find_one(
                 self.db_name, self.stock_prices_col, {"ticker": ticker}
             )
+            if doc is None:
+                return {}
             return_dict = {"ticker": doc["ticker"], "prices": doc["Close"]}
             return return_dict
         except Exception as e:

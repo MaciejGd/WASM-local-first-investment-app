@@ -1,7 +1,6 @@
 import os
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify
 from flask_cors import CORS
-from .finance_api import finance_api
 
 
 def create_app(test_config=None, instance_path=None):

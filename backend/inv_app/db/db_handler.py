@@ -14,7 +14,7 @@ class DBHandler(ABC):
         pass
 
     @abstractmethod
-    def close(self):
+    def close(self, db_handle):
         raise NotImplementedError
 
     @abstractmethod
@@ -22,7 +22,7 @@ class DBHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def initialize(self, schema_path: str):
+    def initialize(self, db_handle, schema_path: str):
         raise NotImplementedError
 
     @abstractmethod
@@ -34,7 +34,7 @@ class DBHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def reset_collection(self, db_handle, user_id: int) -> bool:
+    def reset_collection(self, db_handle, user_id: int, table_name: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -66,15 +66,17 @@ class DBHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_events_from_id(self, db_handler, user_id, last_event_id):
+    def get_events_from_id(self, db_handle, user_id, last_event_id) -> list[int]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_event(self, db_handler, user_id, last_event_id):
+    def get_event(self, db_handle, user_id, event_id):
         raise NotImplementedError
 
     @abstractmethod
-    def get_collection_hash(self, db_handle, user_id: int, collection_name: str) -> str:
+    def get_collection_hash(
+        self, db_handle, user_id: int, collection_name: str
+    ) -> str | None:
         raise NotImplementedError
 
     @abstractmethod

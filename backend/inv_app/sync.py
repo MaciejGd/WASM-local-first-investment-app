@@ -1,7 +1,4 @@
-import functools
-
 from . import auth
-from .db import db_proxy
 from .sync_api import DBUpdater
 
 from flask import Blueprint, jsonify, request, abort, session
@@ -29,37 +26,10 @@ def push_changes():
     event_id = updater.process_event(
         session["user_id"], timestamp, table_name, type, ulid, obj_hash, payload
     )
-    if event_id == None:
+    if event_id is None:
         abort(500, "Pushing changes to remote failed")
 
     return jsonify({"event_id": event_id})
-
-
-@bp.route("/get_record/<table_name>/<ulid>", methods=("GET",))
-@auth.login_required
-def get_record(table_name, ulid):
-    """
-    Testing endpoint for testing end-to-end frontend-backend connection
-
-    :param table_name: name of the table from which information should be taken
-    :param ulid:
-    """
-
-    updater = DBUpdater()
-    record = updater.get_record(
-        user_id=session["user_id"],
-        payload={"compare_obj": ulid, "table_name": table_name},
-    )
-    if record is None:
-        abort(500, "Failed to retrieve record with given ulid")
-
-    return jsonify({"record": record})
-
-
-# @bp.route('/pull_events/<event_id>', methods=('GET',))
-# @auth.login_required
-# def get_pending_events(event_id):
-#     last_event_id = event_id
 
 
 @bp.route("/pull_events_ids/<event_id>", methods=("GET",))
@@ -87,7 +57,7 @@ def pull_changes(event_id):
 def compare_hashes():
     hashes_json = request.get_json()
     if hashes_json is None:
-        return abort("Invalid request JSON.")
+        return abort(500, "Invalid request JSON.")
 
     user_id = session["user_id"]
     updater = DBUpdater()

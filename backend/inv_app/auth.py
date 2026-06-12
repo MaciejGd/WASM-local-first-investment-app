@@ -6,6 +6,7 @@ from flask import (
     request,
     session,
     abort,
+    jsonify,
 )
 
 from .db import db_proxy
@@ -17,7 +18,7 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 @bp.route("/register", methods=("GET", "POST"))
 def register():
     # TODO - implement registering new users
-    pass
+    return jsonify({"status": 200})
 
 
 # endpoint for logging into the service

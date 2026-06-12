@@ -93,7 +93,7 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.get_event(db, user_id, event_id)
 
-    def get_collection_hash(self, user_id: int, col_name: str) -> str:
+    def get_collection_hash(self, user_id: int, col_name: str) -> str | None:
         """
         Get hash of the user's collection
 

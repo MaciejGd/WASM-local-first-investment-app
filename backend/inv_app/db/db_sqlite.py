@@ -117,7 +117,7 @@ class SQLite3DB(db_handler.DBHandler):
         table_name: str,
         type: str,
         ulid: str,
-    ) -> bool:
+    ) -> int:
         table = SQLite3DB.EVENTS_TABLE + str(user_id)
         try:
             db_handle.execute(SQLite3DB.CREATE_EVENTS_TABLE.format(table))
@@ -178,7 +178,7 @@ class SQLite3DB(db_handler.DBHandler):
             # db_handle.commit()
             return True
         except Exception:
-            db_handler.rollback()
+            db_handle.rollback()
             return False
 
     def get_events_from_id(self, db_handle, user_id, last_event_id) -> list[int]:
@@ -190,7 +190,7 @@ class SQLite3DB(db_handler.DBHandler):
             ).fetchall()
             ids = [row[0] for row in records]
             return ids
-        except Exception as e:
+        except Exception:
             db_handle.rollback()
             return []
 
@@ -206,10 +206,12 @@ class SQLite3DB(db_handler.DBHandler):
         except Exception:
             return None
 
-    def update_collection_hash(self, db_handle, user_id, table_name, hash):
+    def update_collection_hash(
+        self, db_handle, user_id: int, collection_name: str, hash: str
+    ):
         table = SQLite3DB.META_TABLE + str(user_id)
         table_record = (
-            table_name + "_" + str(user_id)
+            collection_name + "_" + str(user_id)
         )  # table which record should be updated
         try:
             db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
@@ -226,14 +228,17 @@ class SQLite3DB(db_handler.DBHandler):
             db_handle.rollback()
             return False
 
-    def get_collection_hash(self, db_handle, user_id, table_name):
+    def get_collection_hash(
+        self, db_handle, user_id: int, collection_name: str
+    ) -> str | None:
         table = SQLite3DB.META_TABLE + str(user_id)
-        table_record = table_name + "_" + str(user_id)
+        table_record = collection_name + "_" + str(user_id)
         try:
             hash = db_handle.execute(SQLite3DB.GET_META.format(table), (table_record,))
             return hash.fetchone()[2]
         except Exception:
             db_handle.rollback()
+            return None
 
     def get_all_encrypted_records(self, db_handle, user_id, table_name):
         table = table_name + "_" + str(user_id)
