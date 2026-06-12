@@ -5,10 +5,40 @@ class DBUpdater:
     def __init__(self):
         self.registered_tables = {"wallet_assets", "sim_history"}
 
+    def compare_hashes(self, user_id, hashes):
+        res = {}
+        for (table, hash) in hashes.items():
+            if table not in self.registered_tables:
+                print("Table not registered!!!")
+                continue 
+
+            res[table] = {}
+            match = (db_proxy.get_collection_hash(user_id, table) == hash)
+            res[table]["equal"] = match
+            if match:
+                continue
+
+            # handle scenario in which we need to pass all records to remote db
+            records = self.get_all_records(user_id, table)
+            records = [
+            {
+                "ulid" : record['ulid'],
+                "hash" : record['hash'],
+                "payload" : self._encode_payload(record['payload'])
+            } for record in records 
+            ]
+            res[table]["records"] = records
+        return res
+
+    def get_all_records(self, user_id, table_name):
+
+        return db_proxy.get_all_encrypted_records(user_id, table_name)
+
+
 
     def process_add_event(self, user_id, timestamp, table_name, type, ulid, hash, payload) -> int | None:
         table_hash = self.reevaluate_hash(user_id, table_name, hash)
-        return db_proxy.add_data_record(user_id, timestamp, table_name, type, ulid, hash, table_hash, self._decode_payload(payload))
+        return db_proxy.add_data_record(user_id, timestamp, table_name, type, ulid, hash, table_hash, self._decode_payload(payload))    
 
 
     def process_remove_event(self, user_id, timestamp, table_name, type, ulid):
@@ -160,7 +190,7 @@ class DBUpdater:
             raise ValueError("Hashes must be same length!")
         xored = bytes(a ^ b for a,b in zip(b1,b2))
         return xored.hex()
-    
+        
 
     def get_record_hash(self, user_id, table_name, ulid):
         row = db_proxy.get_encrypted_record(table_name, user_id, ulid)

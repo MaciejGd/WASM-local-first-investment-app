@@ -140,6 +140,12 @@ class DBProxy(object):
             return None
         return event_id
     
+    
+    def get_all_encrypted_records(self, user_id, table_name):
+        db = self.get_db()
+        return self.db_handler.get_all_encrypted_records(db, user_id, table_name)
+
+    
 
     def remove_data_record(self, user_id, timestamp, table_name, type, ulid, table_hash):
         db = self.get_db()
@@ -158,9 +164,6 @@ class DBProxy(object):
         if not up_state:
             return None
         return event_id
-        
-
-    
 
 # initialize db proxy with wanted implementation, for now sqlite3
 db_proxy = DBProxy(db_sqlite.SQLite3DB(), "schema.sql")

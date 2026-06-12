@@ -83,3 +83,16 @@ def pull_changes(event_id):
 
     records = updater.get_events(user_id, event_id)
     return jsonify(records)
+
+
+@bp.route("/hash_compare", methods=("POST", ))
+@auth.login_required
+def compare_hashes():
+    hashes_json = request.get_json()
+    if hashes_json is None:
+        return abort("Invalid request JSON.")
+    
+    user_id = session["user_id"]
+    updater = DBUpdater()
+    response = updater.compare_hashes(user_id, hashes_json)
+    return jsonify(response)

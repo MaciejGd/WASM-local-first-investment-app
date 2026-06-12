@@ -1,6 +1,6 @@
 import { DBEncryptor } from "../db/db_encryptor.js";
 import { RequestGET, RequestPOST } from "../Requests.js";
-import { getDBInstance } from "../db/db.js";
+import { getDBInstance, getTablesHashes } from "../db/db.js";
 import { SyncDBUpdater } from "./syncDBUpdater.js";
 
 // From here we should somehow put events into a Dexie db so that events are being preserved between sessions and resistant to some
@@ -71,6 +71,7 @@ export class DBSynchronizer {
     static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
     static PULL_EVENTS_IDS = "http://127.0.0.1:5000/sync/pull_events_ids/";
     static PULL_EVENTS = "http://127.0.0.1:5000/sync/pull_events/";
+    static COMPARE_HASHES = "http://127.0.0.1:5000/sync/hash_compare";
     constructor() {
         // we have two basic actions to perform
         this.db_handle = getDBInstance(); // create db handle
@@ -226,6 +227,28 @@ export class DBSynchronizer {
         }
     }
 
+    /**
+     * Call external server for comparing db hashes. If local hash and remote one are not equal, endpoint
+     * would return all tables records in response
+     * @returns True on success, False otherwise
+     */
+    async compareHashes() {
+        var ev = await getTablesHashes();
+        var response = null;
+        try {
+            // post a request but response can either return empty object or db to be updated
+            response = await RequestPOST(DBSynchronizer.COMPARE_HASHES, ev);
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+        // here we should check for the response code
+        console.log(response);
+        console.log(response.sim_history);
+        console.log(response.wallet_assets);
+        return true;
+    }
 
     pollData() {
         if (this.outgoing_events_pending === true) {
@@ -233,11 +256,12 @@ export class DBSynchronizer {
         }
         console.log("Polling events from remote!");
 
-        this.outgoing_events_pending = true;        
+        this.outgoing_events_pending = true;         
         // first pull data from remote and sync
         this.pullFromRemote();
         // then push your changes to remote
         this.pushToRemote();
+        this.compareHashes();
         this.outgoing_events_pending = false;
     }
 
@@ -269,9 +293,6 @@ export class DBSynchronizer {
         });
     }
 
-    async get_last_event_timestamp() {
-
-    }
 };
 
 export var sync = new DBSynchronizer();

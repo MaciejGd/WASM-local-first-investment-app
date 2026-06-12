@@ -16,3 +16,6 @@ testpaths = ["test"]
 [tool.coverage.run]
 branch = true
 source = ["inv_app"]
+
+[tool.ruff]
+exclude = ["./venv", "./inv_app/__pycache__"]

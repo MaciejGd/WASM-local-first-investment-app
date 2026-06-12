@@ -41,6 +41,7 @@ class SQLite3DB(db_handler.DBHandler):
     ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, hash, payload) VALUES (?, ?, ?);"
     REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=?;"
     GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
+    GET_ALL_ENCRYPTED_RECORDS = "SELECT * FROM {} WHERE 1=1;"
 
     # update meta table
     CREATE_META_TABLE = "CREATE TABLE IF NOT EXISTS {} \
@@ -221,3 +222,12 @@ class SQLite3DB(db_handler.DBHandler):
             return hash.fetchone()[2]
         except:
             db_handle.rollback()
+
+
+    def get_all_encrypted_records(self, db_handle, user_id, table_name):
+        table = table_name + "_" + str(user_id)
+        try:
+            cursor = db_handle.execute(SQLite3DB.GET_ALL_ENCRYPTED_RECORDS.format(table))
+            return cursor.fetchall() 
+        except:
+            print("FAIL!!!")

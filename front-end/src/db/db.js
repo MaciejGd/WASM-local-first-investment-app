@@ -23,6 +23,28 @@ export function getDBInstance() {
     return dbInstance;
 }
 
+
+async function getTableHash(table_name) {
+    var db = getDBInstance();
+    const table_name_hash = table_name + "_hash";
+    const meta_table = db.table("metadata");
+    const hash_obj = await meta_table.get(table_name_hash);
+    return hash_obj.value;
+}
+
+/**
+ * Take hashes of all tables and returns as object [name : hash]
+ */
+export async function getTablesHashes() {
+    const wallet_hash = await getTableHash("wallet_assets");
+    const sims_hash = await getTableHash("sim_history");
+    return {
+        "wallet_assets" : wallet_hash,
+        "sim_history" : sims_hash,
+    };
+}
+
+
 /**
  * Function to be used when data is being put into a db. It handles whole transaction's
  * process, first adds new record to proper db and then updates the table hash,
@@ -40,7 +62,7 @@ export async function putDataToDb(db, table_name, asset) {
             id = await db.table(table_name).put(asset);
             await updateHash(
                 db,
-                "wallet_assets",
+                table_name,
                 asset.hash,
             )
         }

@@ -63,7 +63,10 @@ class DBHandler(ABC):
     def get_collection_hash(self, db_handle, user_id: int, collection_name: str) -> str:
         raise NotImplementedError
     
-
     @abstractmethod
     def update_collection_hash(self, db_handle, user_id: int, collection_name: str, hash: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_all_encrypted_records(self, db_handle, user_id: int, table_name: str):
         raise NotImplementedError
