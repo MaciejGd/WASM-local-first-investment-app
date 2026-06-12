@@ -1,27 +1,21 @@
 """
-    Simple class wrapper for MongoDb calls
+Simple class wrapper for MongoDb calls
 """
 
 from pymongo import MongoClient
 
-class MongoHandler():
+
+class MongoHandler:
     def __init__(self, uri: str):
         self.uri = uri
         self.client = MongoClient(uri)
 
-
     def get_db(self, db_name: str):
-        """
-            Get db specified by db_name
-            @para
-        """
-
         try:
             db = self.client.get_database(db_name)
             return db
         except Exception as e:
             raise Exception("Failed to get db: {}".format(db_name)) from e
-        
 
     def get_collection(self, db, col_name: str):
         """Try getting collection from db"""
@@ -32,34 +26,21 @@ class MongoHandler():
         except Exception as e:
             raise Exception("Collection: {}".format(col_name)) from e
 
-
-
     def find_one(self, db_name, col_name, filter):
-        # get element from db and reset id 
+        # get element from db and reset id
         try:
             db = self.get_db(db_name)
             col = self.get_collection(db, col_name)
-            cursor = col.find_one(filter, {"_id" : 0})
+            cursor = col.find_one(filter, {"_id": 0})
             return cursor
         except Exception as e:
             raise Exception("Failed to obtain one record from MongoDB") from e
-
 
     def get_all_docs(self, db_name, col_name):
         try:
             db = self.get_db(db_name)
             col = self.get_collection(db, col_name)
-            # TODO - change that so it is not filtering by tickers (it should not be db specific)
-            cursor = col.find({}, {"ticker" : 1})
+            cursor = col.find({}, {"ticker": 1})
             return cursor
         except Exception as e:
             raise Exception("Failed to get all docs from collection") from e
-
-
-    
-
-    
-
-    
-
-    

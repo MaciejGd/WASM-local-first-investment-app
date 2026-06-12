@@ -1,4 +1,4 @@
-import os 
+import os
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from .finance_api import finance_api
@@ -6,19 +6,19 @@ from .finance_api import finance_api
 
 def create_app(test_config=None, instance_path=None):
     # create and configure app instance
-    app = Flask(__name__, 
-                instance_relative_config=True,
-                instance_path=instance_path)
-    
+    app = Flask(__name__, instance_relative_config=True, instance_path=instance_path)
+
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY="dev",
         SESSION_COOKIE_SAMESITE="None",
         SESSION_COOKIE_SECURE=True,
-        DATABASE=os.path.join(app.instance_path, 'application.sqlite') # TODO, change that with some proxy etc.
+        DATABASE=os.path.join(
+            app.instance_path, "application.sqlite"
+        ),  # TODO, change that with some proxy etc.
     )
     # load init configuration of the app
     if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
 
@@ -27,27 +27,34 @@ def create_app(test_config=None, instance_path=None):
 
     # init main database
     from . import db
-    db.init_app(app)    
+
+    db.init_app(app)
 
     # example, testing endpoint
     @app.route("/hello")
     def hello():
-        return jsonify({ "first" : "hello", "second" : "world" })
-    
+        return jsonify({"first": "hello", "second": "world"})
+
     # init authentication module
     from . import auth
+
     app.register_blueprint(auth.bp)
 
     # init finance api
     from . import finance
+
     app.register_blueprint(finance.bp)
 
     # register sync endpoints
     from . import sync
+
     app.register_blueprint(sync.bp)
 
     # register CORS so that react app can access server
-    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"], 
-        supports_credentials=True)
+    CORS(
+        app,
+        origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        supports_credentials=True,
+    )
 
     return app

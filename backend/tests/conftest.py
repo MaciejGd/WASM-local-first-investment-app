@@ -1,5 +1,3 @@
-
-
 import os
 import tempfile
 
@@ -8,18 +6,20 @@ from inv_app import create_app
 from inv_app.db import db_proxy
 
 
-with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
-    _data_sql = f.read().decode('utf-8')
+with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
+    _data_sql = f.read().decode("utf-8")
 
 
 @pytest.fixture
 def app():
     db_fd, db_path = tempfile.mkstemp()
     # create app instance for testing
-    app = create_app({
-        'TESTING' : True,
-        'DATABASE' : db_path,
-    })
+    app = create_app(
+        {
+            "TESTING": True,
+            "DATABASE": db_path,
+        }
+    )
 
     with app.app_context():
         db_proxy.init_db()
@@ -48,13 +48,12 @@ class AuthActions(object):
 
     def login(self, username="test", password="test"):
         return self._client.post(
-            '/auth/login',
-            json = {'username' : username, 'password' : password }
+            "/auth/login", json={"username": username, "password": password}
         )
 
     def logout(self):
-        return self._client.get('/auth/logout')
-    
+        return self._client.get("/auth/logout")
+
 
 @pytest.fixture
 def auth(client):
