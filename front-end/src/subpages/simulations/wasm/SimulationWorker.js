@@ -15,52 +15,60 @@ let simAPI = null;
  * sims: number of simulations to be performed
  */
 onmessage = async (e) => {
-    const {type, payload} = e.data;
+  const { type, payload } = e.data;
 
-    if (type === "INIT") {
-        simAPI = await SimulationAPI.create();
-    }
-    else if (type === "RUN") {
-        console.log("Worker received message from the main script");
-        const stockData = payload.stockData;
-        const weights = payload.weights;
-        const times = payload.times;
-        const sims = payload.sims;
-        
+  if (type === "INIT") {
+    simAPI = await SimulationAPI.create();
+  } else if (type === "RUN") {
+    console.log("Worker received message from the main script");
+    const stockData = payload.stockData;
+    const weights = payload.weights;
+    const times = payload.times;
+    const sims = payload.sims;
 
-        // const results = simAPI.runSimulation(stockData, weights, times, sims);
+    // const results = simAPI.runSimulation(stockData, weights, times, sims);
 
-        const results = measureWasmThreading(stockData, weights, times, sims);
-        // const results = measureWasm(stockData, weights, times, sims);
-        // const results = measureJS(stockData, weights, times, sims);
+    const results = measureWasmThreading(stockData, weights, times, sims);
+    // const results = measureWasm(stockData, weights, times, sims);
+    // const results = measureJS(stockData, weights, times, sims);
 
-        postMessage(results);
-    }
+    postMessage(results);
+  }
 };
 
 function measureWasm(stockData, weights, times, sims) {
-    console.log("WASM simulation starting");
-    const start = performance.now();
-    const results = simAPI.runSimulationSerialized(stockData, weights, times, sims);
-    const end = performance.now();
-    console.log(`WASM simulation took ${end - start} milliseconds.`);
-    return results;
+  console.log("WASM simulation starting");
+  const start = performance.now();
+  const results = simAPI.runSimulationSerialized(
+    stockData,
+    weights,
+    times,
+    sims,
+  );
+  const end = performance.now();
+  console.log(`WASM simulation took ${end - start} milliseconds.`);
+  return results;
 }
 
 function measureWasmThreading(stockData, weights, times, sims) {
-    console.log("WASM simulation starting");
-    const start = performance.now();
-    const results = simAPI.runSimulationMultithreading(stockData, weights, times, sims);
-    const end = performance.now();
-    console.log(`WASM simulation took ${end - start} milliseconds.`);
-    return results;
+  console.log("WASM simulation starting");
+  const start = performance.now();
+  const results = simAPI.runSimulationMultithreading(
+    stockData,
+    weights,
+    times,
+    sims,
+  );
+  const end = performance.now();
+  console.log(`WASM simulation took ${end - start} milliseconds.`);
+  return results;
 }
 
 function measureJS(stockData, weights, times, sims) {
-    console.log("Running JS simulation...");
-    const start = performance.now();
-    const results = runSimulations(stockData, weights, times, sims);
-    const end = performance.now();
-    console.log(`JS simulation took ${end - start} milliseconds.`);
-    return results;
+  console.log("Running JS simulation...");
+  const start = performance.now();
+  const results = runSimulations(stockData, weights, times, sims);
+  const end = performance.now();
+  console.log(`JS simulation took ${end - start} milliseconds.`);
+  return results;
 }

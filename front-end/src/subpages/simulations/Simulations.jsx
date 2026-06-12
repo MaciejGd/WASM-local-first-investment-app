@@ -196,12 +196,12 @@ export default function SimulationsPage() {
     <>
       <div className="page">
         <div className="sims_settings_container">
-            <SimulationsOptionsPane
+          <SimulationsOptionsPane
             addAsset={toggleModalVisibility}
             deleteSelectedCb={deleteSelected}
             onRunSim={RunFinanceSimulations}
-            />
-            <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset} />
+          />
+          <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset} />
         </div>
         <SimsResults
           results={simsResults}

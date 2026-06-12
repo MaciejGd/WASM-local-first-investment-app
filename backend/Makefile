@@ -1,2 +1,2 @@
 make format:
-	ruff format 
+	ruff format ./inv_app

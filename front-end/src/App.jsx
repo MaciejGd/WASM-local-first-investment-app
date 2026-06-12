@@ -1,31 +1,30 @@
-import './App.css';
-import StockPage from './subpages/wallet/Stock.jsx';
-import SettingsPage from './subpages/Settings.jsx';
-import CryptoPage from './subpages/Crypto.jsx';
-import ObligationsPage from './subpages/Obligations.jsx';
-import SimulationsPage from './subpages/simulations/Simulations.jsx';
-import GraphsPage from './subpages/graphs/Graphs.jsx';
+import "./App.css";
+import StockPage from "./subpages/wallet/Stock.jsx";
+import SettingsPage from "./subpages/Settings.jsx";
+import CryptoPage from "./subpages/Crypto.jsx";
+import ObligationsPage from "./subpages/Obligations.jsx";
+import SimulationsPage from "./subpages/simulations/Simulations.jsx";
+import GraphsPage from "./subpages/graphs/Graphs.jsx";
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
-import { useState } from 'react';
-import { 
+import { useState } from "react";
+import {
   WalletIcon,
-  LeftArrowIcon, 
-  RightArrowIcon, 
-  CryptoIcon, 
-  GraphsIcon, 
-  ObligationsIcon, 
-  SimulationsIcon, 
-  SettingsIcon, 
-  LogOutIcon 
-} from './IconLoader.jsx';
-import { LogInPopUp } from './subpages/auth/Login.jsx';
-import { LogOutPopUp } from './subpages/auth/Logout.jsx';
-import SyncTest from './subpages/sync_test/Sync.jsx';
-import { DBEncryptor } from './db/db_encryptor.js';
+  LeftArrowIcon,
+  RightArrowIcon,
+  CryptoIcon,
+  GraphsIcon,
+  ObligationsIcon,
+  SimulationsIcon,
+  SettingsIcon,
+  LogOutIcon,
+} from "./IconLoader.jsx";
+import { LogInPopUp } from "./subpages/auth/Login.jsx";
+import { LogOutPopUp } from "./subpages/auth/Logout.jsx";
+import SyncTest from "./subpages/sync_test/Sync.jsx";
+import { DBEncryptor } from "./db/db_encryptor.js";
 
 // TODO remove after testing
-import { sync_worker } from './sync/syncWorkerWrapper.js';
-
+import { sync_worker } from "./sync/syncWorkerWrapper.js";
 
 function NavigationBar({ onLogOut }) {
   const [visible, setVisible] = useState(true);
@@ -34,22 +33,56 @@ function NavigationBar({ onLogOut }) {
     setVisible(!visible);
   }
 
-  return <NavBar onHideButtonClick={clickButton} onLogOut={onLogOut} visible={visible}></NavBar>
+  return (
+    <NavBar
+      onHideButtonClick={clickButton}
+      onLogOut={onLogOut}
+      visible={visible}
+    ></NavBar>
+  );
 }
 
 // Left-oriented nav bar of the application
-function NavBar({onHideButtonClick, onLogOut, visible}) {
+function NavBar({ onHideButtonClick, onLogOut, visible }) {
   return (
     <nav className="sidebar">
-      <button className="navigationButton" onClick={onHideButtonClick}> {visible ? <LeftArrowIcon /> : <RightArrowIcon/>}<span>{visible ? " Hide navbar " : ""}</span></button>
-      <NavLink className="navigationButton" to="/stock"><WalletIcon />{visible ? " Stock " : ""} </NavLink>
-      <NavLink className="navigationButton" to="/crypto"><CryptoIcon/>{visible ? " Crypto " : ""}</NavLink>
-      <NavLink className="navigationButton" to="/obligations"><ObligationsIcon/>{visible ? " Obligations " : ""}</NavLink>
-      <NavLink className="navigationButton" to="/simulations"><SimulationsIcon/>{visible ? " Simulations " : ""}</NavLink>
-      <NavLink className="navigationButton" to="/graphs"><GraphsIcon/>{visible ? " Graphs " : ""}</NavLink>
-      <NavLink className="navigationButton" to="/settings"><SettingsIcon/>{visible ? " Settings " : ""}</NavLink>
-      <NavLink className="navigationButton" to="/sync"><SettingsIcon/>{visible ? " SyncTests " : ""}</NavLink>
-      <button className="navigationButton" onClick={onLogOut}><LogOutIcon/>{visible ? " Logout " : ""}</button>
+      <button className="navigationButton" onClick={onHideButtonClick}>
+        {" "}
+        {visible ? <LeftArrowIcon /> : <RightArrowIcon />}
+        <span>{visible ? " Hide navbar " : ""}</span>
+      </button>
+      <NavLink className="navigationButton" to="/stock">
+        <WalletIcon />
+        {visible ? " Stock " : ""}{" "}
+      </NavLink>
+      <NavLink className="navigationButton" to="/crypto">
+        <CryptoIcon />
+        {visible ? " Crypto " : ""}
+      </NavLink>
+      <NavLink className="navigationButton" to="/obligations">
+        <ObligationsIcon />
+        {visible ? " Obligations " : ""}
+      </NavLink>
+      <NavLink className="navigationButton" to="/simulations">
+        <SimulationsIcon />
+        {visible ? " Simulations " : ""}
+      </NavLink>
+      <NavLink className="navigationButton" to="/graphs">
+        <GraphsIcon />
+        {visible ? " Graphs " : ""}
+      </NavLink>
+      <NavLink className="navigationButton" to="/settings">
+        <SettingsIcon />
+        {visible ? " Settings " : ""}
+      </NavLink>
+      <NavLink className="navigationButton" to="/sync">
+        <SettingsIcon />
+        {visible ? " SyncTests " : ""}
+      </NavLink>
+      <button className="navigationButton" onClick={onLogOut}>
+        <LogOutIcon />
+        {visible ? " Logout " : ""}
+      </button>
     </nav>
   );
 }
@@ -81,29 +114,39 @@ export default function App() {
   }
 
   return (
-      <>
-        {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>}
-        { logged &&
-          <BrowserRouter>
-            <div className="layout">
-              <NavigationBar onLogOut={showLogOut}></NavigationBar>
-              <main className="content">
-                <Routes>
-                  <Route path="/" element={<StockPage/>}></Route>
-                  <Route path="/stock" element={<StockPage/>}></Route>
-                  <Route path="/crypto" element={<CryptoPage/>}></Route>
-                  <Route path="/obligations" element={<ObligationsPage/>}></Route>
-                  <Route path="/simulations" element={<SimulationsPage/>}></Route>
-                  <Route path="/graphs" element={<GraphsPage/>}></Route>
-                  <Route path="/settings" element={<SettingsPage/>}></Route>
-                  <Route path="/sync" element={<SyncTest></SyncTest>}></Route>
-                </Routes>
-              {show_logout && <LogOutPopUp onClose={rejectLoggingOut} onAccept={acceptLogginOut}/>}
-              </main>
-            </div>
-          </BrowserRouter>
-        }
-      </>
+    <>
+      {!logged && <LogInPopUp onSuccess={setLoggedIn}></LogInPopUp>}
+      {logged && (
+        <BrowserRouter>
+          <div className="layout">
+            <NavigationBar onLogOut={showLogOut}></NavigationBar>
+            <main className="content">
+              <Routes>
+                <Route path="/" element={<StockPage />}></Route>
+                <Route path="/stock" element={<StockPage />}></Route>
+                <Route path="/crypto" element={<CryptoPage />}></Route>
+                <Route
+                  path="/obligations"
+                  element={<ObligationsPage />}
+                ></Route>
+                <Route
+                  path="/simulations"
+                  element={<SimulationsPage />}
+                ></Route>
+                <Route path="/graphs" element={<GraphsPage />}></Route>
+                <Route path="/settings" element={<SettingsPage />}></Route>
+                <Route path="/sync" element={<SyncTest></SyncTest>}></Route>
+              </Routes>
+              {show_logout && (
+                <LogOutPopUp
+                  onClose={rejectLoggingOut}
+                  onAccept={acceptLogginOut}
+                />
+              )}
+            </main>
+          </div>
+        </BrowserRouter>
+      )}
+    </>
   );
 }
-
