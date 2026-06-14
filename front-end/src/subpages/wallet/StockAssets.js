@@ -171,16 +171,33 @@ export class AssetsEntry {
    * @param {string} price price of the stock bought
    */
   insert(id, quantity, price) {
-    if (!Number.isNaN(quantity) && !Number.isNaN(price)) {
-      this._data.push(new AssetData(id, Number(quantity), Number(price)));
-    } else {
-      throw new Error(
-        "Either quantity or price is not a number, failed to update asset entry",
-      );
-    }
-
+    this._data.push(new AssetData(id, Number(quantity), Number(price)));      
     this.udpateAverageData();
   }
+
+  /**
+   * Update assets entry
+   * @param {string} id identification of the asset
+   * @param {number} quantity amount of stock owned
+   * @param {nunber} price price of the stock bought
+   * @returns 
+   */
+  update(id, quantity, price) {
+    // if already in the _data, skip further execution
+    if (this._data.includes(id)) {
+      return;
+    }
+    this._data.push(new AssetData(id, Number(quantity), Number(price)));
+    this.udpateAverageData();
+  }
+
+  removeNotMatchingAssets(assets) {
+    const removeIds = new Set(assets.map(a => a.id));
+    this._data = this._data.filter(
+      item => removeIds.has(item.id)
+    );
+  }
+
 
   /**
    * Select asset at specified index
@@ -312,6 +329,36 @@ export class AssetsMap {
       mp.get(el.ticker).insert(el.ulid, el.price, el.quantity);
     });
     mp.countAssetsSummary(); // count assets summary after addition is done
+    return mp;
+  }
+
+  /**
+   * Update current map with values from remote
+   * @param {Array} assets array of assets to be added to map
+   * @returns 
+   */
+  updateFromDB(assets) {
+    const mp = new AssetsMap(this);
+    if (!assets) {
+      return mp;
+    }
+    
+    // remove old values that are not in the new assets to be set
+    if (!mp.asset_map) {
+      return createFromDB(assets);
+    }
+    mp.asset_map.forEach((value, key) => {
+      value.removeNotMatchingAssets(assets);
+    });
+    // update new values
+    assets.forEach((el) => {
+      if (mp.get(el.ticker) === undefined) {
+        mp.set(el.ticker, new AssetsEntry(el.ticker));
+      }
+      mp.get(el.ticker).update(el.ulid, el.price, el.quantity);
+    });
+
+    mp.countAssetsSummary();
     return mp;
   }
 

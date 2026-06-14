@@ -1,12 +1,15 @@
 import "../../styling/pop_up.css";
 import "../../styling/wallet.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AddAssetPopUp from "./AddAssetPopUp";
 import { ArrowDownIcon } from "../../IconLoader";
 import { ArrowUpIcon } from "../../IconLoader";
 import { AssetsEntry, AssetsMap } from "./StockAssets.js";
 import { AssetsTable } from "./AssetsTable.jsx";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
+import { useLiveQuery } from "dexie-react-hooks";
+// Testing
+import { sync_worker } from "../../sync/syncWorkerWrapper.js";
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   return (
@@ -37,16 +40,19 @@ export default function StockPage() {
   const [modal_visible, setModalVisible] = useState(false);
   const [assets, setAssets] = useState(new AssetsMap());
   const [assets_init, setAssetsInit] = useState([]);
-  const [db_instance, setDbInstance] = useState(new IndexedDbHandler());
-  // we wanna fetch data from db on page render
+  const db_instance = IndexedDbHandler.getInstance();
+
+  const dbAssets = useLiveQuery(
+    () => db_instance.getWalletAssets(),
+    []
+  );
+
   useEffect(() => {
-    const loadData = async () => {
-      const db_array = await db_instance.getWalletAssets(); // obtain ref to singleton obj
-      const new_map = AssetsMap.createFromDB(db_array);
-      setAssets(new_map);
-    };
-    loadData();
-  }, []);
+      if (!dbAssets) return;
+      setAssets(prev => prev.updateFromDB(dbAssets));
+    }, 
+    [dbAssets]
+  );
 
   function toggleModalVisibility() {
     setModalVisible(!modal_visible);
@@ -63,7 +69,6 @@ export default function StockPage() {
     // check if quantity and price is correct (number and not empty)
     const quantityNum = Number(quantity);
     if (Number.isNaN(quantityNum) || quantity == "") {
-      // TODO fix that so it works
       console.error("Quantity value is not a number!!!");
       return;
     }
@@ -84,14 +89,6 @@ export default function StockPage() {
       console.log("Failed adding into the db");
       return;
     }
-
-    var assets_map = new AssetsMap(assets);
-    const map_entry = assets_map.get(ticker) ?? new AssetsEntry(ticker);
-    map_entry.insert(id, quantityNum, priceNum);
-    assets_map.set(ticker, map_entry);
-    setAssets(assets_map);
-
-    // hide modal on accept as well
     toggleModalVisibility();
   }
 
@@ -101,8 +98,7 @@ export default function StockPage() {
       return;
     }
     // trigger visibility on resource
-    const map_copy = new AssetsMap(assets);
-    let asset = map_copy.get(ticker);
+    const map_copy = new AssetsMap(assets);    
     asset.triggerVisibility();
     setAssets(map_copy);
   }
@@ -111,6 +107,7 @@ export default function StockPage() {
     const new_map = new AssetsMap(assets);
     new_map.sort(columnName, false);
     setAssets(new_map);
+    assets.sort(columnName, false);
   }
 
   function sortDown(columnName) {
@@ -122,8 +119,9 @@ export default function StockPage() {
   function selectRow(ticker, idx, select) {
     console.log("Select row callback");
     const new_map = new AssetsMap(assets);
-    new_map.selectData(ticker, idx, select);
+    new_map.selectData(ticker, idx, select);    
     setAssets(new_map);
+    // assets.selectData(ticker, idx, select);
   }
 
   // async function deleteSelected() {
@@ -132,10 +130,6 @@ export default function StockPage() {
     // remove selected elements from indexed db
     const selected_ids = assets.getSelectedIds();
     await db_instance.deleteWalletAssets(selected_ids);
-    // should deleete from local only if removing from db succeeded
-    const new_map = new AssetsMap(assets);
-    new_map.deleteSelected();
-    setAssets(new_map);
   }
 
   return (

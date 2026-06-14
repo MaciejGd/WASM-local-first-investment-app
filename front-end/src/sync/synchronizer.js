@@ -1,6 +1,6 @@
 import { DBEncryptor } from "../db/db_encryptor.js";
 import { RequestGET, RequestPOST } from "../Requests.js";
-import { getDBInstance, getTablesHashes } from "../db/db.js";
+import { getDBInstance, getTablesHashes, clearTable } from "../db/db.js";
 import { SyncDBUpdater } from "./syncDBUpdater.js";
 
 // From here we should somehow put events into a Dexie db so that events are being preserved between sessions and resistant to some
@@ -122,14 +122,10 @@ export class DBSynchronizer {
     if (this.event_queue === undefined || (await this.event_queue.empty())) {
       return;
     }
-    if (this.outgoing_events_pending === true) {
-      // events already processed
-      return;
-    }
 
-    this.outgoing_events_pending = true;
-
+    console.log("Pushing events out to remotes");
     const push_event = async () => {
+      console.log("In events push");
       var ev = await this.event_queue.front();
       var response = null;
       try {
@@ -151,10 +147,6 @@ export class DBSynchronizer {
     }
 
     this.outgoing_events_pending = false;
-  }
-
-  async refreshDb() {
-    // TODO -> implement that
   }
 
   /**
@@ -203,10 +195,10 @@ export class DBSynchronizer {
           await this.db_updater.removeRecord(event.ulid, event.table_name);
         } else if (event.type == "add") {
           var payload = await DBEncryptor.decrypt(event.payload);
-          payload.hash = event.hash;
           await this.db_updater.addRecord(
             event.ulid,
             event.table_name,
+            event.hash,
             payload,
           );
         } else {
@@ -224,8 +216,8 @@ export class DBSynchronizer {
   }
 
   /**
-   * Call external server for comparing db hashes. If local hash and remote one are not equal, endpoint
-   * would return all tables records in response
+   * Call external server for comparing db hashes. If hashes are not equal, purge actual table and
+   * fill with content from remote server
    * @returns True on success, False otherwise
    */
   async compareHashes() {
@@ -239,13 +231,30 @@ export class DBSynchronizer {
       return false;
     }
     // here we should check for the response code
-    console.log(response);
-    console.log(response.sim_history);
-    console.log(response.wallet_assets);
+    var hashes = await getTablesHashes();
+    // add all records one by one for now
+    for (let [table_name, value] of Object.entries(response)) {
+      // if hashes not equal, reset hash for current table as we would recreate it
+      if (value.equal == true) {
+        continue;
+      }
+
+      await clearTable(table_name); // reset hash of particular table to zeros
+      for (let el of value.records) {
+        var payload = await DBEncryptor.decrypt(el.payload);
+        await this.db_updater.addRecord(
+          el.ulid,
+          table_name,
+          el.hash,
+          payload,
+        );
+      }
+    }
+
     return true;
   }
 
-  pollData() {
+  async pollData() {
     if (this.outgoing_events_pending === true) {
       return;
     }
@@ -256,6 +265,8 @@ export class DBSynchronizer {
     this.pullFromRemote();
     // then push your changes to remote
     this.pushToRemote();
+    var sleep = () => {return new Promise(resolve => setTimeout(resolve, 2000));}; // artificial 2seconds of delay
+    await sleep();
     this.compareHashes();
     this.outgoing_events_pending = false;
   }

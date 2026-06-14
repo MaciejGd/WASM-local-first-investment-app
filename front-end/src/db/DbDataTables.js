@@ -19,6 +19,13 @@ export class IndexedDbHandler {
     IndexedDbHandler.instance = this;
   }
 
+  static getInstance() {
+    if (!IndexedDbHandler.instance) {
+      return new IndexedDbHandler();
+    }
+    return IndexedDbHandler.instance;
+  }
+
   initializeTableNames() {
     this.table_to_name = new Map();
     this.table_to_name.set(this.db.wallet_assets, "wallet_assets");

@@ -12,13 +12,14 @@ export class SyncDBUpdater {
    * Add new record to IndexedDb
    * @param {string} ulid unique identifier of the record
    * @param {string} table_name name of the table to be updated
+   * @param {string} hash hash of the record to be added
    * @param {string} payload data to be added
    */
-  async addRecord(ulid, table_name, payload) {
+  async addRecord(ulid, table_name, hash, payload) {
     try {
       var table_handle = this.db_handle.table(table_name);
-      // insert ulid inside payload
-      payload.ulid = ulid;
+      payload.ulid = ulid; // update payload with ulid
+      payload.hash = hash; // update payload with hash
       await putDataToDb(this.db_handle, table_name, payload);
     } catch (error) {
       console.log(error);

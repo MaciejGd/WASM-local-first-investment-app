@@ -20,7 +20,6 @@ import {
 } from "./IconLoader.jsx";
 import { LogInPopUp } from "./subpages/auth/Login.jsx";
 import { LogOutPopUp } from "./subpages/auth/Logout.jsx";
-import SyncTest from "./subpages/sync_test/Sync.jsx";
 import { DBEncryptor } from "./db/db_encryptor.js";
 
 // TODO remove after testing
@@ -74,10 +73,6 @@ function NavBar({ onHideButtonClick, onLogOut, visible }) {
       <NavLink className="navigationButton" to="/settings">
         <SettingsIcon />
         {visible ? " Settings " : ""}
-      </NavLink>
-      <NavLink className="navigationButton" to="/sync">
-        <SettingsIcon />
-        {visible ? " SyncTests " : ""}
       </NavLink>
       <button className="navigationButton" onClick={onLogOut}>
         <LogOutIcon />
@@ -135,7 +130,6 @@ export default function App() {
                 ></Route>
                 <Route path="/graphs" element={<GraphsPage />}></Route>
                 <Route path="/settings" element={<SettingsPage />}></Route>
-                <Route path="/sync" element={<SyncTest></SyncTest>}></Route>
               </Routes>
               {show_logout && (
                 <LogOutPopUp

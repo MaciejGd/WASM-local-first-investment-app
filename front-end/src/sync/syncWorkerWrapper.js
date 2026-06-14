@@ -68,6 +68,12 @@ export class SyncWorkerWrapper {
       table_name: table_name,
     });
   }
+
+  async syncTables(table_name) {
+    this.worker.postMessage({
+      type: "sync",
+    })
+  }
 }
 
 // global sync worker object

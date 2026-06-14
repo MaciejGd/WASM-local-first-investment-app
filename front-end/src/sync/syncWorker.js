@@ -20,6 +20,8 @@ onmessage = async (e) => {
     await DBEncryptor.generateKey(data.passwd, data.salt);
   } else if (data.type == "purge") {
     await sync.purgeTable(data.table_name);
+  } else if (data.type == "sync") {
+    await sync.pollData();
   }
 };
 
