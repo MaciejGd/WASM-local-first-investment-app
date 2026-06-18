@@ -39,16 +39,16 @@ export class IndexedDbHandler {
   async addSimsHistory(payload) {
     try {
       // add hash to payload
-      var object_hash = this.hashSimsHistory(payload);
-      payload.hash = object_hash;
-      console.log(payload.hash);
-      // check if hash already in db
       var sims_stored = await this.db.sim_history.toArray();
-      for (let i = 0; i < sims_stored.length; i++) {
-        if (sims_stored[i].hash === payload.hash) {
-          return false;
-        }
+      // check if simulation name already in the list
+      var new_sims = sims_stored.filter((el) => { return el.name == payload.name;});
+      console.log(new_sims.length);
+      if (new_sims.length != 0) {
+        // TODO - it should show some pop-up that name is already used
+        console.error(`Name: "${payload.name}" already used for saved simulation`);
+        return false;
       }
+
       await this._addRecord(this.db.sim_history, payload);
     } catch (error) {
       console.error(error);
@@ -58,19 +58,11 @@ export class IndexedDbHandler {
   }
 
   /**
-   * Produce hash of the simulation results record for faster comparisons
-   * @param {*} payload object to be hashed
-   * @returns hash of the input object
+   * Return saved simulations history in the form of array
+   * @returns 
    */
-  hashSimsHistory(payload) {
-    const new_obj = {
-      assets: payload.assets,
-      date: payload.date,
-      results: payload.results,
-      sims: payload.sims,
-      timepoints: payload.timepoints,
-    };
-    return hash(new_obj);
+  async getSimsHistory() {
+    return this.db.sim_history.toArray();
   }
 
   /**

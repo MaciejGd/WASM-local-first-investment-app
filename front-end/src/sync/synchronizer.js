@@ -262,12 +262,10 @@ export class DBSynchronizer {
 
     this.outgoing_events_pending = true;
     // first pull data from remote and sync
-    this.pullFromRemote();
+    await this.pullFromRemote();
     // then push your changes to remote
-    this.pushToRemote();
-    var sleep = () => {return new Promise(resolve => setTimeout(resolve, 2000));}; // artificial 2seconds of delay
-    await sleep();
-    this.compareHashes();
+    await this.pushToRemote();
+    await this.compareHashes();
     this.outgoing_events_pending = false;
   }
 

@@ -50,7 +50,7 @@ export default function StockPage() {
   useEffect(() => {
       if (!dbAssets) return;
       setAssets(prev => prev.updateFromDB(dbAssets));
-    }, 
+    },
     [dbAssets]
   );
 
@@ -98,7 +98,8 @@ export default function StockPage() {
       return;
     }
     // trigger visibility on resource
-    const map_copy = new AssetsMap(assets);    
+    const map_copy = new AssetsMap(assets);
+    let asset = map_copy.get(ticker);
     asset.triggerVisibility();
     setAssets(map_copy);
   }
@@ -119,7 +120,7 @@ export default function StockPage() {
   function selectRow(ticker, idx, select) {
     console.log("Select row callback");
     const new_map = new AssetsMap(assets);
-    new_map.selectData(ticker, idx, select);    
+    new_map.selectData(ticker, idx, select);
     setAssets(new_map);
     // assets.selectData(ticker, idx, select);
   }

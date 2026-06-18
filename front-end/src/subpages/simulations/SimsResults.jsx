@@ -5,17 +5,89 @@ import { SimResultsTable } from "./results/SimsReturnsResultsTable.jsx";
 import { SimRiskResultsTable } from "./results/SimsRiskResultsTable.jsx";
 import { useState } from "react";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
+import AddAssetPopUp from "../wallet/AddAssetPopUp.jsx";
+import { useLiveQuery } from "dexie-react-hooks";
+import { SimAssetMap } from "./SimsAssetsData.js";
 /// Here should be another table showing the results of run simulations
 const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
 const PERCENTILES = 3; // we have three results showing in percentiles
 
-function SimsResultsButtons({ saveSim }) {
+function ShowSavedSimsModal({ onAccept, onClose }) {
+  const db_instance = IndexedDbHandler.getInstance();
+  const [selected, setSelected] = useState(0);  
+  
+  const db_saved_sims = useLiveQuery(
+    async () => await db_instance.getSimsHistory(),
+    [],
+    []
+  );
+
+  return (
+    <div className="modal_overlay">
+      <div className="modal_container">
+        <div className="modal_title">Add asset</div>
+        <div className="modal_input_table">
+          {db_saved_sims.map(
+            (el, idx) => { return <button onClick={()=>setSelected(el)} className={selected===el? "selected" : ""} key={idx}>{el.name}</button>}
+          )}
+        </div>
+        <div className="modal_buttons">
+          <button className="modal_button" onClick={onClose}>
+            {" "}
+            Close{" "}
+          </button>
+          <button
+            className="modal_button"
+            onClick={() => onAccept(selected)}
+          >
+            {" "}
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SaveSimModal({ onAccept, onClose }) {
+  const [sim_name, setSimName] = useState("");
+
+  return (
+    <div className="modal_overlay">
+      <div className="modal_container">
+        <div className="modal_title">Input simulation name:</div>
+        <div className="modal_input_table">
+          <input
+            className="modal_input"
+            onChange={(e) => setSimName(e.target.value)}
+            autoFocus={true}
+          ></input>
+        </div>
+        <div className="modal_buttons">
+          <button className="modal_button" onClick={onClose}>
+            {" "}
+            Close{" "}
+          </button>
+          <button
+            className="modal_button"
+            onClick={() => onAccept(sim_name)}
+          >
+            {" "}
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SimsResultsButtons({ saveSim, showSaved }) {
   return (
     <div className="sims_results_buttons">
       <button className="sims_results_button" onClick={saveSim}>
         Save Sim
       </button>
-      <button className="sims_results_button">Restore from saved</button>
+      <button className="sims_results_button" onClick={showSaved}>Restore from saved</button>
     </div>
   );
 }
@@ -48,24 +120,29 @@ function SimsResultsRiskDescription() {
 }
 
 export default function SimsResults({
+  restoreSimsResults,
   results,
-  tickers,
   assets,
   date,
   sims,
   timepoints,
 }) {
-  const [db_instance, setDbInstance] = useState(new IndexedDbHandler());
+  const [save_modal_vis, setSaveModalVis] = useState(false);
+  const [show_saved_modal_vis, setShowSavedModalVis] = useState(false);
 
+  const db_instance = IndexedDbHandler.getInstance();
   if (!results || results.length === 0) {
     return <></>;
   }
 
-  async function AddToHistory() {
+  const tickers_state = assets.getTickersArray();
+  const assets_state = assets.toArray();
+
+  async function AddToHistory(sim_name) {
     try {
       await db_instance.addSimsHistory({
+        name: sim_name,
         results: results,
-        tickers: tickers,
         assets: assets,
         date: date,
         sims: sims,
@@ -73,6 +150,9 @@ export default function SimsResults({
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      // close modal on save
+      setSaveModalVis(false); 
     }
   }
 
@@ -92,35 +172,43 @@ export default function SimsResults({
     return ((el / cvars_sum) * 100).toFixed(2);
   });
 
+  const SaveSimsModal = save_modal_vis ? SaveSimModal : () => <></>;
+  const ShowSavedModal = show_saved_modal_vis ? ShowSavedSimsModal : () => <></>;
+
   return (
     <>
       <h1>Simulation Results</h1>
       <div className="sims_results_pane">
-        <SimsResultsButtons saveSim={AddToHistory}></SimsResultsButtons>
+        <SimsResultsButtons 
+          saveSim={() => setSaveModalVis(true)} 
+          showSaved={() => setShowSavedModalVis(true)}>
+        </SimsResultsButtons>
         <SimsResultsAssetsDescription
           date={date}
           sims={sims}
           timepoints={timepoints}
         ></SimsResultsAssetsDescription>
-        <SimsResultsAssetsPane assets={assets}></SimsResultsAssetsPane>
+        <SimsResultsAssetsPane assets={assets_state}></SimsResultsAssetsPane>
         <SimsResultsDescription></SimsResultsDescription>
         <SimResultsTable results={results} />
         <SimsResultsRiskDescription></SimsResultsRiskDescription>
         <div className="sims_results_risk_container">
           <SimRiskResultsTable
-            tickers={tickers}
+            tickers={tickers_state}
             VaR={VaR}
             cvars={cvars}
           ></SimRiskResultsTable>
           <SimsResultsPieChart
             results={{
-              tickers: tickers,
+              tickers: tickers_state,
               VaR: VaR,
               cvars: cvars,
             }}
           ></SimsResultsPieChart>
         </div>
       </div>
+      <SaveSimsModal onClose={()=> setSaveModalVis(false)} onAccept={AddToHistory}></SaveSimsModal>
+      <ShowSavedModal onClose={()=> setShowSavedModalVis(false)} onAccept={(el) => {restoreSimsResults(el); setShowSavedModalVis(false);}}></ShowSavedModal>
     </>
     // we do not want to plot all simulations run in here to the end-user
   );

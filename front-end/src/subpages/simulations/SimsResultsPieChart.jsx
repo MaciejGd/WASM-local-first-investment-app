@@ -48,7 +48,6 @@ function transformResultsToPieData(payload) {
 }
 
 export function SimsResultsPieChart({ results }) {
-  console.log("test");
   var data = transformResultsToPieData(results);
   return (
     <div className="sims_results_pie_chart">

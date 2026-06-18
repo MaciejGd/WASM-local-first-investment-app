@@ -39,6 +39,11 @@
     /* text-align: left; */
 }
 
+.modal_input_table button.selected {
+    background-color: aliceblue;
+    color: black;
+}
+
 .modal_buttons {
     position: relative;
     display: flex;

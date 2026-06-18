@@ -26,7 +26,12 @@ export class SimAssetMap {
     // we want to map ticker to its data
     if (other instanceof SimAssetMap) {
       this.asset_map = new Map(other.asset_map);
-    } else {
+    } 
+    else if (other instanceof Map) {
+      // copy from the external map
+      this.asset_map = new Map(other);
+    }
+    else {
       this.asset_map = new Map();
     }
   }

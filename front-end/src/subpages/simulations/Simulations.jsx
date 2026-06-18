@@ -112,6 +112,15 @@ export default function SimulationsPage() {
     setModalVisible(!modal_visible);
   }
 
+  function restoreFromSaved(obj) {
+    setSimsResults(obj.results);
+    // need to wrap in SimAssetMap
+    setResultsAssets(new SimAssetMap(obj.assets.asset_map));
+    setSimsResultsDate(obj.date);
+    setSimsAmountResults(obj.sims);
+    setSimsTimepointsResults(obj.timepoints);
+  }
+
   function onModalAccept(ticker, price) {
     // create new asset map
     var asset_map = new SimAssetMap(assets);
@@ -204,9 +213,9 @@ export default function SimulationsPage() {
           <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset} />
         </div>
         <SimsResults
+          restoreSimsResults={restoreFromSaved}
           results={simsResults}
-          tickers={resultsAssets.getTickersArray()}
-          assets={resultsAssets.toArray()}
+          assets={resultsAssets}
           sims={simsAmountResults}
           timepoints={simsTimepointsResults}
           date={simsResultsDate}
