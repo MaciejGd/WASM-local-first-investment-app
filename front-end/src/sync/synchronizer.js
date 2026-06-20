@@ -165,9 +165,10 @@ export class DBSynchronizer {
         console.log("No remote changes");
         return true;
       }
+      // too many events to update, just refetch whole db
       if (ids.length > 100) {
-        // We do not want to update in here any more. We would rather just pull the whole db from remote if amount of changes is great
-        console.log("Huge amount of changes, skip udpate");
+        // update last event as we would fetch all of new records in next steps
+        await this.db_updater.updateLastEventId(Math.max(...ids));
         return true;
       }
       // if checks passed, fetch changes from remote
