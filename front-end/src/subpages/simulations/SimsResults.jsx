@@ -135,8 +135,10 @@ export default function SimsResults({
     return <></>;
   }
 
-  const tickers_state = assets.getTickersArray();
-  const assets_state = assets.toArray();
+  // get tickers array
+  const tickers_state = SimAssetMap.getTickersArray(assets);
+  // sims asset map to array  
+  const assets_state = SimAssetMap.toArray(assets);
 
   async function AddToHistory(sim_name) {
     try {

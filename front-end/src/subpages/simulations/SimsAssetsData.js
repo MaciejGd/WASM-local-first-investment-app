@@ -1,55 +1,23 @@
 /**
- * Simple entity data of stock hold by SimAssetMap
- */
-export class SimsData {
-  constructor(ticker, price, percent, selected) {
-    if (isNaN(Number(price))) {
-      throw new Error("Price should be a number");
-    }
-    if (isNaN(Number(percent))) {
-      throw new Error("Percent should be a number");
-    }
-    this.ticker = ticker;
-    this.price = Number(price);
-    this.percent = Number(percent);
-    this.selected = selected;
-  }
-}
-
-/**
  * Map of assets for the purpose of Simulations pane
  * Covers basic functionalities needed for the
  * Simulations purpose.
  */
 export class SimAssetMap {
-  constructor(other) {
-    // we want to map ticker to its data
-    if (other instanceof SimAssetMap) {
-      this.asset_map = new Map(other.asset_map);
-    } 
-    else if (other instanceof Map) {
-      // copy from the external map
-      this.asset_map = new Map(other);
-    }
-    else {
-      this.asset_map = new Map();
-    }
-  }
-
   /**
    * Add rectord to underlying map
    * @param {string} ticker ticker to be added to the list
    * @param {number} price price of ticker to be added as value
    * @returns true on success, false otherwise
    */
-  addRecord(ticker, price) {
+  static addRecord(asset_map, ticker, price) {
     // at first check if price can be turned into a number
     if (isNaN(Number(price))) {
       console.log("Price is not a number!!!");
       return false;
     }
     // append ticker with price to the map
-    this.asset_map.set(ticker, new SimsData(ticker, price, 0.0, false));
+    asset_map[ticker] = {ticker: ticker, price: Number(price), percent: 0.0, selected: false};
 
     return true;
   }
@@ -58,12 +26,12 @@ export class SimAssetMap {
    * Turn map to array and append percentage sum
    * @returns array of pairs: ticker:percent
    */
-  toArray() {
+  static toArray(asset_map) {
     var sum = 0.0;
-    this.asset_map.forEach((value) => {
-      sum += value.price;
-    });
-    var array = Array.from(this.asset_map);
+    for (let el in asset_map) {
+      sum += Number(asset_map[el].price);
+    }
+    var array = Object.entries(asset_map);
     for (var i = 0; i < array.length; i++) {
       // append percentage value of each asset
       let percent = (array[i][1].price / sum) * 100;
@@ -72,11 +40,11 @@ export class SimAssetMap {
     return array;
   }
 
-  getTickersArray() {
-    var array = Array.from(this.asset_map);
+  static getTickersArray(asset_map) {
+    var array = Object.values(asset_map);
     // get key of the map's entry, which is a ticker
     return array.map((el) => {
-      return el[0];
+      return el.ticker;
     });
   }
 
@@ -86,29 +54,29 @@ export class SimAssetMap {
    * @param {boolean} value True on selection, False otherwise
    * @returns null
    */
-  setSelected(ticker, value) {
-    console.log(`Running setSelected on ticker:value => ${ticker}:${value}`);
-    let el = this.asset_map.get(ticker);
+  static setSelected(asset_map, ticker, value) {
+    let el = asset_map[ticker];
     if (el == undefined) {
       return;
     }
     el.selected = value;
-    this.asset_map.set(ticker, el);
+    asset_map[ticker] = el;
   }
 
   /**
    * Delete from map, tickers that has been selected
    */
-  deleteSelected() {
+  static deleteSelected(asset_map) {
     const selected = [];
+    var assets = Object.values(asset_map);
     // find which tickers have been selected
-    this.asset_map.forEach((value, key) => {
+    assets.forEach((value) => {
       if (!value.selected) return;
-      selected.push(key);
+      selected.push(value.ticker);
     });
     // delete selected tickers
     selected.forEach((key) => {
-      this.asset_map.delete(key);
+      delete asset_map[key];
     });
   }
   //
@@ -117,18 +85,20 @@ export class SimAssetMap {
    * Return tickers from inner map
    * @returns object in form {"tickers":[array of tickers]}
    */
-  getTickers() {
+  static getTickers(asset_map) {
     const tickers = [];
-    this.asset_map.forEach((value, key) => tickers.push(key));
+    var assets = Object.values(asset_map);
+    assets.forEach((value) => tickers.push(value.ticker));
     return { tickers: tickers };
   }
 
   /**
    * Get money meant for particular asset
    */
-  getWeights() {
+  static getWeights(asset_map) {
     const weights = [];
-    this.asset_map.forEach((value, key) => {
+    var assets = Object.values(asset_map);
+    assets.forEach((value) => {
       weights.push(value.price);
     });
     return weights;

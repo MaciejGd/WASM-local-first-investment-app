@@ -123,9 +123,7 @@ export class DBSynchronizer {
       return;
     }
 
-    console.log("Pushing events out to remotes");
-    const push_event = async () => {
-      console.log("In events push");
+    const push_event = async () => {      
       var ev = await this.event_queue.front();
       var response = null;
       try {

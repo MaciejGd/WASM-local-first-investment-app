@@ -30,7 +30,7 @@ function SimResultsTableBody({ results }) {
     [], // Max-Drawdowns
     [], // Max-Upsides
   ];
-  console.log(results);
+
   for (var i = 0; i < result_row_size * percentiles.length; i++) {
     if (i >= results.length) break;
     percentiles[Math.floor(i / 9)].push(results[i]);

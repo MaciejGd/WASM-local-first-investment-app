@@ -73,8 +73,8 @@ function AddAssetPopUp({ onClose, onAccept, tickersList }) {
 export default function SimulationsPage() {
   const [modal_visible, setModalVisible] = useState(false);
   const [asset_error, setAssetError] = useState(""); // error on asset passed to pop-up
-  const [assets, setAssets] = useState(new SimAssetMap()); // map of ticker to its price
-  const [resultsAssets, setResultsAssets] = useState(new SimAssetMap()); // assets to be passed to
+  const [assets, setAssets] = useState({}); // map of ticker to its price
+  const [resultsAssets, setResultsAssets] = useState({}); // assets to be passed to
   const [simsAmount, setSimsAmount] = useState(0);
   const [simsAmountResults, setSimsAmountResults] = useState(0);
   const [simsTimepoints, setSimsTimepoints] = useState(0);
@@ -90,7 +90,7 @@ export default function SimulationsPage() {
   const { simRun, simTerminate } = useSimulationWorker((e) => {
     setSimRunning(false);
     setSimsResults(e);
-    setResultsAssets(new SimAssetMap(assetsRef.current));
+    setResultsAssets({...assetsRef.current});
     setSimsTimepointsResults(simsTimepointsRef.current);
     setSimsAmountResults(simsAmountRef.current);
     setSimsResultsDate(new Date());
@@ -113,23 +113,31 @@ export default function SimulationsPage() {
   }
 
   function restoreFromSaved(obj) {
-    setSimsResults(obj.results);
+    var res = obj.results;
+    if (!(obj.results instanceof Array)) {
+      res = Object.values(obj.results);
+    }
+    setSimsResults(res);
     // need to wrap in SimAssetMap
-    setResultsAssets(new SimAssetMap(obj.assets.asset_map));
-    setSimsResultsDate(obj.date);
+    setResultsAssets(obj.assets);
+    var date = obj.date;
+    if (!(date instanceof Date)) {
+      date = new Date(date);
+    }
+    setSimsResultsDate(date);
     setSimsAmountResults(obj.sims);
     setSimsTimepointsResults(obj.timepoints);
   }
 
   function onModalAccept(ticker, price) {
     // create new asset map
-    var asset_map = new SimAssetMap(assets);
+    var asset_map = {...assets};
     // check if ticker is valid
     if (!tickers_list.includes(ticker)) {
       setAssetError("No such asset with this tickers in database!");
       return;
     }
-    const rec_add = asset_map.addRecord(ticker, price);
+    const rec_add = SimAssetMap.addRecord(asset_map, ticker, price);
     // check if number passed as argument
     if (rec_add === false) {
       setAssetError("Failed to add asset, price should be a number!");
@@ -141,15 +149,15 @@ export default function SimulationsPage() {
   }
 
   function selectAsset(ticker, value) {
-    var asset_map = new SimAssetMap(assets);
-    asset_map.setSelected(ticker, value);
+    var asset_map = {...assets};
+    SimAssetMap.setSelected(asset_map, ticker, value);
     console.log("Asset_map: ", asset_map);
     setAssets(asset_map);
   }
 
   function deleteSelected() {
-    var asset_map = new SimAssetMap(assets);
-    asset_map.deleteSelected();
+    var asset_map = {...assets};
+    SimAssetMap.deleteSelected(asset_map);
     setAssets(asset_map);
   }
 
@@ -170,7 +178,7 @@ export default function SimulationsPage() {
 
   // Fetch prices of the stock from remote server
   async function FetchStockPrices() {
-    const tickers = assets.getTickers();
+    const tickers = SimAssetMap.getTickers(assets);
     const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
     let responseJson = await RequestPOST(api_url, tickers);
     return responseJson;
@@ -181,7 +189,7 @@ export default function SimulationsPage() {
     const responseJson = await FetchStockPrices();
     // get amount of money invested in each asset
     setSimRunning(true); // set running as simulation status
-    const weights = assets.getWeights();
+    const weights = SimAssetMap.getWeights(assets);
     simRun({
       stockData: responseJson,
       weights: weights,
@@ -210,7 +218,7 @@ export default function SimulationsPage() {
             deleteSelectedCb={deleteSelected}
             onRunSim={RunFinanceSimulations}
           />
-          <AssetsPane assets={assets.toArray()} onSelectCb={selectAsset} />
+          <AssetsPane assets={SimAssetMap.toArray(assets)} onSelectCb={selectAsset} />
         </div>
         <SimsResults
           restoreSimsResults={restoreFromSaved}
