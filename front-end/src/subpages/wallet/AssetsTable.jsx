@@ -163,14 +163,16 @@ export function AssetRow({
               }}
             ></input>
           )}
-          <span style={{ fontWeight: "bold", paddingLeft: 20 }}>
-            {asset.ticker}
-          </span>
-          {asset.isFirst && (
-            <button onClick={() => onToggleVisibility(asset.ticker)}>
-              {asset.isFolded ? <ArrowDownIcon /> : <ArrowUpIcon />}
-            </button>
-          )}
+          <div className="row_ticker_content">
+            <span className="row_ticker_name" style={{ fontWeight: "bold", paddingLeft: 20 }}>
+              {asset.ticker}
+            </span>
+            {asset.isFirst && (
+              <button onClick={() => onToggleVisibility(asset.ticker)}>
+                {asset.isFolded ? <ArrowDownIcon /> : <ArrowUpIcon />}
+              </button>
+            )}
+          </div>
         </div>
       </td>
       <td>{asset.quantity}</td>
@@ -194,7 +196,7 @@ export function AssetsTable({
   onSelectRow,
 }) {
   return (
-    <table className="assets_table">
+    <table className="assets_table sims_asset_table">
       <thead>
         <AssetsTableHead onSortDown={onSortDown} onSortUp={onSortUp} />
       </thead>

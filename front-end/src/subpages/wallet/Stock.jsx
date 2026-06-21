@@ -1,5 +1,6 @@
 import "../../styling/pop_up.css";
 import "../../styling/wallet.css";
+import "../../styling/simulations.css";
 import { useState, useEffect, useMemo } from "react";
 import AddAssetPopUp from "./AddAssetPopUp";
 import { ArrowDownIcon } from "../../IconLoader";
@@ -13,27 +14,15 @@ import { sync_worker } from "../../sync/syncWorkerWrapper.js";
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   return (
-    <div className="assets_table_buttons_container">
-      <AddAssetButton onAddAsset={onAddAsset}></AddAssetButton>
-      <DeleteSelectedButton
-        onDeleteSelectedCb={onDeleteSelectedCb}
-      ></DeleteSelectedButton>
-    </div>
-  );
-}
-
-export function AddAssetButton({ onAddAsset }) {
-  return (
-    <div>
-      <button className="assets_add_button" onClick={onAddAsset}>
+    <div className="wallet_buttons">
+      <button className="wallet_button" onClick={onAddAsset}>
         Add asset
+      </button>
+      <button  className="wallet_button" onClick={() => onDeleteSelectedCb()}>
+        Delete Selected
       </button>
     </div>
   );
-}
-
-export function DeleteSelectedButton({ onDeleteSelectedCb }) {
-  return <button onClick={() => onDeleteSelectedCb()}>Delete Selected</button>;
 }
 
 export default function StockPage() {
@@ -135,19 +124,23 @@ export default function StockPage() {
 
   return (
     <>
-      <h1>Stock subpage!</h1>
-      <div className="assets_page">
-        <AssetButtons
-          onAddAsset={toggleModalVisibility}
-          onDeleteSelectedCb={deleteSelected}
-        ></AssetButtons>
-        <AssetsTable
-          assets={assets}
-          onToggleVisibility={toggleAssetVisibility}
-          onSortUp={sortUp}
-          onSortDown={sortDown}
-          onSelectRow={selectRow}
-        ></AssetsTable>
+      <div className="page">
+        <h1>Stock holdings</h1>
+        <div className="sims_settings_container">
+          <AssetButtons
+            onAddAsset={toggleModalVisibility}
+            onDeleteSelectedCb={deleteSelected}
+          ></AssetButtons>
+          <div className="sims_table_container">
+            <AssetsTable
+              assets={assets}
+              onToggleVisibility={toggleAssetVisibility}
+              onSortUp={sortUp}
+              onSortDown={sortDown}
+              onSelectRow={selectRow}
+            ></AssetsTable>
+          </div>
+        </div>
       </div>
       {/* Modal to be opened when proper button pressed */}
       <Modal onClose={toggleModalVisibility} onAccept={addAsset} />

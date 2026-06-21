@@ -8,6 +8,8 @@ import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db insta
 import AddAssetPopUp from "../wallet/AddAssetPopUp.jsx";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SimAssetMap } from "./SimsAssetsData.js";
+import { SimRunningPopUp } from "./SimPopUps.jsx";
+import { ErrorPopUp } from "../../components/PopUp.jsx";
 /// Here should be another table showing the results of run simulations
 const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
 const PERCENTILES = 3; // we have three results showing in percentiles
@@ -129,6 +131,7 @@ export default function SimsResults({
 }) {
   const [save_modal_vis, setSaveModalVis] = useState(false);
   const [show_saved_modal_vis, setShowSavedModalVis] = useState(false);
+  const [sim_results_error, setSimsResultsError] = useState(""); // error on asset passed to pop-up
 
   const db_instance = IndexedDbHandler.getInstance();
   if (!results || results.length === 0) {
@@ -142,7 +145,7 @@ export default function SimsResults({
 
   async function AddToHistory(sim_name) {
     try {
-      await db_instance.addSimsHistory({
+      var res = await db_instance.addSimsHistory({
         name: sim_name,
         results: results,
         assets: assets,
@@ -154,7 +157,12 @@ export default function SimsResults({
       console.error(error);
     } finally {
       // close modal on save
-      setSaveModalVis(false); 
+      if (res != true) {
+        setSimsResultsError(`Name "${sim_name}" already used.`);
+      }
+      else {
+        setSaveModalVis(false); 
+      }      
     }
   }
 
@@ -211,6 +219,12 @@ export default function SimsResults({
       </div>
       <SaveSimsModal onClose={()=> setSaveModalVis(false)} onAccept={AddToHistory}></SaveSimsModal>
       <ShowSavedModal onClose={()=> setShowSavedModalVis(false)} onAccept={(el) => {restoreSimsResults(el); setShowSavedModalVis(false);}}></ShowSavedModal>
+      {sim_results_error !== "" && (
+        <ErrorPopUp
+          content={sim_results_error}
+          onClose={() => setSimsResultsError("")}
+        ></ErrorPopUp>
+      )}
     </>
     // we do not want to plot all simulations run in here to the end-user
   );

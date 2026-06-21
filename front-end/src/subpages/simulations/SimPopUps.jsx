@@ -1,29 +1,5 @@
 import "../../components/PopUp";
-import PopUpComponent from "../../components/PopUp";
-
-function PopUpContent({ txt }) {
-  return <p>{txt}</p>;
-}
-
-function PopUpButtons({ content, onClose }) {
-  return (
-    <>
-      <button onClick={onClose}>{content}</button>
-    </>
-  );
-}
-
-export function SimErrorPopUp({ content, onClose }) {
-  return (
-    <PopUpComponent
-      title="Error"
-      content={<PopUpContent txt={content}></PopUpContent>}
-      buttons={
-        <PopUpButtons onClose={onClose} content={"Close"}></PopUpButtons>
-      }
-    ></PopUpComponent>
-  );
-}
+import { ErrorPopUp, PopUpButtons, PopUpComponent } from "../../components/PopUp";
 
 export function SimRunningPopUp({ onClose }) {
   return (

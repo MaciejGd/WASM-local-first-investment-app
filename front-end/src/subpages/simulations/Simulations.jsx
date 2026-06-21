@@ -1,7 +1,5 @@
 import {
   AssetButtons,
-  AddAssetButton,
-  DeleteSelectedButton,
 } from "../wallet/Stock";
 import "../../styling/simulations.css";
 import { useEffect, useState, useRef } from "react";
@@ -16,7 +14,8 @@ import {
   useSimulationWorker,
   useSequencialWorker,
 } from "./SimulationRunners.js";
-import { SimErrorPopUp, SimRunningPopUp } from "./SimPopUps.jsx";
+import { SimRunningPopUp } from "./SimPopUps.jsx";
+import { ErrorPopUp } from "../../components/PopUp.jsx";
 
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
@@ -237,10 +236,10 @@ export default function SimulationsPage() {
         />
       )}
       {asset_error !== "" && (
-        <SimErrorPopUp
+        <ErrorPopUp
           content={asset_error}
           onClose={() => setAssetError("")}
-        ></SimErrorPopUp>
+        ></ErrorPopUp>
       )}
       {simRunning && (
         <SimRunningPopUp onClose={stopSimulation}></SimRunningPopUp>

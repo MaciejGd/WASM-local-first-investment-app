@@ -1,35 +1,78 @@
+:root {
+  --assets-sum: rgba(7, 17, 43, 0.95);
+}
+
 .assets_table {
-  background-color: rgb(59, 59, 59);
+  width: 100%;
+  border-collapse: collapse;
 }
 
 table {
   table-layout: fixed;
-  width: 70%;
-  margin: 10px auto;
+  width: 100%;
+  min-width: 720px;
+  margin: 0;
   border-collapse: collapse;
   text-align: left;
+  background: transparent;
 }
 
 th,
 td {
-  padding: 0.6em;
-  border: 2px;
-  border: 1px solid white;
+  padding: 1rem 1.1rem;
+  border: none;
+  color: var(--sim-text);
 }
 
 tfoot {
-    border-top: 1px solid #999999;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-tbody tr:nth-child(odd) {
-  background-color: rgb(49,49,49);
+tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+tbody tr:hover {
+  background: rgba(94, 168, 255, 0.08);
+}
+
+/* .row_ticker {
+  /* display: flex;
+  flex-direction: row;
+  align-items: center; */
+  /*
+  display: flex;
+  align-items: center;
+}
+
+.row_ticker_name {
+  display: inline-block;
+  min-width: 120px;
+  font-weight: bold;
+  padding-left: 20px;
+} */
+th:first-child,
+td:first-child {
+  width: 180px;
 }
 
 .row_ticker {
   display: flex;
-  flex-direction: row;
   align-items: center;
+  gap: 8px;
 }
+
+.row_ticker_content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
 
 .row_ticker button {
   all: unset;
@@ -62,10 +105,10 @@ tbody tr:nth-child(odd) {
 .sort_buttons button:hover {
   background-color: black;
 }
-
+/* 
 .assets_summary {
-  background-color: rgb(40, 40, 40);
-}
+  background-color: var(--assets-sum);
+} */
 
 
 .assets_page {
@@ -93,4 +136,42 @@ tbody tr:nth-child(odd) {
 
 .assets_add_button {
   margin-right: auto;
+}
+
+.wallet_button:hover,
+.wallet_button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* .wallet_button {  
+  color: var(--sim-text);
+  box-shadow: none;
+} */
+
+.wallet_buttons {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+
+.wallet_button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border: none;
+  border-radius: 999px;
+  color: var(--sim-text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
 }
