@@ -42,3 +42,15 @@ export function ErrorPopUp({ content, onClose }) {
     ></PopUpComponent>
   );
 }
+
+export function InfoPopUp({ content, onClose }) {
+  return (
+    <PopUpComponent
+      title="Info"
+      content={<PopUpContent txt={content}></PopUpContent>}
+      buttons={
+        <PopUpButtons onClose={onClose} content={"Close"}></PopUpButtons>
+      }
+    ></PopUpComponent>
+  );
+}

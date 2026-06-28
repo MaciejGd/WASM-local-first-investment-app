@@ -88,11 +88,14 @@ export default function App() {
   const [logged, setLogged] = useState(false); // TODO - to be changed to false after changes
   const [show_logout, setShowLogout] = useState(false);
 
-  async function setLoggedIn(passwd) {
+  async function setLoggedIn(passwd, salt) {
     setLogged(true);
+    const salt_mod = new Uint8Array(
+      salt.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
+    ); 
     // generate encryption key, based on password provided
-    DBEncryptor.generateKey(passwd, null);
-    sync_worker.InitCrypto(passwd, null);
+    DBEncryptor.generateKey(passwd, salt_mod);
+    sync_worker.InitCrypto(passwd, salt_mod);
   }
 
   function acceptLogginOut() {

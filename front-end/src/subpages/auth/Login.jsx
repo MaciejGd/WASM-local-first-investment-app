@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { RequestPOST } from "../../Requests";
+import RegisterPopUp from "./Register";
+import { ErrorPopUp } from "../../components/PopUp";
 
-function InputRow({ title, value, onChange }) {
+export function InputRow({ title, value, onChange }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>
@@ -13,7 +15,7 @@ function InputRow({ title, value, onChange }) {
   );
 }
 
-function InputRowPassword({ title, value, onChange }) {
+export function InputRowPassword({ title, value, onChange }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>
@@ -29,30 +31,40 @@ function InputRowPassword({ title, value, onChange }) {
 export function LogInPopUp({ onClose, onAccept, onSuccess }) {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
-  const [login_status, setLoginStatus] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [register_modal_vis, setRegisterModalVis] = useState(false);
+  const [errorPopUp, setErrorPopUp] = useState(null);
   // try logging in with the credentials passed by user
 
   async function LogInRequest() {
     setLoading(true); // at first we want to set Loading to true, to render that to a user
     try {
-      let responseJson = await RequestPOST("http://127.0.0.1:5000/auth/login", {
+      let response = await RequestPOST("http://127.0.0.1:5000/auth/login", {
         username: username,
         password: password,
       });
-      setLoginStatus(responseJson);
-      setError(null);
-      onSuccess(password);
+      let responseJson = await response.json();
+      if (responseJson.error) {
+        setError(responseJson.error);
+      }
+      else {
+        setError(null);
+        onSuccess(password, responseJson.salt);
+      }      
     } catch (err) {
       setError(err.message);
-      setLoginStatus(null);
     } finally {
       setLoading(false);
     }
   }
 
+  function closeRegistering() {
+    setRegisterModalVis(false);
+  }
+
   return (
+    <>
     <div className="modal_overlay">
       <div className="modal_container">
         <div className="modal_title">Login</div>
@@ -68,19 +80,35 @@ export function LogInPopUp({ onClose, onAccept, onSuccess }) {
             onChange={setPassword}
           ></InputRowPassword>
         </div>
-        {error != null && <p>{error}</p>}
+        {/* {error != null && <p>{error}</p>} */}
         {loading && <p>Loading...</p>}
         <div className="modal_buttons">
+          <button className="modal_button" onClick={() => setRegisterModalVis(true)}>Register</button>
           <button className="modal_button" onClick={onClose}>
             {" "}
             Close{" "}
           </button>
-          <button className="modal_button" onClick={() => LogInRequest()}>
+          <button className="modal_button" onClick={async () => await LogInRequest()}>
             {" "}
             Accept
           </button>
         </div>
       </div>
     </div>
+    { error && 
+      <ErrorPopUp 
+        content={error} 
+        onClose={()=>setError(null)}>
+      </ErrorPopUp>
+    }
+    {
+      register_modal_vis && 
+      <RegisterPopUp 
+        onClose={closeRegistering} 
+        onRegistered={() => setRegisterModalVis(false)}
+      >
+      </RegisterPopUp>
+    }
+    </>
   );
 }

@@ -2,6 +2,9 @@ from . import db_handler, db_sqlite
 
 import click
 from flask import current_app, g
+import secrets
+
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class DBProxy(object):
@@ -28,6 +31,19 @@ class DBProxy(object):
     def init_db(self):
         db = self.get_db()
         self.db_handler.initialize(db, self.schema_path)
+
+    def register_user(self, username, password) -> str | None:
+        """
+        Register user with passed username and password. Additionally hash the password and generate
+        random encryption salt for user. Returns tuple storing: salt (or None on error).
+        """
+
+        return self.db_handler.register_user(
+            self.get_db(),
+            username,
+            generate_password_hash(password),
+            secrets.token_hex(16),
+        )
 
     def get_user_data(self, id: int):
         """

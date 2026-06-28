@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RequestPOST, RequestGET } from "../../Requests";
+import { RequestGET } from "../../Requests";
 
 export function LogOutPopUp({ onClose, onAccept }) {
   const [loading, setLoading] = useState(false);
@@ -8,9 +8,14 @@ export function LogOutPopUp({ onClose, onAccept }) {
   async function LogOutRequest() {
     setLoading(true); // at first we want to set Loading to true, to render that to a user
     try {
-      let responseJson = await RequestGET("http://127.0.0.1:5000/auth/logout");
-      setError(null);
-      onAccept();
+      let responseJson = await RequestGET("http://127.0.0.1:5000/auth/logout");      
+      if (responseJson.error) {
+        setError(responseJson.error);
+      }
+      else {
+        setError(null);
+        onAccept();
+      }
     } catch (err) {
       setError(err.message);
     } finally {

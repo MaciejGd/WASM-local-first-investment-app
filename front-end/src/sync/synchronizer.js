@@ -239,6 +239,7 @@ export class DBSynchronizer {
       }
 
       await clearTable(table_name); // reset hash of particular table to zeros
+      if (!value.records) continue; // skip if there are no records to be added
       for (let el of value.records) {
         var payload = await DBEncryptor.decrypt(el.payload);
         await this.db_updater.addRecord(

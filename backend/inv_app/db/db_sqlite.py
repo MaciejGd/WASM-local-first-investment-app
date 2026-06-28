@@ -61,6 +61,8 @@ class SQLite3DB(db_handler.DBHandler):
 
     GET_META = "SELECT * FROM {} WHERE table_name = ?;"
 
+    REGISTER_USER = "INSERT INTO user (username, password, salt) VALUES (?, ?, ?);"
+
     def __init__(self):
         pass
 
@@ -80,6 +82,20 @@ class SQLite3DB(db_handler.DBHandler):
     def initialize(self, db_handle, schema_path: str):
         with current_app.open_resource(schema_path) as f:
             db_handle.executescript(f.read().decode("utf-8"))
+
+    def register_user(self, db_handle, username, password, salt):
+        """
+        Try registering user into db. return tuple with two strings, salt and error.
+        """
+        try:
+            db_handle.execute(
+                self.REGISTER_USER,
+                (username, password, salt),
+            )
+            db_handle.commit()
+            return salt
+        except db_handle.IntegrityError:
+            return None
 
     def get_user_data(self, db_handle, user_id: int):
         return db_handle.execute(
@@ -234,6 +250,8 @@ class SQLite3DB(db_handler.DBHandler):
         table = SQLite3DB.META_TABLE + str(user_id)
         table_record = collection_name + "_" + str(user_id)
         try:
+            db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
+            db_handle.commit()
             hash = db_handle.execute(SQLite3DB.GET_META.format(table), (table_record,))
             return hash.fetchone()[2]
         except Exception:

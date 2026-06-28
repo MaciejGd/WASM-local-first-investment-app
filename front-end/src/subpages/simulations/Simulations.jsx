@@ -179,7 +179,11 @@ export default function SimulationsPage() {
   async function FetchStockPrices() {
     const tickers = SimAssetMap.getTickers(assets);
     const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
-    let responseJson = await RequestPOST(api_url, tickers);
+    let response = await RequestPOST(api_url, tickers);
+    if (!response.ok) {
+      throw new Error("Failed to fetch data from remote.");
+    }
+    let responseJson = await response.json();
     return responseJson;
   }
 

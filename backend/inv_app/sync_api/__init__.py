@@ -21,6 +21,9 @@ class DBUpdater:
 
             # handle scenario in which we need to pass all records to remote db
             records = self.get_all_records(user_id, table)
+            if records is None:
+                res[table]["records"] = records
+                continue
             records = [
                 {
                     "ulid": record["ulid"],

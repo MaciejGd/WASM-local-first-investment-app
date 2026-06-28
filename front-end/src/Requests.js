@@ -8,10 +8,7 @@ export const RequestPOST = async (url, data) => {
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      throw new Error(`HTTP error: Status: ${response.status}`);
-    }
-    return response.json();
+    return response;
   } catch (err) {
     console.log("Thrown an exception!");
     throw err;
@@ -30,7 +27,7 @@ export const RequestGET = async (url) => {
     if (!response.ok) {
       throw new Error(`HTTP error: Status: ${response.status}`);
     }
-    return response.json();
+    return await response.json();
   } catch (err) {
     console.log("Exception thrown during GET request");
     throw err;

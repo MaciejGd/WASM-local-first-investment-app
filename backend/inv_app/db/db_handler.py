@@ -18,6 +18,10 @@ class DBHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def register_user(self, db_handle, username, password, salt) -> str | None:
+        raise NotImplementedError
+
+    @abstractmethod
     def setup_connection(self, db_path):
         raise NotImplementedError
 
