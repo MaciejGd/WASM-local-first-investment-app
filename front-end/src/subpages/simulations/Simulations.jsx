@@ -1,6 +1,4 @@
-import {
-  AssetButtons,
-} from "../wallet/Stock";
+import { AssetButtons } from "../wallet/Stock";
 import "../../styling/simulations.css";
 import { useEffect, useState, useRef } from "react";
 
@@ -16,6 +14,10 @@ import {
 } from "./SimulationRunners.js";
 import { SimRunningPopUp } from "./SimPopUps.jsx";
 import { ErrorPopUp } from "../../components/PopUp.jsx";
+import {
+  FetchStockPrices,
+  FetchStocksList,
+} from "../finance_api/FinanceApi.jsx";
 
 // what do we want in here??? we want some table which we can add tickers + set proportions / amount of
 // we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
@@ -89,7 +91,7 @@ export default function SimulationsPage() {
   const { simRun, simTerminate } = useSimulationWorker((e) => {
     setSimRunning(false);
     setSimsResults(e);
-    setResultsAssets({...assetsRef.current});
+    setResultsAssets({ ...assetsRef.current });
     setSimsTimepointsResults(simsTimepointsRef.current);
     setSimsAmountResults(simsAmountRef.current);
     setSimsResultsDate(new Date());
@@ -130,7 +132,7 @@ export default function SimulationsPage() {
 
   function onModalAccept(ticker, price) {
     // create new asset map
-    var asset_map = {...assets};
+    var asset_map = { ...assets };
     // check if ticker is valid
     if (!tickers_list.includes(ticker)) {
       setAssetError("No such asset with this tickers in database!");
@@ -148,14 +150,14 @@ export default function SimulationsPage() {
   }
 
   function selectAsset(ticker, value) {
-    var asset_map = {...assets};
+    var asset_map = { ...assets };
     SimAssetMap.setSelected(asset_map, ticker, value);
     console.log("Asset_map: ", asset_map);
     setAssets(asset_map);
   }
 
   function deleteSelected() {
-    var asset_map = {...assets};
+    var asset_map = { ...assets };
     SimAssetMap.deleteSelected(asset_map);
     setAssets(asset_map);
   }
@@ -166,25 +168,6 @@ export default function SimulationsPage() {
   function stopSimulation() {
     simTerminate();
     setSimRunning(false);
-  }
-
-  // should be done once on page loading
-  async function FetchStocksList() {
-    const api_url = "http://127.0.0.1:5000/finance/get_stocks_list";
-    const tickers_array = await RequestGET(api_url);
-    return tickers_array;
-  }
-
-  // Fetch prices of the stock from remote server
-  async function FetchStockPrices() {
-    const tickers = SimAssetMap.getTickers(assets);
-    const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
-    let response = await RequestPOST(api_url, tickers);
-    if (!response.ok) {
-      throw new Error("Failed to fetch data from remote.");
-    }
-    let responseJson = await response.json();
-    return responseJson;
   }
 
   async function RunFinanceSimulations(times, sims) {
@@ -221,7 +204,10 @@ export default function SimulationsPage() {
             deleteSelectedCb={deleteSelected}
             onRunSim={RunFinanceSimulations}
           />
-          <AssetsPane assets={SimAssetMap.toArray(assets)} onSelectCb={selectAsset} />
+          <AssetsPane
+            assets={SimAssetMap.toArray(assets)}
+            onSelectCb={selectAsset}
+          />
         </div>
         <SimsResults
           restoreSimsResults={restoreFromSaved}

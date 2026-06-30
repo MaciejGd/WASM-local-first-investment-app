@@ -134,7 +134,7 @@ export class DBEncryptor {
    * @param {string} salt unique 16 bytes for key generation
    */
   static async generateKey(passwd, salt) {
-    // transform salt string into a format that is accepted by subtle.deriveKey    
+    // transform salt string into a format that is accepted by subtle.deriveKey
     const keyMaterial = await this._generateKeyMaterial(passwd);
     DBEncryptor.KEY = await crypto.subtle.deriveKey(
       {

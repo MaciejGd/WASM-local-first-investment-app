@@ -47,11 +47,10 @@ export function LogInPopUp({ onClose, onAccept, onSuccess }) {
       let responseJson = await response.json();
       if (responseJson.error) {
         setError(responseJson.error);
-      }
-      else {
+      } else {
         setError(null);
         onSuccess(password, responseJson.salt);
-      }      
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,50 +64,53 @@ export function LogInPopUp({ onClose, onAccept, onSuccess }) {
 
   return (
     <>
-    <div className="modal_overlay">
-      <div className="modal_container">
-        <div className="modal_title">Login</div>
-        <div className="modal_input_table">
-          <InputRow
-            title="Username"
-            value={username}
-            onChange={setUsername}
-          ></InputRow>
-          <InputRowPassword
-            title="Password"
-            value={password}
-            onChange={setPassword}
-          ></InputRowPassword>
-        </div>
-        {/* {error != null && <p>{error}</p>} */}
-        {loading && <p>Loading...</p>}
-        <div className="modal_buttons">
-          <button className="modal_button" onClick={() => setRegisterModalVis(true)}>Register</button>
-          <button className="modal_button" onClick={onClose}>
-            {" "}
-            Close{" "}
-          </button>
-          <button className="modal_button" onClick={async () => await LogInRequest()}>
-            {" "}
-            Accept
-          </button>
+      <div className="modal_overlay">
+        <div className="modal_container">
+          <div className="modal_title">Login</div>
+          <div className="modal_input_table">
+            <InputRow
+              title="Username"
+              value={username}
+              onChange={setUsername}
+            ></InputRow>
+            <InputRowPassword
+              title="Password"
+              value={password}
+              onChange={setPassword}
+            ></InputRowPassword>
+          </div>
+          {/* {error != null && <p>{error}</p>} */}
+          {loading && <p>Loading...</p>}
+          <div className="modal_buttons">
+            <button
+              className="modal_button"
+              onClick={() => setRegisterModalVis(true)}
+            >
+              Register
+            </button>
+            <button className="modal_button" onClick={onClose}>
+              {" "}
+              Close{" "}
+            </button>
+            <button
+              className="modal_button"
+              onClick={async () => await LogInRequest()}
+            >
+              {" "}
+              Accept
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    { error && 
-      <ErrorPopUp 
-        content={error} 
-        onClose={()=>setError(null)}>
-      </ErrorPopUp>
-    }
-    {
-      register_modal_vis && 
-      <RegisterPopUp 
-        onClose={closeRegistering} 
-        onRegistered={() => setRegisterModalVis(false)}
-      >
-      </RegisterPopUp>
-    }
+      {error && (
+        <ErrorPopUp content={error} onClose={() => setError(null)}></ErrorPopUp>
+      )}
+      {register_modal_vis && (
+        <RegisterPopUp
+          onClose={closeRegistering}
+          onRegistered={() => setRegisterModalVis(false)}
+        ></RegisterPopUp>
+      )}
     </>
   );
 }

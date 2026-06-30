@@ -9,6 +9,10 @@ import { AssetsEntry, AssetsMap } from "./StockAssets.js";
 import { AssetsTable } from "./AssetsTable.jsx";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
 import { useLiveQuery } from "dexie-react-hooks";
+import {
+  FetchStocksList,
+  FetchStockPrices,
+} from "../finance_api/FinanceApi.jsx";
 // Testing
 import { sync_worker } from "../../sync/syncWorkerWrapper.js";
 
@@ -18,7 +22,7 @@ export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
       <button className="wallet_button" onClick={onAddAsset}>
         Add asset
       </button>
-      <button  className="wallet_button" onClick={() => onDeleteSelectedCb()}>
+      <button className="wallet_button" onClick={() => onDeleteSelectedCb()}>
         Delete Selected
       </button>
     </div>
@@ -29,19 +33,23 @@ export default function StockPage() {
   const [modal_visible, setModalVisible] = useState(false);
   const [assets, setAssets] = useState(new AssetsMap());
   const [assets_init, setAssetsInit] = useState([]);
+  const [tickers_list, setTickersList] = useState([]);
   const db_instance = IndexedDbHandler.getInstance();
 
-  const dbAssets = useLiveQuery(
-    () => db_instance.getWalletAssets(),
-    []
-  );
+  useEffect(() => {
+    const load_tickers = async () => {
+      var tickers_list = await FetchStocksList();
+      setTickersList(tickers_list);
+    };
+    load_tickers();
+  }, []);
+
+  const dbAssets = useLiveQuery(() => db_instance.getWalletAssets(), []);
 
   useEffect(() => {
-      if (!dbAssets) return;
-      setAssets(prev => prev.updateFromDB(dbAssets));
-    },
-    [dbAssets]
-  );
+    if (!dbAssets) return;
+    setAssets((prev) => prev.updateFromDB(dbAssets));
+  }, [dbAssets]);
 
   function toggleModalVisibility() {
     setModalVisible(!modal_visible);
@@ -143,7 +151,11 @@ export default function StockPage() {
         </div>
       </div>
       {/* Modal to be opened when proper button pressed */}
-      <Modal onClose={toggleModalVisibility} onAccept={addAsset} />
+      <Modal
+        onClose={toggleModalVisibility}
+        onAccept={addAsset}
+        tickersList={tickers_list}
+      />
     </>
   );
 }

@@ -62,7 +62,7 @@ export async function getTablesHashes() {
  * Reset the hash of particular table
  * @param {string} table_name name of the table which hash should be reset
  */
-export async function resetTableHash(table_name) {  
+export async function resetTableHash(table_name) {
   const hash_reset = bytesToHex(new Uint8Array(hash_size).fill(0));
   console.log("New hash value to be set: ", hash_reset);
   const db = getDBInstance();

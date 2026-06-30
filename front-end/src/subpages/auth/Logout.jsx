@@ -8,11 +8,10 @@ export function LogOutPopUp({ onClose, onAccept }) {
   async function LogOutRequest() {
     setLoading(true); // at first we want to set Loading to true, to render that to a user
     try {
-      let responseJson = await RequestGET("http://127.0.0.1:5000/auth/logout");      
+      let responseJson = await RequestGET("http://127.0.0.1:5000/auth/logout");
       if (responseJson.error) {
         setError(responseJson.error);
-      }
-      else {
+      } else {
         setError(null);
         onAccept();
       }

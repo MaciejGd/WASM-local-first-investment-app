@@ -123,7 +123,7 @@ export class DBSynchronizer {
       return;
     }
 
-    const push_event = async () => {      
+    const push_event = async () => {
       var ev = await this.event_queue.front();
       var response = null;
       try {
@@ -242,12 +242,7 @@ export class DBSynchronizer {
       if (!value.records) continue; // skip if there are no records to be added
       for (let el of value.records) {
         var payload = await DBEncryptor.decrypt(el.payload);
-        await this.db_updater.addRecord(
-          el.ulid,
-          table_name,
-          el.hash,
-          payload,
-        );
+        await this.db_updater.addRecord(el.ulid, table_name, el.hash, payload);
       }
     }
 

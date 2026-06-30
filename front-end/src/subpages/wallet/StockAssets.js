@@ -171,7 +171,7 @@ export class AssetsEntry {
    * @param {string} price price of the stock bought
    */
   insert(id, quantity, price) {
-    this._data.push(new AssetData(id, Number(quantity), Number(price)));      
+    this._data.push(new AssetData(id, Number(quantity), Number(price)));
     this.udpateAverageData();
   }
 
@@ -180,7 +180,7 @@ export class AssetsEntry {
    * @param {string} id identification of the asset
    * @param {number} quantity amount of stock owned
    * @param {nunber} price price of the stock bought
-   * @returns 
+   * @returns
    */
   update(id, quantity, price) {
     // if already in the _data, skip further execution
@@ -192,12 +192,9 @@ export class AssetsEntry {
   }
 
   removeNotMatchingAssets(assets) {
-    const removeIds = new Set(assets.map(a => a.id));
-    this._data = this._data.filter(
-      item => removeIds.has(item.id)
-    );
+    const removeIds = new Set(assets.map((a) => a.id));
+    this._data = this._data.filter((item) => removeIds.has(item.id));
   }
-
 
   /**
    * Select asset at specified index
@@ -335,14 +332,14 @@ export class AssetsMap {
   /**
    * Update current map with values from remote
    * @param {Array} assets array of assets to be added to map
-   * @returns 
+   * @returns
    */
   updateFromDB(assets) {
     const mp = new AssetsMap(this);
     if (!assets) {
       return mp;
     }
-    
+
     // remove old values that are not in the new assets to be set
     if (!mp.asset_map) {
       return createFromDB(assets);

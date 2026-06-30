@@ -164,7 +164,10 @@ export function AssetRow({
             ></input>
           )}
           <div className="row_ticker_content">
-            <span className="row_ticker_name" style={{ fontWeight: "bold", paddingLeft: 20 }}>
+            <span
+              className="row_ticker_name"
+              style={{ fontWeight: "bold", paddingLeft: 20 }}
+            >
               {asset.ticker}
             </span>
             {asset.isFirst && (

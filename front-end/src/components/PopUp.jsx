@@ -21,15 +21,17 @@ export function PopUpContent({ txt }) {
 export function PopUpButtons({ content, onClose }) {
   return (
     <>
-      <button onClick={onClose}>{content}</button>
+      <button className="modal_button" onClick={onClose}>
+        {content}
+      </button>
     </>
   );
 }
 
 /**
  * Classic ErrorPopUp to be used on error thrown by the application
- * @param {*} param0 
- * @returns 
+ * @param {*} param0
+ * @returns
  */
 export function ErrorPopUp({ content, onClose }) {
   return (

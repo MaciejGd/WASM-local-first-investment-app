@@ -16,12 +16,12 @@ const PERCENTILES = 3; // we have three results showing in percentiles
 
 function ShowSavedSimsModal({ onAccept, onClose }) {
   const db_instance = IndexedDbHandler.getInstance();
-  const [selected, setSelected] = useState(0);  
-  
+  const [selected, setSelected] = useState(0);
+
   const db_saved_sims = useLiveQuery(
     async () => await db_instance.getSimsHistory(),
     [],
-    []
+    [],
   );
 
   return (
@@ -29,19 +29,24 @@ function ShowSavedSimsModal({ onAccept, onClose }) {
       <div className="modal_container">
         <div className="modal_title">Add asset</div>
         <div className="modal_input_table">
-          {db_saved_sims.map(
-            (el, idx) => { return <button onClick={()=>setSelected(el)} className={selected===el? "selected" : ""} key={idx}>{el.name}</button>}
-          )}
+          {db_saved_sims.map((el, idx) => {
+            return (
+              <button
+                onClick={() => setSelected(el)}
+                className={selected === el ? "selected" : ""}
+                key={idx}
+              >
+                {el.name}
+              </button>
+            );
+          })}
         </div>
         <div className="modal_buttons">
           <button className="modal_button" onClick={onClose}>
             {" "}
             Close{" "}
           </button>
-          <button
-            className="modal_button"
-            onClick={() => onAccept(selected)}
-          >
+          <button className="modal_button" onClick={() => onAccept(selected)}>
             {" "}
             Accept
           </button>
@@ -70,10 +75,7 @@ function SaveSimModal({ onAccept, onClose }) {
             {" "}
             Close{" "}
           </button>
-          <button
-            className="modal_button"
-            onClick={() => onAccept(sim_name)}
-          >
+          <button className="modal_button" onClick={() => onAccept(sim_name)}>
             {" "}
             Accept
           </button>
@@ -89,7 +91,9 @@ function SimsResultsButtons({ saveSim, showSaved }) {
       <button className="sims_results_button" onClick={saveSim}>
         Save Sim
       </button>
-      <button className="sims_results_button" onClick={showSaved}>Restore from saved</button>
+      <button className="sims_results_button" onClick={showSaved}>
+        Restore from saved
+      </button>
     </div>
   );
 }
@@ -140,7 +144,7 @@ export default function SimsResults({
 
   // get tickers array
   const tickers_state = SimAssetMap.getTickersArray(assets);
-  // sims asset map to array  
+  // sims asset map to array
   const assets_state = SimAssetMap.toArray(assets);
 
   async function AddToHistory(sim_name) {
@@ -159,10 +163,9 @@ export default function SimsResults({
       // close modal on save
       if (res != true) {
         setSimsResultsError(`Name "${sim_name}" already used.`);
+      } else {
+        setSaveModalVis(false);
       }
-      else {
-        setSaveModalVis(false); 
-      }      
     }
   }
 
@@ -183,16 +186,18 @@ export default function SimsResults({
   });
 
   const SaveSimsModal = save_modal_vis ? SaveSimModal : () => <></>;
-  const ShowSavedModal = show_saved_modal_vis ? ShowSavedSimsModal : () => <></>;
+  const ShowSavedModal = show_saved_modal_vis
+    ? ShowSavedSimsModal
+    : () => <></>;
 
   return (
     <>
       <h1>Simulation Results</h1>
       <div className="sims_results_pane">
-        <SimsResultsButtons 
-          saveSim={() => setSaveModalVis(true)} 
-          showSaved={() => setShowSavedModalVis(true)}>
-        </SimsResultsButtons>
+        <SimsResultsButtons
+          saveSim={() => setSaveModalVis(true)}
+          showSaved={() => setShowSavedModalVis(true)}
+        ></SimsResultsButtons>
         <SimsResultsAssetsDescription
           date={date}
           sims={sims}
@@ -217,8 +222,17 @@ export default function SimsResults({
           ></SimsResultsPieChart>
         </div>
       </div>
-      <SaveSimsModal onClose={()=> setSaveModalVis(false)} onAccept={AddToHistory}></SaveSimsModal>
-      <ShowSavedModal onClose={()=> setShowSavedModalVis(false)} onAccept={(el) => {restoreSimsResults(el); setShowSavedModalVis(false);}}></ShowSavedModal>
+      <SaveSimsModal
+        onClose={() => setSaveModalVis(false)}
+        onAccept={AddToHistory}
+      ></SaveSimsModal>
+      <ShowSavedModal
+        onClose={() => setShowSavedModalVis(false)}
+        onAccept={(el) => {
+          restoreSimsResults(el);
+          setShowSavedModalVis(false);
+        }}
+      ></ShowSavedModal>
       {sim_results_error !== "" && (
         <ErrorPopUp
           content={sim_results_error}

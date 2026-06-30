@@ -41,11 +41,15 @@ export class IndexedDbHandler {
       // add hash to payload
       var sims_stored = await this.db.sim_history.toArray();
       // check if simulation name already in the list
-      var new_sims = sims_stored.filter((el) => { return el.name == payload.name;});
+      var new_sims = sims_stored.filter((el) => {
+        return el.name == payload.name;
+      });
       console.log(new_sims.length);
       if (new_sims.length != 0) {
         // TODO - it should show some pop-up that name is already used
-        console.error(`Name: "${payload.name}" already used for saved simulation`);
+        console.error(
+          `Name: "${payload.name}" already used for saved simulation`,
+        );
         return false;
       }
 
@@ -59,7 +63,7 @@ export class IndexedDbHandler {
 
   /**
    * Return saved simulations history in the form of array
-   * @returns 
+   * @returns
    */
   async getSimsHistory() {
     return this.db.sim_history.toArray();

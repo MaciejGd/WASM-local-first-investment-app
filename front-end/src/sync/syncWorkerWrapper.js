@@ -72,7 +72,7 @@ export class SyncWorkerWrapper {
   async syncTables(table_name) {
     this.worker.postMessage({
       type: "sync",
-    })
+    });
   }
 }
 

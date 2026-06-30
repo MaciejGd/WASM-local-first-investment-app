@@ -17,7 +17,12 @@ export class SimAssetMap {
       return false;
     }
     // append ticker with price to the map
-    asset_map[ticker] = {ticker: ticker, price: Number(price), percent: 0.0, selected: false};
+    asset_map[ticker] = {
+      ticker: ticker,
+      price: Number(price),
+      percent: 0.0,
+      selected: false,
+    };
 
     return true;
   }

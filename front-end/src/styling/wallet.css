@@ -40,21 +40,6 @@ tbody tr:hover {
   background: rgba(94, 168, 255, 0.08);
 }
 
-/* .row_ticker {
-  /* display: flex;
-  flex-direction: row;
-  align-items: center; */
-  /*
-  display: flex;
-  align-items: center;
-}
-
-.row_ticker_name {
-  display: inline-block;
-  min-width: 120px;
-  font-weight: bold;
-  padding-left: 20px;
-} */
 th:first-child,
 td:first-child {
   width: 180px;
@@ -143,11 +128,6 @@ td:first-child {
   transform: translateY(-1px);
   filter: brightness(1.05);
 }
-
-/* .wallet_button {  
-  color: var(--sim-text);
-  box-shadow: none;
-} */
 
 .wallet_buttons {
   width: 100%;
