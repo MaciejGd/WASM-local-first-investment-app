@@ -356,8 +356,13 @@ export class AssetsMap {
     if (!mp.asset_map) {
       return createFromDB(assets);
     }
+
     mp.asset_map.forEach((value, key) => {
       value.removeNotMatchingAssets(assets);
+      // remove ticker entry if all records are gone
+      if (value._data.length === 0) {
+        mp.asset_map.delete(key);
+      }
     });
     // update new values
     assets.forEach((el) => {

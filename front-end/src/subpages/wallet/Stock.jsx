@@ -36,6 +36,7 @@ export default function StockPage() {
   const [tickers_list, setTickersList] = useState([]);
   const db_instance = IndexedDbHandler.getInstance();
 
+  /// Load list of accessible tickers from the remote server
   useEffect(() => {
     const load_tickers = async () => {
       var tickers_list = await FetchStocksList();
@@ -44,8 +45,8 @@ export default function StockPage() {
     load_tickers();
   }, []);
 
-  const dbAssets = useLiveQuery(() => db_instance.getWalletAssets(), []);
-
+  /// Load assets map based on assets stored in IndexedDb
+  const dbAssets = useLiveQuery(() => db_instance.getWalletAssets(), []);  
   useEffect(() => {
     if (!dbAssets) return;
     const new_assets = assets.updateFromDB(dbAssets);
@@ -94,6 +95,7 @@ export default function StockPage() {
     toggleModalVisibility();
   }
 
+  /** Show summary/single of ticker resources */
   function toggleAssetVisibility(ticker) {
     if (!assets.has(ticker)) {
       console.err(`There is no such ticker as ${ticker} in map.`);
@@ -106,6 +108,7 @@ export default function StockPage() {
     setAssets(map_copy);
   }
 
+  /** Sort table up, by columnName */
   function sortUp(columnName) {
     const new_map = new AssetsMap(assets);
     new_map.sort(columnName, false);
@@ -113,6 +116,7 @@ export default function StockPage() {
     assets.sort(columnName, false);
   }
 
+  /** Sort column down by columnName */
   function sortDown(columnName) {
     const new_map = new AssetsMap(assets);
     new_map.sort(columnName, true);
@@ -120,16 +124,12 @@ export default function StockPage() {
   }
 
   function selectRow(ticker, idx, select) {
-    console.log("Select row callback");
     const new_map = new AssetsMap(assets);
     new_map.selectData(ticker, idx, select);
     setAssets(new_map);
-    // assets.selectData(ticker, idx, select);
   }
 
-  // async function deleteSelected() {
   async function deleteSelected() {
-    console.log("Delete selected callback");
     // remove selected elements from indexed db
     const selected_ids = assets.getSelectedIds();
     await db_instance.deleteWalletAssets(selected_ids);
