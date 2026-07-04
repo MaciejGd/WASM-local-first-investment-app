@@ -1,8 +1,5 @@
 import "./App.css";
 import StockPage from "./subpages/wallet/Stock.jsx";
-import SettingsPage from "./subpages/Settings.jsx";
-import CryptoPage from "./subpages/Crypto.jsx";
-import ObligationsPage from "./subpages/Obligations.jsx";
 import SimulationsPage from "./subpages/simulations/Simulations.jsx";
 import GraphsPage from "./subpages/graphs/Graphs.jsx";
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
@@ -54,14 +51,6 @@ function NavBar({ onHideButtonClick, onLogOut, visible }) {
         <WalletIcon />
         {visible ? " Stock " : ""}{" "}
       </NavLink>
-      <NavLink className="navigationButton" to="/crypto">
-        <CryptoIcon />
-        {visible ? " Crypto " : ""}
-      </NavLink>
-      <NavLink className="navigationButton" to="/obligations">
-        <ObligationsIcon />
-        {visible ? " Obligations " : ""}
-      </NavLink>
       <NavLink className="navigationButton" to="/simulations">
         <SimulationsIcon />
         {visible ? " Simulations " : ""}
@@ -69,10 +58,6 @@ function NavBar({ onHideButtonClick, onLogOut, visible }) {
       <NavLink className="navigationButton" to="/graphs">
         <GraphsIcon />
         {visible ? " Graphs " : ""}
-      </NavLink>
-      <NavLink className="navigationButton" to="/settings">
-        <SettingsIcon />
-        {visible ? " Settings " : ""}
       </NavLink>
       <button className="navigationButton" onClick={onLogOut}>
         <LogOutIcon />
@@ -122,17 +107,11 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<StockPage />}></Route>
                 <Route path="/stock" element={<StockPage />}></Route>
-                <Route path="/crypto" element={<CryptoPage />}></Route>
-                <Route
-                  path="/obligations"
-                  element={<ObligationsPage />}
-                ></Route>
                 <Route
                   path="/simulations"
                   element={<SimulationsPage />}
                 ></Route>
                 <Route path="/graphs" element={<GraphsPage />}></Route>
-                <Route path="/settings" element={<SettingsPage />}></Route>
               </Routes>
               {show_logout && (
                 <LogOutPopUp

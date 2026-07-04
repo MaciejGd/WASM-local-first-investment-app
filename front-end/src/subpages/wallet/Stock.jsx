@@ -48,7 +48,12 @@ export default function StockPage() {
 
   useEffect(() => {
     if (!dbAssets) return;
-    setAssets((prev) => prev.updateFromDB(dbAssets));
+    const new_assets = assets.updateFromDB(dbAssets);
+    const fetch_prices = async () => {
+      await new_assets.fetchAssetsPrice();
+      setAssets(new_assets);
+    };
+    fetch_prices();
   }, [dbAssets]);
 
   function toggleModalVisibility() {

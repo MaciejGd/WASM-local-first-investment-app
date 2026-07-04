@@ -26,6 +26,23 @@ def get_stocks_prices():
     return jsonify(data)
 
 
+@bp.route("/get_recent_price/<ticker>", methods=("GET",))
+def get_recent_price(ticker):
+    data = finance_api.get_recent_price(ticker)
+    return jsonify(data)
+
+
+@bp.route("/get_recent_prices", methods=("POST",))
+def get_recent_prices():
+    tickers = request.get_json()
+
+    if not isinstance(tickers, list):
+        return jsonify({"return": "not list passed as a json object"})
+
+    data = finance_api.get_recent_prices(tickers)
+    return jsonify(data)
+
+
 @bp.route("/get_stocks_list", methods=("GET",))
 def get_tickers_list():
     tickers = finance_api.get_tickers_list()

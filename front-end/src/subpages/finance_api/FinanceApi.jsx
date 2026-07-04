@@ -1,4 +1,4 @@
-import { RequestGET } from "../../Requests";
+import { RequestGET, RequestPOST } from "../../Requests";
 
 export async function FetchStocksList() {
   const api_url = "http://127.0.0.1:5000/finance/get_stocks_list";
@@ -7,12 +7,29 @@ export async function FetchStocksList() {
 }
 
 // Fetch prices of the stock from remote server
-export async function FetchStockPrices() {
-  const tickers = SimAssetMap.getTickers(assets);
+export async function FetchStockPrices(tickers) {
   const api_url = "http://127.0.0.1:5000/finance/get_stocks_prices";
   let response = await RequestPOST(api_url, tickers);
   if (!response.ok) {
     throw new Error("Failed to fetch data from remote.");
+  }
+  let responseJson = await response.json();
+  return responseJson;
+}
+
+// Fetch last historical price of the product
+export async function GetRecentPrice(ticker) {
+  const api_url = `http://127.0.0.1:5000/finance/get_recent_price/{ticker}`;
+  let responseJson = await RequestGET(api_url);
+  return responseJson;
+}
+
+export async function GetRecentPrices(tickers) {
+  const api_url = `http://127.0.0.1:5000/finance/get_recent_prices`;
+  let response = await RequestPOST(api_url, tickers);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch stock prices from remote");
   }
   let responseJson = await response.json();
   return responseJson;

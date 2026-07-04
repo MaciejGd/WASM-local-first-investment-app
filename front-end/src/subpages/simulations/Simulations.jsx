@@ -172,7 +172,7 @@ export default function SimulationsPage() {
 
   async function RunFinanceSimulations(times, sims) {
     // fetch stock prices
-    const responseJson = await FetchStockPrices();
+    const responseJson = await FetchStockPrices(SimAssetMap.getTickers(assets));
     // get amount of money invested in each asset
     setSimRunning(true); // set running as simulation status
     const weights = SimAssetMap.getWeights(assets);

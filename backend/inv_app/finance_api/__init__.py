@@ -18,6 +18,44 @@ class FinanceDataAPI:
             tickers_data.append(doc)
         return tickers_data
 
+    def get_recent_prices(self, tickers: str) -> dict:
+        """Get most recent prices of stocks specified in the list passed as argument"""
+        prices = {}
+        for ticker in tickers:
+            try:
+                price = self.get_recent_price(ticker)
+                prices[ticker] = price
+            except Exception:
+                prices[ticker] = None
+
+        return prices
+
+    def get_recent_price(self, ticker: str) -> dict:
+        """Get most recent price of the specified ticker"""
+        try:
+            doc = self.db_handler.find_one(
+                self.db_name, self.stock_prices_col, {"ticker": ticker}
+            )
+
+            if doc is None:
+                raise Exception
+
+            close_prices = doc.get("Close", {})
+
+            if not close_prices:
+                raise Exception
+
+            last_date = max(close_prices.keys())
+            last_price = close_prices[last_date]
+
+            return {
+                "date": last_date,
+                "price": last_price,
+            }
+
+        except Exception as e:
+            raise Exception("Failed to get {} finance data".format(ticker)) from e
+
     def get_stock_prices(self, ticker: str) -> dict:
         try:
             doc = self.db_handler.find_one(

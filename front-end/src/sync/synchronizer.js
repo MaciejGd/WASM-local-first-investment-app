@@ -128,6 +128,9 @@ export class DBSynchronizer {
       var response = null;
       try {
         response = await RequestPOST(DBSynchronizer.PUSH_ENDPOINT, ev);
+        if (!response.ok) {
+          throw Error("Failed to update data");
+        }
       } catch (error) {
         console.error(error);
         return false;
@@ -135,7 +138,8 @@ export class DBSynchronizer {
       // here we should check for the response code
       await this.event_queue.pop(); // if succeeded do not forget to pop from the queue
       console.log(response);
-      this.db_updater.updateLastEventId(response.event_id);
+      const responseJson = await response.json();
+      this.db_updater.updateLastEventId(responseJson.event_id);
 
       return true;
     };
@@ -156,6 +160,10 @@ export class DBSynchronizer {
     // check how many events are actyually pending in the list
     try {
       var lastId = await this.db_updater.getLastEventId();
+      // secure scenario in which lastId is undefined
+      if (!lastId) {
+        lastId = 0;
+      }
       var ids = await RequestGET(
         DBSynchronizer.PULL_EVENTS_IDS + lastId.toString(),
       );
@@ -280,17 +288,6 @@ export class DBSynchronizer {
       return;
     }
     console.log(response);
-  }
-
-  /**
-   * Save last event's id in the DB
-   * @param {int} id event id to be set in db
-   */
-  async set_last_event_timestamp(id) {
-    await this.metadata.put({
-      key: "lastEvent",
-      value: id,
-    });
   }
 }
 

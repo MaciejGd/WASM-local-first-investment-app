@@ -1,3 +1,5 @@
+import { GetRecentPrices } from "../finance_api/FinanceApi";
+
 /**
  * Class representing data from investment wallet
  */
@@ -329,6 +331,16 @@ export class AssetsMap {
     return mp;
   }
 
+  async fetchAssetsPrice() {
+    // ticker -> asset entry
+    const tickers = Array.from(this.asset_map.keys());
+    const prices = await GetRecentPrices(tickers);
+    this.asset_map.forEach((el, ticker) => {
+      el.current_price = prices[ticker].price;
+      this.asset_map.set(ticker, el);
+    });
+  }
+
   /**
    * Update current map with values from remote
    * @param {Array} assets array of assets to be added to map
@@ -385,8 +397,8 @@ export class AssetsMap {
             asset.folded,
             idx === 0,
             data.quantity,
-            asset.current_price,
-            data.getCurrentValue(asset.current_price),
+            asset.current_price.toFixed(2),
+            data.getCurrentValue(asset.current_price).toFixed(2),
             data.getProfit(asset.current_price).toFixed(2),
             data.getProfitPercentage(asset.current_price).toFixed(2),
             data.price.toFixed(2),
@@ -454,7 +466,7 @@ export class AssetsMap {
     summary.quantity = quantity;
     summary.current_price = "-";
     summary.profit = profit.toFixed(2);
-    summary.current_value = current_value;
+    summary.current_value = current_value.toFixed(2);
     // we divide so if cost === 0, just return 0 :))
     summary.profit_percentage =
       cost != 0 ? ((profit / cost) * 100).toFixed(2) : 0;
