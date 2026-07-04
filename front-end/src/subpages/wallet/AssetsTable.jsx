@@ -199,7 +199,7 @@ export function AssetsTable({
   onSelectRow,
 }) {
   return (
-    <table className="assets_table sims_asset_table">
+    <table className="assets_table sims_table">
       <thead>
         <AssetsTableHead onSortDown={onSortDown} onSortUp={onSortUp} />
       </thead>

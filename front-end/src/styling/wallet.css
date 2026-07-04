@@ -1,5 +1,5 @@
 :root {
-  --assets-sum: rgba(7, 17, 43, 0.95);
+  --assets-sum: rgba(7, 11, 30, 0.95);
 }
 
 .assets_table {
@@ -25,19 +25,19 @@ td {
 }
 
 tfoot {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(91, 141, 255, 0.15);
 }
 
 tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(91, 141, 255, 0.1);
 }
 
 tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(91, 141, 255, 0.06);
 }
 
 tbody tr:hover {
-  background: rgba(94, 168, 255, 0.08);
+  background: rgba(91, 141, 255, 0.14);
 }
 
 th:first-child,
@@ -58,15 +58,13 @@ td:first-child {
   min-width: 140px;
 }
 
-
 .row_ticker button {
   all: unset;
   margin-left: auto;
 }
 
 .row_profit::after {
-  content : "%";
-
+  content: "%";
 }
 
 .table_header {
@@ -83,40 +81,36 @@ td:first-child {
 }
 
 .sort_buttons button {
-  all:unset;
+  all: unset;
   font-size: 0.1rem;
 }
 
 .sort_buttons button:hover {
   background-color: black;
 }
-/* 
-.assets_summary {
-  background-color: var(--assets-sum);
-} */
-
 
 .assets_page {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  /* background-color: purple; */
 }
 
 .assets_table_buttons_container {
-  /* background-color: aqua; */
   width: 70%;
   display: flex;
-  /* align-items: center;
-  justify-content: center; */
 }
 
 .assets_table_buttons_container button {
-  background-color: rgb(59, 59, 59);
+  background-color: rgba(91, 141, 255, 0.15);
   border-radius: 10px;
-  border-color: white;
+  border: 1px solid rgba(91, 141, 255, 0.25);
   margin-left: 5px;
+  color: var(--text-primary);
+}
+
+.assets_table_buttons_container button:hover {
+  background-color: rgba(91, 141, 255, 0.25);
 }
 
 .assets_add_button {
@@ -126,7 +120,7 @@ td:first-child {
 .wallet_button:hover,
 .wallet_button:hover {
   transform: translateY(-1px);
-  filter: brightness(1.05);
+  filter: brightness(1.1);
 }
 
 .wallet_buttons {
@@ -150,7 +144,7 @@ td:first-child {
   color: var(--sim-text);
   font-weight: 600;
   letter-spacing: 0.02em;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(91, 141, 255, 0.15);
   box-shadow: none;
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;

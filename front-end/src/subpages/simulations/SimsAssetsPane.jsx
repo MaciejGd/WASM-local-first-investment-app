@@ -54,7 +54,7 @@ function AssetTableBody({ assets, onSelectCb }) {
 function AssetTable({ assets, onSelectCb }) {
   return (
     <div className="sims_table_container">
-      <table className="sims_asset_table">
+      <table className="sims_table">
         <AssetTableHeader />
         <AssetTableBody assets={assets} onSelectCb={onSelectCb} />
       </table>

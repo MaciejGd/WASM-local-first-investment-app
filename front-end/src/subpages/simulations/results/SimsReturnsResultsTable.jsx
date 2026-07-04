@@ -2,16 +2,16 @@ function SimResultsTableHeader() {
   return (
     <thead>
       <tr>
-        <th>Category</th>
-        <th>10th Percentile</th>
-        <th>20th Percentile</th>
-        <th>30th Percentile</th>
-        <th>40th Percentile</th>
-        <th>50th Percentile</th>
-        <th>60th Percentile</th>
-        <th>70th Percentile</th>
-        <th>80th Percentile</th>
-        <th>90th Percentile</th>
+        <th><div className="table_header"><span>Category</span></div></th>
+        <th><div className="table_header"><span>10th Percentile</span></div></th>
+        <th><div className="table_header"><span>20th Percentile</span></div></th>
+        <th><div className="table_header"><span>30th Percentile</span></div></th>
+        <th><div className="table_header"><span>40th Percentile</span></div></th>
+        <th><div className="table_header"><span>50th Percentile</span></div></th>
+        <th><div className="table_header"><span>60th Percentile</span></div></th>
+        <th><div className="table_header"><span>70th Percentile</span></div></th>
+        <th><div className="table_header"><span>80th Percentile</span></div></th>
+        <th><div className="table_header"><span>90th Percentile</span></div></th>
       </tr>
     </thead>
   );
@@ -57,11 +57,9 @@ function SimResultsTableBody({ results }) {
 
 export function SimResultsTable({ results }) {
   return (
-    <div className="sims_results_table">
-      <table style={{ width: "80%", paddingLeft: "2rem" }}>
+      <table className="sims_table">
         <SimResultsTableHeader />
         <SimResultsTableBody results={results} />
       </table>
-    </div>
   );
 }

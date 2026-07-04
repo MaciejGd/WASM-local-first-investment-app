@@ -2,7 +2,7 @@ import { SimsResultsPieChart } from "./SimsResultsPieChart.jsx";
 import "./results/SimsResultsAssetsTable.jsx";
 import SimsResultsAssetsPane from "./results/SimsResultsAssetsTable.jsx";
 import { SimResultsTable } from "./results/SimsReturnsResultsTable.jsx";
-import { SimRiskResultsTable } from "./results/SimsRiskResultsTable.jsx";
+import { SimResultsRiskPane } from "./results/SimsResultsRiskAnalysis.jsx";
 import { useState } from "react";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
 import AddAssetPopUp from "../wallet/AddAssetPopUp.jsx";
@@ -206,21 +206,7 @@ export default function SimsResults({
         <SimsResultsAssetsPane assets={assets_state}></SimsResultsAssetsPane>
         <SimsResultsDescription></SimsResultsDescription>
         <SimResultsTable results={results} />
-        <SimsResultsRiskDescription></SimsResultsRiskDescription>
-        <div className="sims_results_risk_container">
-          <SimRiskResultsTable
-            tickers={tickers_state}
-            VaR={VaR}
-            cvars={cvars}
-          ></SimRiskResultsTable>
-          <SimsResultsPieChart
-            results={{
-              tickers: tickers_state,
-              VaR: VaR,
-              cvars: cvars,
-            }}
-          ></SimsResultsPieChart>
-        </div>
+        <SimResultsRiskPane tickers={tickers_state} VaR={VaR} cvars={cvars}></SimResultsRiskPane>
       </div>
       <SaveSimsModal
         onClose={() => setSaveModalVis(false)}

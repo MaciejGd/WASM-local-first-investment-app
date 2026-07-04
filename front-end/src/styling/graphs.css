@@ -1,27 +1,22 @@
-
 .graph_page {
   align-items: center;
-}
-
-.graph_container {
-  /* TODO */
 }
 
 .graph_chart {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* padding: 20px; */
   padding-bottom: 0px;
-} 
+}
 
 .graph_line_chart {
-  /* margin-bottom: 5rem; */
   margin-top: 10px;
   margin-bottom: 10px;
   width: 60%;
   padding: 20px;
-  background-color: rgb(49, 48, 48);
+  background-color: rgba(18, 27, 55, 0.95);
+  border-radius: 16px;
+  border: 1px solid rgba(91, 141, 255, 0.12);
 }
 
 .graph_ticker_selector {
@@ -31,8 +26,17 @@
 }
 
 .graph_ticker_selector button {
-  background-color: white;
+  background-color: rgba(91, 141, 255, 0.12);
+  border: 1px solid rgba(91, 141, 255, 0.22);
+  color: var(--text-primary, #f0f4ff);
   margin-left: 5px;
+  border-radius: 8px;
+  padding: 0.5em 1em;
+  transition: background-color 0.2s;
+}
+
+.graph_ticker_selector button:hover {
+  background-color: rgba(91, 141, 255, 0.25);
 }
 
 .graph_indicator_field {
@@ -42,8 +46,17 @@
 }
 
 .graph_indicator_field button {
-  background-color: white;
+  background-color: rgba(91, 141, 255, 0.12);
+  border: 1px solid rgba(91, 141, 255, 0.22);
+  color: var(--text-primary, #f0f4ff);
   margin-left: 5px;
+  border-radius: 8px;
+  padding: 0.5em 1em;
+  transition: background-color 0.2s;
+}
+
+.graph_indicator_field button:hover {
+  background-color: rgba(91, 141, 255, 0.25);
 }
 
 .graph_selector {
@@ -52,26 +65,22 @@
   padding-left: 400px;
 }
 
-.graph_legend {
-}
-
 .legend_entry {
   display: flex;
   width: fit-content;
   margin-left: 400px;
-  border: 2px white;
   align-items: center;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(91, 141, 255, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .legend_entry_description {
-  color: white;
+  color: var(--text-primary, #f0f4ff);
   width: 300px;
   text-align: left;
-  border-radius: 5px;
   height: 40px;
-  background-color: rgb(59, 59, 59);
-
+  background-color: rgba(91, 141, 255, 0.08);
   display: flex;
   align-items: center;
   padding-left: 8px;
@@ -82,4 +91,11 @@
   display: flex;
   align-items: center;
   border-radius: 0%;
+  background-color: transparent;
+  border: none;
+  color: var(--text-secondary, #c0cce8);
+}
+
+.legend_entry button:hover {
+  background-color: rgba(91, 141, 255, 0.15);
 }
