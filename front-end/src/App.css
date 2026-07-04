@@ -47,7 +47,6 @@
 .sidebar.hidden .navigationButton {
   padding: 14px 10px;
   justify-content: center;
-  border-left: none;
   gap: 0;
 }
 
@@ -108,13 +107,12 @@
   display: flex;
   gap: 10px;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
   text-decoration: none;
   width: 100%;
   box-sizing: border-box;
   text-align: left;
-  border-left: 3px solid transparent;
-  flex-shrink: 0;
+
 }
 
 .navigationButton:hover {
@@ -125,7 +123,7 @@
 .navigationButton.active {
   background-color: var(--bg-nav-active);
   color: #fff;
-  border-left-color: var(--accent-blue);
+  border-left: 3px solid var(--accent-blue);
 }
 
 .navigationButton:focus,
