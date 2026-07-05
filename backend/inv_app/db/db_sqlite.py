@@ -63,9 +63,6 @@ class SQLite3DB(db_handler.DBHandler):
 
     REGISTER_USER = "INSERT INTO user (username, password, salt) VALUES (?, ?, ?);"
 
-    def __init__(self):
-        pass
-
     def close(self, db_handle):
         db_handle.close()
         print("SQLITE close db!")
@@ -83,6 +80,16 @@ class SQLite3DB(db_handler.DBHandler):
         with current_app.open_resource(schema_path) as f:
             db_handle.executescript(f.read().decode("utf-8"))
 
+    def get_user_data(self, db_handle, user_id: int):
+        return db_handle.execute(
+            "SELECT * FROM user WHERE id = ?", (user_id,)
+        ).fetchone()
+
+    def get_username_data(self, db_handle, username: str):
+        return db_handle.execute(
+            "SELECT * FROM user WHERE username = ?", (username,)
+        ).fetchone()
+
     def register_user(self, db_handle, username, password, salt):
         """
         Try registering user into db. return tuple with two strings, salt and error.
@@ -94,18 +101,8 @@ class SQLite3DB(db_handler.DBHandler):
             )
             db_handle.commit()
             return salt
-        except db_handle.IntegrityError:
+        except sqlite3.IntegrityError:
             return None
-
-    def get_user_data(self, db_handle, user_id: int):
-        return db_handle.execute(
-            "SELECT * FROM user WHERE id = ?", (user_id,)
-        ).fetchone()
-
-    def get_username_data(self, db_handle, username: str):
-        return db_handle.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
 
     def reset_collection(self, db_handle, user_id: int, table_name: str) -> bool:
         """
@@ -129,8 +126,8 @@ class SQLite3DB(db_handler.DBHandler):
         self,
         db_handle,
         user_id: int,
-        timestamp: int,
         table_name: str,
+        timestamp: int,
         type: str,
         ulid: str,
     ) -> int:
@@ -151,7 +148,7 @@ class SQLite3DB(db_handler.DBHandler):
             return -1
 
     def add_encrypted_data_record(
-        self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload
+        self, db_handle, user_id: int, table_name: str, ulid: int, hash: str, payload
     ) -> int:
         table = table_name + "_" + str(user_id)
         # try creating table if not exists already and add record
@@ -165,13 +162,12 @@ class SQLite3DB(db_handler.DBHandler):
                     payload,
                 ),
             )
-            # db_handle.commit()
             return cursor.lastrowid
         except Exception:
             db_handle.rollback()
             return -1
 
-    def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
+    def get_encrypted_record(self, db_handle, user_id: int, table_name: str, ulid: str):
         table = table_name + "_" + str(user_id)
 
         try:
@@ -185,7 +181,7 @@ class SQLite3DB(db_handler.DBHandler):
             return None
 
     def remove_encrypted_record(
-        self, db_handle, table_name: str, user_id: int, ulid: str
+        self, db_handle, user_id: int, table_name: str, ulid: str
     ):
         table = table_name + "_" + str(user_id)
 
@@ -252,8 +248,10 @@ class SQLite3DB(db_handler.DBHandler):
         try:
             db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
             db_handle.commit()
-            hash = db_handle.execute(SQLite3DB.GET_META.format(table), (table_record,))
-            return hash.fetchone()[2]
+            cursor = db_handle.execute(
+                SQLite3DB.GET_META.format(table), (table_record,)
+            )
+            return cursor.fetchone()[2]
         except Exception:
             db_handle.rollback()
             return None
@@ -266,4 +264,4 @@ class SQLite3DB(db_handler.DBHandler):
             )
             return cursor.fetchall()
         except Exception:
-            print("FAIL!!!")
+            return None

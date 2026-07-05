@@ -46,8 +46,8 @@ class DBHandler(ABC):
         self,
         db_handle,
         user_id: int,
-        timestamp: int,
         table_name: str,
+        timestamp: int,
         type: str,
         ulid: str,
     ) -> int:
@@ -55,17 +55,17 @@ class DBHandler(ABC):
 
     @abstractmethod
     def add_encrypted_data_record(
-        self, db_handle, table_name: str, user_id: int, ulid: int, hash: str, payload
+        self, db_handle, user_id: int, table_name: str, ulid: int, hash: str, payload
     ) -> int:
         raise NotImplementedError
 
     @abstractmethod
-    def get_encrypted_record(self, db_handle, table_name: str, user_id: int, ulid: str):
+    def get_encrypted_record(self, db_handle, user_id: int, table_name: str, ulid: str):
         raise NotImplementedError
 
     @abstractmethod
     def remove_encrypted_record(
-        self, db_handle, table_name: str, user_id: int, ulid: str
+        self, db_handle, user_id: int, table_name: str, ulid: str
     ):
         raise NotImplementedError
 

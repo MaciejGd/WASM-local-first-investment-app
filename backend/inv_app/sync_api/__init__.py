@@ -108,7 +108,7 @@ class DBUpdater:
         Get record from encrypted table and process its content so it can be jsonified.
         """
 
-        record = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        record = db_proxy.get_encrypted_record(user_id, table_name, ulid)
         if record is None:
             return None
         obj = {
@@ -198,7 +198,7 @@ class DBUpdater:
         return xored.hex()
 
     def get_record_hash(self, user_id, table_name, ulid):
-        row = db_proxy.get_encrypted_record(table_name, user_id, ulid)
+        row = db_proxy.get_encrypted_record(user_id, table_name, ulid)
         if not row:
             return None
         return row["hash"]  # hash is stored at second position

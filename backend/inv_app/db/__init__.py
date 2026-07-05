@@ -81,7 +81,7 @@ class DBProxy(object):
         db = self.get_db()
         return self.db_handler.reset_collection(db, user_id, table_name)
 
-    def get_encrypted_record(self, table_name: str, user_id: int, ulid: str):
+    def get_encrypted_record(self, user_id: int, table_name: str, ulid: str):
         """
         Get record from encrypted collection, identified by user_id
 
@@ -91,7 +91,7 @@ class DBProxy(object):
         """
 
         db = self.get_db()
-        return self.db_handler.get_encrypted_record(db, table_name, user_id, ulid)
+        return self.db_handler.get_encrypted_record(db, user_id, table_name, ulid)
 
     def get_events_from_id(self, user_id: int, last_event_id: int) -> list[int]:
         """
@@ -182,7 +182,7 @@ class DBProxy(object):
         if table_hash is None:
             return event_id - 1
 
-        rec_id = self.db_handler.remove_encrypted_record(db, table_name, user_id, ulid)
+        rec_id = self.db_handler.remove_encrypted_record(db, user_id, table_name, ulid)
         if not rec_id:
             return None
 
