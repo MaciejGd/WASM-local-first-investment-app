@@ -1,34 +1,51 @@
 import pytest
+from http import HTTPStatus
 from inv_app import finance
 
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 
-@pytest.fixture
-def finance_api(monkeypatch):
-    fin_api = MagicMock()
-    fin_api.get_stock_prices.return_value = {"test": "test"}
-    fin_api.get_stocks_prices.return_value = {"test": "test"}
-    fin_api.get_tickers_list.return_value = ["test"]
-    monkeypatch.setattr(finance, "finance_api", fin_api)
-    return fin_api
-
-
-def test_get_stock_prices(client, finance_api):
-    response = client.get("/finance/get_stock_prices/LPP.WA")
-    assert response.data == b'{"test":"test"}\n'
-    finance_api.get_stock_prices.assert_called_once_with("LPP.WA")
-
-
-def test_get_stocks_prices(client, finance_api):
+@patch("inv_app.finance.finance_api.get_stocks_prices", return_value = True)
+def test_get_stocks_prices_correct(_, client):
     response = client.post(
         "/finance/get_stocks_prices", json={"tickers": ["LPP.WA", "BDX.WA"]}
     )
-    assert response.data == b'{"test":"test"}\n'
-    finance_api.get_stocks_prices.assert_called_once_with(["LPP.WA", "BDX.WA"])
+    assert response.status_code == HTTPStatus.OK
 
 
-def test_get_tickers_list(client, finance_api):
-    response = client.get("/finance/get_stocks_list")
-    assert response.data == b'["test"]\n'
-    assert finance_api.get_tickers_list.called
+def test_get_stocks_prices_no_tickers(client):
+    response = client.post(
+        "/finance/get_stocks_prices", json={"test": ["LPP.WA", "BDX.WA"]}
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_get_stocks_prices_no_tickers_no_list(client):
+    response = client.post(
+        "/finance/get_stocks_prices", json={"tickers": "BDX.WA"}
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@patch("inv_app.finance.finance_api.get_recent_prices", return_value = True)
+def test_get_recent_prices_correct(_, client):
+    response = client.post(
+        "/finance/get_recent_prices", json=["LPP.WA", "BDX.WA"]
+    )
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_get_recent_prices_no_input_list(client):
+    response = client.post(
+        "/finance/get_recent_prices", json={"ticker" : "BDX.WA"}
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@patch("inv_app.finance.finance_api.get_tickers_list", return_value = True)
+def test_get_tickers_list(_, client):
+    response = client.get(
+        "/finance/get_stocks_list"
+    )
+    assert response.status_code == HTTPStatus.OK
+

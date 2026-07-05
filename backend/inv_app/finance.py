@@ -4,16 +4,10 @@ File with enpoints for receiving finance data
 
 from .finance_api import finance_api
 
+from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 
 bp = Blueprint("finance", __name__, url_prefix="/finance")
-
-
-# Get request for getting price of single stock
-@bp.route("/get_stock_prices/<ticker>", methods=("GET",))
-def get_stock_prices(ticker):
-    data = finance_api.get_stock_prices(ticker)
-    return jsonify(data)
 
 
 # post request for getting data of multiple tickers at once
@@ -22,13 +16,11 @@ def get_stocks_prices():
     post_json = request.get_json()
 
     tickers = post_json.get("tickers")
+
+    if tickers is None or not isinstance(tickers, list):
+        return jsonify({"return": "Bad post JSON"}), HTTPStatus.BAD_REQUEST
+    # TODO, check that and refactor so that it answers as get_recent_prices
     data = finance_api.get_stocks_prices(tickers)
-    return jsonify(data)
-
-
-@bp.route("/get_recent_price/<ticker>", methods=("GET",))
-def get_recent_price(ticker):
-    data = finance_api.get_recent_price(ticker)
     return jsonify(data)
 
 
@@ -37,7 +29,9 @@ def get_recent_prices():
     tickers = request.get_json()
 
     if not isinstance(tickers, list):
-        return jsonify({"return": "not list passed as a json object"})
+        return jsonify(
+            {"return": "not list passed as a json object"}
+        ), HTTPStatus.BAD_REQUEST
 
     data = finance_api.get_recent_prices(tickers)
     return jsonify(data)

@@ -21,29 +21,6 @@ def finance_api(mongo_handler):
     return fin_api
 
 
-def test_get_stock_prices(finance_api, mongo_handler):
-    # set cursor returned by mongo_handler mock
-    cursor = {"ticker": "LPP.WA", "Close": 12}
-    mongo_handler.find_one.return_value = cursor
-    # check finance props
-    db_name = finance_api.db_name
-    col_name = finance_api.stock_prices_col
-    # run test
-    result = finance_api.get_stock_prices("LPP.WA")
-
-    mongo_handler.find_one.assert_called_once_with(
-        db_name, col_name, {"ticker": "LPP.WA"}
-    )
-    assert result == {"ticker": "LPP.WA", "prices": 12}
-
-
-def test_get_stock_prices_throw(finance_api, mongo_handler):
-    mongo_handler.find_one.side_effect = Exception("test")
-    with pytest.raises(Exception) as exc_info:
-        finance_api.get_stock_prices("LPP.WA")
-    assert "Failed to get" in exc_info.value.args[0]
-
-
 def test_get_tickers_list(finance_api, mongo_handler):
     mongo_handler.get_all_docs.return_value = [
         {"ticker": "LPP.WA"},

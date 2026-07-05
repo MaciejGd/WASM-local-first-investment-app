@@ -11,7 +11,7 @@ class FinanceDataAPI:
         self.stock_info_col = "StockInfo"
         self.stock_markers_col = "StockMarkers"
 
-    def get_stocks_prices(self, tickers) -> list:
+    def get_stocks_prices(self, tickers: list[str]) -> list:
         tickers_data = []
         for ticker in tickers:
             doc = self.get_stock_prices(ticker)
