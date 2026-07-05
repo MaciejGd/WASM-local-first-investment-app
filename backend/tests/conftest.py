@@ -55,6 +55,11 @@ class AuthActions(object):
         return self._client.get("/auth/logout")
 
 
+    def register(self, username="test", password="test"):
+        return self._client.post(
+            "/auth/register", json={"username": username, "password": password}
+        )
+
 @pytest.fixture
-def auth(client):
+def authentication(client):
     return AuthActions(client)

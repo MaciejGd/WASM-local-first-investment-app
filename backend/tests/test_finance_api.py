@@ -70,11 +70,11 @@ def test_get_stocks_prices(finance_api):
     ticker_cdr = {"ticker": "CDR.WA", "Close": 3}
 
     def my_get_stock(ticker: str):
-        if ticker is "LPP.WA":
+        if ticker == "LPP.WA":
             return ticker_lpp
-        if ticker is "BDX.WA":
+        if ticker == "BDX.WA":
             return ticker_bdx
-        if ticker is "CDR.WA":
+        if ticker == "CDR.WA":
             return ticker_cdr
 
     finance_api.get_stock_prices = MagicMock(side_effect=my_get_stock)

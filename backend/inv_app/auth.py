@@ -1,4 +1,5 @@
 import functools
+from http import HTTPStatus
 
 from flask import (
     Blueprint,
@@ -18,23 +19,22 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 # endpoint for registering new user account
 @bp.route("/register", methods=("POST",))
 def register():
-    if request.method == "POST":
-        # get both username and password from request
-        req_json = request.get_json()
-        username = req_json.get("username", None)
-        password = req_json.get("password", None)
-        # check invalid cases
-        if not username:
-            return jsonify({"error": "Username is required."}), 400
+    # get both username and password from request
+    req_json = request.get_json()
+    username = req_json.get("username", None)
+    password = req_json.get("password", None)
+    # check invalid cases
+    if not username:
+        return jsonify({"error": "Username is required."}), HTTPStatus.BAD_REQUEST
 
-        elif not password:
-            return jsonify({"error": "Password is required."}), 400
+    elif not password:
+        return jsonify({"error": "Password is required."}), HTTPStatus.BAD_REQUEST
 
-        salt = db_proxy.register_user(username, password)
-        if salt is None:
-            return jsonify({"error": "Username already used."}), 409
+    salt = db_proxy.register_user(username, password)
+    if salt is None:
+        return jsonify({"error": "Username already used."}), HTTPStatus.CONFLICT
 
-        return 200
+    return {}, HTTPStatus.OK
 
 
 # endpoint for logging into the service
@@ -48,18 +48,18 @@ def login():
     user = db_proxy.get_username_data(username)
     error = None
     if not username:
-        error = "Username is required"
+        error = ({"error": "Username is required"}, HTTPStatus.BAD_REQUEST)
     elif not password:
-        error = "Password is required"
+        error = ({"error": "Password is required"}, HTTPStatus.BAD_REQUEST)
     # TODO - currently password stored without hashing for simplicity
     elif user is None or not check_password_hash(user["password"], password):
-        error = "Invalid username or password"
+        error = ({"error": "Invalid username or password"}, HTTPStatus.UNAUTHORIZED)
     else:
         session.clear()
         session["user_id"] = user["id"]
-        return {"data": "Properly logged in", "salt": user["salt"]}, 200
+        return {"data": "Properly logged in", "salt": user["salt"]}, HTTPStatus.OK
 
-    return {"error": error}, 401
+    return error
 
 
 # endpoint for logging user out
@@ -85,7 +85,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(*args, **kwargs):
         if g.user is None:
-            return abort(500, "Log in to retrieve data!")
+            return abort(HTTPStatus.FORBIDDEN, "Log in to retrieve data!")
         return view(*args, **kwargs)
 
     return wrapped_view

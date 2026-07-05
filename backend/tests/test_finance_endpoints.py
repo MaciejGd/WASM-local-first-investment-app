@@ -31,4 +31,4 @@ def test_get_stocks_prices(client, finance_api):
 def test_get_tickers_list(client, finance_api):
     response = client.get("/finance/get_stocks_list")
     assert response.data == b'["test"]\n'
-    assert finance_api.get_tickers_list.called == True
+    assert finance_api.get_tickers_list.called

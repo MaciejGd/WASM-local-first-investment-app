@@ -18,7 +18,7 @@ class FinanceDataAPI:
             tickers_data.append(doc)
         return tickers_data
 
-    def get_recent_prices(self, tickers: str) -> dict:
+    def get_recent_prices(self, tickers: list[str]) -> dict:
         """Get most recent prices of stocks specified in the list passed as argument"""
         prices = {}
         for ticker in tickers:
