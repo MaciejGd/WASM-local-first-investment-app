@@ -4,28 +4,29 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;    
+    justify-content: center;
+    z-index: 200;
 }
 
 .modal_container {
     box-shadow:
-        0 10px 25px rgba(0,0,0,0.45),
-        0 0 40px rgba(80,140,255,0.12);
-    background-color: rgba(23, 33, 58, 0.95);
-    color: #edf2ff;;
+        0 10px 25px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(91, 141, 255, 0.1);
+    background-color: rgba(18, 27, 55, 0.98);
+    color: var(--text-primary, #f0f4ff);
     border-radius: 30px;
     position: relative;
     width: 80%;
-    max-width: 500px; 
+    max-width: 500px;
     display: flex;
-    flex-direction: column;    
+    flex-direction: column;
     padding: 10px;
+    border: 1px solid rgba(91, 141, 255, 0.15);
 }
-
 
 .modal_title {
     padding: 15px 20px;
@@ -35,43 +36,38 @@
 }
 
 .modal_input_table {
-    /*  */
     padding: 20px;
-    /* text-align: left; */
 }
 
 .modal_input_table button.selected {
-    background-color: aliceblue;
-    color: black;
+    background-color: var(--accent-blue, #5b8dff);
+    color: white;
 }
 
 .modal_buttons {
     position: relative;
     display: flex;
     padding: 10px;
-    /* gap: 10px; */
-    margin-left: auto;        
+    margin-left: auto;
 }
 
 .modal_button {
     width: 100px;
-    align-items: right;
-
-    background-color: rgb(59, 59, 59);
+    background-color: rgba(91, 141, 255, 0.15);
     border-radius: 999px;
-    border-color: white;
-    border: none;
+    border: 1px solid rgba(91, 141, 255, 0.25);
     margin-left: 5px;
+    color: var(--text-primary, #f0f4ff);
 }
 
 .modal_button:hover {
   transform: translateY(-1px);
-  filter: brightness(1.30);
+  filter: brightness(1.3);
 }
 
 .modal_input_row {
   display: grid;
-  grid-template-columns: 120px 1fr; /* label width + flexible input */
+  grid-template-columns: 120px 1fr;
   row-gap: 12px;
   text-align: left;
   padding: 10px 0px;
@@ -80,6 +76,9 @@
 
 .modal_input {
     display: flex;
-    background-color: rgb(59, 59, 59);
-    border-radius: 8px;    
+    background-color: rgba(91, 141, 255, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(91, 141, 255, 0.15);
+    color: var(--text-primary, #f0f4ff);
+    padding: 8px 12px;
 }

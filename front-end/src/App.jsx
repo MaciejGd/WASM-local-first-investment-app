@@ -41,27 +41,30 @@ function NavigationBar({ onLogOut }) {
 // Left-oriented nav bar of the application
 function NavBar({ onHideButtonClick, onLogOut, visible }) {
   return (
-    <nav className="sidebar">
+    <nav className={`sidebar${visible ? '' : ' hidden'}`}>
+      <div className="sidebar-brand">
+        <div className="sidebar-brand-icon">◈</div>
+        {visible && <div className="sidebar-brand-text">FinSim</div>}
+      </div>
       <button className="navigationButton" onClick={onHideButtonClick}>
-        {" "}
         {visible ? <LeftArrowIcon /> : <RightArrowIcon />}
-        <span>{visible ? " Hide navbar " : ""}</span>
+        <span>{visible ? " Hide" : ""}</span>
       </button>
       <NavLink className="navigationButton" to="/stock">
         <WalletIcon />
-        {visible ? " Stock " : ""}{" "}
+        {visible ? " Stock" : ""}
       </NavLink>
       <NavLink className="navigationButton" to="/simulations">
         <SimulationsIcon />
-        {visible ? " Simulations " : ""}
+        {visible ? " Simulations" : ""}
       </NavLink>
       <NavLink className="navigationButton" to="/graphs">
         <GraphsIcon />
-        {visible ? " Graphs " : ""}
+        {visible ? " Graphs" : ""}
       </NavLink>
       <button className="navigationButton" onClick={onLogOut}>
         <LogOutIcon />
-        {visible ? " Logout " : ""}
+        {visible ? " Logout" : ""}
       </button>
     </nav>
   );

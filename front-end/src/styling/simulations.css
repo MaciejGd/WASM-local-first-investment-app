@@ -1,13 +1,13 @@
 :root {
-  --sim-bg: #0b111f;
-  --sim-panel: rgba(17, 24, 42, 0.95);
-  --sim-panel-soft: rgba(23, 33, 58, 0.95);
-  --sim-border: rgba(255, 255, 255, 0.08);
-  --sim-text: #edf2ff;
-  --sim-muted: #9ca7c8;
-  --sim-accent: #5ea8ff;
-  --sim-accent-strong: #71c3ff;
-  --sim-shadow: 0 28px 90px rgba(0, 0, 0, 0.25);
+  --sim-bg: #080d22;
+  --sim-panel: rgba(18, 27, 55, 0.95);
+  --sim-panel-soft: rgba(26, 36, 65, 0.95);
+  --sim-border: rgba(91, 141, 255, 0.15);
+  --sim-text: #f0f4ff;
+  --sim-muted: #c0cce8;
+  --sim-accent: #5b8dff;
+  --sim-accent-strong: #4dc9f6;
+  --sim-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
 }
 
 .page {
@@ -18,9 +18,10 @@
   align-items: center;
   gap: 1.5rem;
   padding: 2rem 1rem 3rem;
-  background: radial-gradient(circle at top left, rgba(94, 168, 255, 0.12), transparent 22%),
-    linear-gradient(180deg, #09101d 0%, #08101b 100%);
+  background: radial-gradient(circle at top left, rgba(91, 141, 255, 0.06), transparent 22%),
+    linear-gradient(180deg, #091027 0%, #080e24 100%);
   color: var(--sim-text);
+  box-sizing: border-box;
 }
 
 .page h1,
@@ -57,10 +58,8 @@
   width: 100%;
   max-width: 380px;
   min-width: 260px;
-  
   padding: 1rem;
   box-sizing: border-box;
-
   margin: 0 auto;
 }
 
@@ -85,16 +84,17 @@
   width: 100%;
   min-height: 44px;
   padding: 0.85rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--sim-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(91, 141, 255, 0.06);
   color: var(--sim-text);
   outline: none;
+  box-sizing: border-box;
 }
 
 .sims_slider input:focus {
-  border-color: rgba(94, 168, 255, 0.7);
-  box-shadow: 0 0 0 4px rgba(94, 168, 255, 0.12);
+  border-color: rgba(91, 141, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(91, 141, 255, 0.12);
 }
 
 .sims_run_button,
@@ -110,7 +110,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   background: linear-gradient(135deg, var(--sim-accent), var(--sim-accent-strong));
-  box-shadow: 0 18px 40px rgba(94, 168, 255, 0.18);
+  box-shadow: 0 18px 40px rgba(91, 141, 255, 0.18);
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
 }
@@ -118,11 +118,11 @@
 .sims_run_button:hover,
 .sims_results_button:hover {
   transform: translateY(-1px);
-  filter: brightness(1.05);
+  filter: brightness(1.1);
 }
 
 .sims_results_button:nth-child(2) {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(91, 141, 255, 0.12);
   color: var(--sim-text);
   box-shadow: none;
 }
@@ -148,10 +148,10 @@
   border-radius: 30px;
   padding: 1.5rem;
   box-shadow: var(--sim-shadow);
+  box-sizing: border-box;
 }
 
-.sims_settings_container 
-{
+.sims_settings_container {
   width: 100%;
   max-width: 1200px;
   display: flex;
@@ -162,6 +162,7 @@
   border-radius: 30px;
   padding: 1.5rem;
   box-shadow: var(--sim-shadow);
+  box-sizing: border-box;
 }
 
 .sims_results_section_desc {
@@ -170,7 +171,7 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--sim-border);
 }
 
 .sims_results_desc_span {
@@ -184,47 +185,41 @@
   width: 100%;
   overflow-x: auto;
   border-radius: 20px;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
 }
 
-
-
-.sims_table_container .sims_asset_table{
+.sims_table_container .sims_table {
   width: 100%;
   min-width: 600px;
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-.sims_asset_table th,
-.sims_asset_table td {
+.sims_table th,
+.sims_table td {
   padding: 1rem 1.1rem;
   text-align: left;
   color: var(--sim-text);
 }
 
-.sims_asset_table thead th {
+.sims_table thead th {
   position: sticky;
   top: 0;
-  background: rgba(13, 21, 38, 0.95);
+  background: rgba(20, 30, 60, 0.98);
   color: var(--sim-accent);
   font-size: 0.95rem;
   letter-spacing: 0.02em;
 }
 
-.sims_asset_table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+.sims_table tbody tr {
+  border-bottom: 1px solid rgba(91, 141, 255, 0.1);
 }
 
-.sims_asset_table tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+.sims_table tbody tr:nth-child(even) {
+  background: rgba(91, 141, 255, 0.06);
 }
 
-.sims_asset_table tbody tr:hover {
-  background: rgba(94, 168, 255, 0.08);
+.sims_table tbody tr:hover {
+  background: rgba(91, 141, 255, 0.14);
 }
 
 .sims_pie_chart,

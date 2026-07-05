@@ -5,8 +5,18 @@
 
 .combo-box input {
   width: 100%;
-  padding: 8px;
+  padding: 8px 12px;
   box-sizing: border-box;
+  background-color: rgba(91, 141, 255, 0.08);
+  border: 1px solid rgba(91, 141, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary, #f0f4ff);
+}
+
+.combo-box input:focus {
+  border-color: rgba(91, 141, 255, 0.5);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(91, 141, 255, 0.15);
 }
 
 .combo-options {
@@ -14,26 +24,30 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin: 0;
-  padding: 0;
+  margin: 4px 0 0;
+  padding: 4px 0;
   list-style: none;
-  border: 1px solid #ccc;
-  background: white;
+  border: 1px solid rgba(91, 141, 255, 0.25);
+  background: rgba(13, 19, 43, 0.98);
   max-height: 150px;
   overflow-y: auto;
   z-index: 1000;
-  color: black;
+  color: var(--text-primary, #f0f4ff);
   text-align: left;
-  margin-left: 8px;
-  margin-right: 8px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.combo-options li {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 .combo-options li:hover {
-    background-color: grey;
-    padding-left: 0px;
+    background-color: rgba(91, 141, 255, 0.15);
 }
 
 .combo-options li.active {
-    background-color: darkgrey;
+    background-color: rgba(91, 141, 255, 0.28);
 }
-
