@@ -1,6 +1,4 @@
-import pytest
 from http import HTTPStatus
-from inv_app import finance
 
 from unittest.mock import patch
 

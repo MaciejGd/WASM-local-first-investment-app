@@ -147,13 +147,13 @@ class DBProxy(object):
 
         db = self.get_db()
         event_id = self.db_handler.add_event_record(
-            db, user_id, timestamp, table_name, type, ulid
+            db, user_id, table_name, timestamp, type, ulid
         )
         if event_id == -1:
             return None
 
         rec_id = self.db_handler.add_encrypted_data_record(
-            db, table_name, user_id, ulid, record_hash, payload
+            db, user_id, table_name, ulid, record_hash, payload
         )
         if rec_id == -1:
             return None
@@ -174,7 +174,7 @@ class DBProxy(object):
     ):
         db = self.get_db()
         event_id = self.db_handler.add_event_record(
-            db, user_id, timestamp, table_name, type, ulid
+            db, user_id, table_name, timestamp, type, ulid
         )
         if event_id == -1:
             return None

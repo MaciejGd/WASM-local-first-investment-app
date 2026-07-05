@@ -1,5 +1,6 @@
 from . import auth
 from .sync_api import DBUpdater
+from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request, abort, session
 
@@ -14,6 +15,8 @@ def push_changes():
     """
 
     post_json = request.get_json()
+    if not isinstance(post_json, dict):
+        abort(HTTPStatus.BAD_REQUEST, "Invalid payload")
     # retrieve events data
     ulid = post_json.get("ulid")
     table_name = post_json.get("table_name")
@@ -22,12 +25,25 @@ def push_changes():
     obj_hash = post_json.get("hash")
     payload = post_json.get("payload")
 
+    if any(
+        v is None
+        for v in (
+            ulid,
+            table_name,
+            timestamp,
+            type,
+            obj_hash,
+            payload,
+        )
+    ):
+        abort(HTTPStatus.BAD_REQUEST, "Missing required payload fields.")
+
     updater = DBUpdater()
     event_id = updater.process_event(
         session["user_id"], timestamp, table_name, type, ulid, obj_hash, payload
     )
     if event_id is None:
-        abort(500, "Pushing changes to remote failed")
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, "Pushing changes to remote failed")
 
     return jsonify({"event_id": event_id})
 
@@ -55,9 +71,9 @@ def pull_changes(event_id):
 @bp.route("/hash_compare", methods=("POST",))
 @auth.login_required
 def compare_hashes():
-    hashes_json = request.get_json()
+    hashes_json = request.get_json(silent=True)
     if hashes_json is None:
-        return abort(500, "Invalid request JSON.")
+        return abort(HTTPStatus.BAD_REQUEST, "Invalid request JSON.")
 
     user_id = session["user_id"]
     updater = DBUpdater()
