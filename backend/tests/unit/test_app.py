@@ -1,10 +1,7 @@
 import pytest
-from unittest.mock import MagicMock
 
-import tempfile
 import os
 
-import inv_app.__init__
 from inv_app import create_app
 
 
@@ -19,7 +16,7 @@ def config_file(tmp_path):
 def test_create_app_config_set():
     test_config = {"TESTING": True, "DATABASE": "test.db"}
     app = create_app(test_config)
-    assert app.config["TESTING"] == True
+    assert app.config["TESTING"]
     assert app.config["DATABASE"] == "test.db"
 
 

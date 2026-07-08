@@ -1,11 +1,11 @@
 make format:
-	ruff format ./inv_app
+	ruff format ./inv_app ./tests
 
 make check:
-	ruff check ./inv_app
+	ruff check ./inv_app ./tests
 
 make test:
-	pytest ./tests
+	pytest ./tests/unit/
 
 
 make all:

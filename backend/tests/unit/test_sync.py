@@ -1,26 +1,23 @@
 from http import HTTPStatus
 from unittest.mock import patch
-from flask import jsonify
 import pytest
 
-@patch("inv_app.sync.DBUpdater.get_pending_events", return_value = 12)
+
+@patch("inv_app.sync.DBUpdater.get_pending_events", return_value=12)
 def test_pull_changes_amount(_, client):
     with client.session_transaction() as sess:
         sess["user_id"] = 1
-    
-    response = client.get(
-        "/sync/pull_events_ids/12"
-    )
+
+    response = client.get("/sync/pull_events_ids/12")
     assert response.status_code == HTTPStatus.OK
 
-@patch("inv_app.sync.DBUpdater.get_events", return_value = 12)
+
+@patch("inv_app.sync.DBUpdater.get_events", return_value=12)
 def test_pull_changes(_, client):
     with client.session_transaction() as sess:
         sess["user_id"] = 1
-    
-    response = client.get(
-        "/sync/pull_events/12"
-    )
+
+    response = client.get("/sync/pull_events/12")
     assert response.status_code == HTTPStatus.OK
 
 
@@ -40,7 +37,7 @@ def test_compare_hashes_pass(client):
         sess["user_id"] = 1
     response = client.post(
         "/sync/hash_compare",
-        data={"data" : "json"},
+        data={"data": "json"},
         content_type="application/json",
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -49,12 +46,12 @@ def test_compare_hashes_pass(client):
 @pytest.fixture
 def example_json():
     yield {
-        "ulid" : "test",
-        "table_name" : "test",
-        "timestamp" : "test",
-        "type" : "test",
-        "hash" : "test",
-        "payload" : "test",
+        "ulid": "test",
+        "table_name": "test",
+        "timestamp": "test",
+        "type": "test",
+        "hash": "test",
+        "payload": "test",
     }
 
 
@@ -103,7 +100,7 @@ def test_push_changes_no_table_name(_, client, example_json):
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    
+
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
 def test_push_changes_no_timestamp(_, client, example_json):
     example_json["timestamp"] = None

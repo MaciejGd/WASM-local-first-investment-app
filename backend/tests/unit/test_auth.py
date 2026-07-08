@@ -7,27 +7,32 @@ from http import HTTPStatus
 
 @pytest.mark.parametrize(
     ("username", "password"),
-    (
-        ("", "test"),
-        ("test", "")
-    ),
+    (("", "test"), ("test", "")),
 )
 def test_login_valid_input(authentication, username, password):
     response = authentication.login(username=username, password=password)
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
-@patch("inv_app.auth.check_password_hash", return_value = False)
-@patch("inv_app.auth.db_proxy.get_username_data", return_value = {'id' : 2, 'password' : 'test', 'salt' : 'test'})
+
+@patch("inv_app.auth.check_password_hash", return_value=False)
+@patch(
+    "inv_app.auth.db_proxy.get_username_data",
+    return_value={"id": 2, "password": "test", "salt": "test"},
+)
 def test_password_hash_fail(_user, _hash, authentication):
     response = authentication.login(username="test", password="test")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-@patch("inv_app.auth.check_password_hash", return_value = True)
+
+@patch("inv_app.auth.check_password_hash", return_value=True)
 def test_properly_logged_in(_, authentication, monkeypatch):
-    monkeypatch.setattr(auth.db_proxy, "get_username_data", lambda x: {'id' : 2, 'password' : 'test', 'salt' : 'test'})
+    monkeypatch.setattr(
+        auth.db_proxy,
+        "get_username_data",
+        lambda x: {"id": 2, "password": "test", "salt": "test"},
+    )
     response = authentication.login(username="test", password="test")
     assert response.status_code == HTTPStatus.OK
-
 
 
 def test_logout(client, authentication):
@@ -44,7 +49,8 @@ def test_load_logged_in_user_none(app):
 
         assert g.user is None
 
-@patch("inv_app.auth.db_proxy.get_user_data", return_value = 2)
+
+@patch("inv_app.auth.db_proxy.get_user_data", return_value=2)
 def test_load_logged_in_user(_, app):
     with app.test_request_context():
         session["user_id"] = 2
@@ -55,7 +61,7 @@ def test_load_logged_in_user(_, app):
 
 def test_login_required_calls_view(app):
     with app.test_request_context():
-        g.user = {"id":1}
+        g.user = {"id": 1}
         called = False
 
         @auth.login_required
@@ -95,12 +101,14 @@ def test_register_missing_params(authentication, username, password):
     response = authentication.register(username=username, password=password)
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
-@patch("inv_app.auth.db_proxy.register_user", return_value = None)
+
+@patch("inv_app.auth.db_proxy.register_user", return_value=None)
 def test_register_used_username(_, authentication):
     response = authentication.register("test", "test")
     assert response.status_code == HTTPStatus.CONFLICT
 
-@patch("inv_app.auth.db_proxy.register_user", return_value = True)
+
+@patch("inv_app.auth.db_proxy.register_user", return_value=True)
 def test_register_set_correct(_, authentication):
     response = authentication.register(username="test", password="test")
     assert response.status_code == HTTPStatus.OK

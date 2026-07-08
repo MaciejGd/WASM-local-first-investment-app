@@ -1,8 +1,7 @@
 import pytest
 from inv_app.db.db_sqlite import SQLite3DB
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call
 import sqlite3
-from flask import current_app
 
 
 @pytest.fixture
@@ -85,11 +84,13 @@ def test_reset_collection(sqlite_db):
 
     ret = sqlite_db.reset_collection(db_handle, 2, "wallet")
     assert ret
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.RESET_TABLE.format("wallet_2")),
-        call(SQLite3DB.RESET_AUTOINCREMENT, ("wallet_2",)),
-        call(SQLite3DB.VACUUM),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.RESET_TABLE.format("wallet_2")),
+            call(SQLite3DB.RESET_AUTOINCREMENT, ("wallet_2",)),
+            call(SQLite3DB.VACUUM),
+        ]
+    )
     db_handle.commit.assert_called_once
 
 
@@ -118,11 +119,16 @@ def test_add_event_record_pass(sqlite_db):
     ret = sqlite_db.add_event_record(db_handle, 2, table_name, timestamp, type, ulid)
     assert ret == 4
 
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.CREATE_EVENTS_TABLE.format("events_2")),
-        call(SQLite3DB.APPLY_TIMESTAMP_INDEX.format("events_2")),
-        call(SQLite3DB.ADD_EVENT_RECORD.format("events_2"), (timestamp, table_name, type, ulid)),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.CREATE_EVENTS_TABLE.format("events_2")),
+            call(SQLite3DB.APPLY_TIMESTAMP_INDEX.format("events_2")),
+            call(
+                SQLite3DB.ADD_EVENT_RECORD.format("events_2"),
+                (timestamp, table_name, type, ulid),
+            ),
+        ]
+    )
     db_handle.commit.assert_called_once
 
 
@@ -152,13 +158,19 @@ def test_add_encrypted_data_record_pass(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.return_value = cursor_mock
 
-    ret = sqlite_db.add_encrypted_data_record(db_handle, 2, table_name, ulid, hash, payload)
+    ret = sqlite_db.add_encrypted_data_record(
+        db_handle, 2, table_name, ulid, hash, payload
+    )
     assert ret == 4
 
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.CREATE_ENCRYPTED_TABLE.format("wallet_2")),
-        call(SQLite3DB.ADD_ENCRYPTED_RECORD.format("wallet_2"), (ulid, hash, payload)),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.CREATE_ENCRYPTED_TABLE.format("wallet_2")),
+            call(
+                SQLite3DB.ADD_ENCRYPTED_RECORD.format("wallet_2"), (ulid, hash, payload)
+            ),
+        ]
+    )
 
 
 def test_add_encrypted_data_record_exception(sqlite_db):
@@ -170,7 +182,9 @@ def test_add_encrypted_data_record_exception(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.side_effect = Exception()
 
-    ret = sqlite_db.add_encrypted_data_record(db_handle, 2, table_name, ulid, hash, payload)
+    ret = sqlite_db.add_encrypted_data_record(
+        db_handle, 2, table_name, ulid, hash, payload
+    )
     assert ret == -1
     db_handle.rollback.assert_called_once
 
@@ -188,9 +202,12 @@ def test_get_encrypted_record(sqlite_db):
     ret = sqlite_db.get_encrypted_record(db_handle, 2, table_name, ulid)
     assert ret == 4
 
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.GET_ENCRYPTED_RECORD.format("wallet_2"), (ulid,)),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.GET_ENCRYPTED_RECORD.format("wallet_2"), (ulid,)),
+        ]
+    )
+
 
 def test_get_encrypted_data_record_exception(sqlite_db):
     table_name = "wallet"
@@ -221,20 +238,21 @@ def test_remove_encrypted_record_throws(sqlite_db):
     ret = sqlite_db.remove_encrypted_record(db_handle, 4, "wallet", "test")
     assert not ret
     db_handle.rollback.assert_called_once
-    
+
 
 def test_get_events_from_id(sqlite_db):
     records_mock = MagicMock()
-    records_mock.fetchall.return_value = [[1,2],[4,2],[0,2]]
+    records_mock.fetchall.return_value = [[1, 2], [4, 2], [0, 2]]
 
     db_handle = MagicMock()
     db_handle.execute.return_value = records_mock
 
     ret = sqlite_db.get_events_from_id(db_handle, 4, 0)
-    assert ret == [1,4,0]
+    assert ret == [1, 4, 0]
     db_handle.execute.assert_called_once_with(
         SQLite3DB.GET_EVENT_IDS_FROM.format("events_4"), (0,)
     )
+
 
 def test_get_events_from_id_throws(sqlite_db):
     db_handle = MagicMock()
@@ -258,6 +276,7 @@ def test_get_event_correct(sqlite_db):
         SQLite3DB.GET_EVENT_BY_ID.format("events_4"), (0,)
     )
 
+
 def test_get_event_throws(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.side_effect = Exception()
@@ -271,10 +290,12 @@ def test_update_collection_hash_pass(sqlite_db):
 
     ret = sqlite_db.update_collection_hash(db_handle, 4, "wallet", "test_hash")
     assert ret
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.CREATE_META_TABLE.format("meta_4")),
-        call(SQLite3DB.UPDATE_META.format("meta_4"), ("wallet_4", "test_hash")),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.CREATE_META_TABLE.format("meta_4")),
+            call(SQLite3DB.UPDATE_META.format("meta_4"), ("wallet_4", "test_hash")),
+        ]
+    )
     db_handle.commit.assert_called_once
 
 
@@ -289,17 +310,19 @@ def test_udpate_collection_hash_throws(sqlite_db):
 
 def test_get_collection_hash_pass(sqlite_db):
     records_mock = MagicMock()
-    records_mock.fetchone.return_value = [1,2,3,4]
+    records_mock.fetchone.return_value = [1, 2, 3, 4]
 
     db_handle = MagicMock()
     db_handle.execute.return_value = records_mock
 
     ret = sqlite_db.get_collection_hash(db_handle, 4, "wallet")
     assert ret == 3
-    db_handle.execute.assert_has_calls([
-        call(SQLite3DB.CREATE_META_TABLE.format("meta_4")),
-        call(SQLite3DB.GET_META.format("meta_4"), ("wallet_4",)),
-    ])
+    db_handle.execute.assert_has_calls(
+        [
+            call(SQLite3DB.CREATE_META_TABLE.format("meta_4")),
+            call(SQLite3DB.GET_META.format("meta_4"), ("wallet_4",)),
+        ]
+    )
 
     db_handle.commit.assert_called_once
 
@@ -315,21 +338,21 @@ def test_get_collection_hash_pass_throws(sqlite_db):
 
 def test_get_all_encrypted_records(sqlite_db):
     cursor_mock = MagicMock()
-    cursor_mock.fetchall.return_value = [1,2,3]
+    cursor_mock.fetchall.return_value = [1, 2, 3]
 
     db_handle = MagicMock()
     db_handle.execute.return_value = cursor_mock
 
-
     ret = sqlite_db.get_all_encrypted_records(db_handle, 4, "wallet")
-    assert ret == [1,2,3]
+    assert ret == [1, 2, 3]
     db_handle.execute.assert_called_once_with(
         SQLite3DB.GET_ALL_ENCRYPTED_RECORDS.format("wallet_4")
     )
+
 
 def test_get_all_encrypted_records_throws(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.side_effect = Exception()
 
     ret = sqlite_db.get_all_encrypted_records(db_handle, 4, "wallet")
-    assert ret is None    
+    assert ret is None
