@@ -3,13 +3,13 @@ from flask import session, g
 from inv_app import auth
 from unittest.mock import patch
 from http import HTTPStatus
-
+import sqlite3
 
 @pytest.mark.parametrize(
     ("username", "password"),
     (("", "test"), ("test", "")),
 )
-def test_login_valid_input(authentication, username, password):
+def test_login_invalid_input(authentication, username, password):
     response = authentication.login(username=username, password=password)
     assert response.status_code == HTTPStatus.BAD_REQUEST
 

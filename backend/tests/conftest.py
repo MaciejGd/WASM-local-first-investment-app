@@ -24,7 +24,7 @@ def app():
     with app.app_context():
         db_proxy.init_db()
         # TODO change that call so it is not sql specific
-        db_proxy.get_db().executescript(_data_sql)
+        # db_proxy.get_db().executescript(_data_sql)
 
     yield app
 
