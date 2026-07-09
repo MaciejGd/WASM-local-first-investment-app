@@ -5,7 +5,7 @@ make check:
 	ruff check ./inv_app ./tests
 
 make test:
-	pytest ./tests/unit/
+	pytest ./tests/unit/ ./tests/integration/
 
 
 make all:

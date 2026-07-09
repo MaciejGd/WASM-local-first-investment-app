@@ -5,6 +5,7 @@ from unittest.mock import patch
 from http import HTTPStatus
 import sqlite3
 
+
 @pytest.mark.parametrize(
     ("username", "password"),
     (("", "test"), ("test", "")),

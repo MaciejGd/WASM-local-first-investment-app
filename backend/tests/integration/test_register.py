@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash
 
 from http import HTTPStatus
 
+
 def test_register_user(app, authentication):
     response = authentication.register("test", "pass")
     response.status_code == HTTPStatus.OK

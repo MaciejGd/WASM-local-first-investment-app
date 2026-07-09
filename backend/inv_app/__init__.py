@@ -11,9 +11,9 @@ def create_app(test_config=None, instance_path=None):
         SECRET_KEY="dev",
         SESSION_COOKIE_SAMESITE="None",
         SESSION_COOKIE_SECURE=True,
-        DATABASE=os.path.join(
-            app.instance_path, "application.sqlite"
-        ),  # TODO, change that with some proxy etc.
+        DATABASE=os.path.join(app.instance_path, "application.sqlite"),
+        # default mongo db database
+        MONGO_URI="mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.0",
     )
     # load init configuration of the app
     if test_config is None:

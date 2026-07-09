@@ -1,15 +1,24 @@
 from .mongo_handler import MongoHandler
-
-uri = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.0"
+from flask import current_app
 
 
 class FinanceDataAPI:
     def __init__(self):
-        self.db_handler = MongoHandler(uri)
+        self._db_handler = None
         self.db_name = "StockData"
         self.stock_prices_col = "StockPrices"
         self.stock_info_col = "StockInfo"
         self.stock_markers_col = "StockMarkers"
+
+    @property
+    def db_handler(self):
+        if self._db_handler is None:
+            self._db_handler = MongoHandler(current_app.config["MONGO_URI"])
+        return self._db_handler
+
+    @db_handler.setter
+    def db_handler(self, value):
+        self._db_handler = value
 
     def get_stocks_prices(self, tickers: list[str]) -> list:
         tickers_data = []
