@@ -41,7 +41,7 @@ function NavigationBar({ onLogOut }) {
 // Left-oriented nav bar of the application
 function NavBar({ onHideButtonClick, onLogOut, visible }) {
   return (
-    <nav className={`sidebar${visible ? '' : ' hidden'}`}>
+    <nav className={`sidebar${visible ? "" : " hidden"}`}>
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon">◈</div>
         {visible && <div className="sidebar-brand-text">FinSim</div>}

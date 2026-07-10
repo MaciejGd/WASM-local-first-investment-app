@@ -206,7 +206,11 @@ export default function SimsResults({
         <SimsResultsAssetsPane assets={assets_state}></SimsResultsAssetsPane>
         <SimsResultsDescription></SimsResultsDescription>
         <SimResultsTable results={results} />
-        <SimResultsRiskPane tickers={tickers_state} VaR={VaR} cvars={cvars}></SimResultsRiskPane>
+        <SimResultsRiskPane
+          tickers={tickers_state}
+          VaR={VaR}
+          cvars={cvars}
+        ></SimResultsRiskPane>
       </div>
       <SaveSimsModal
         onClose={() => setSaveModalVis(false)}

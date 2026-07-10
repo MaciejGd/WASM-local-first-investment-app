@@ -53,21 +53,21 @@ function SimsResultsRiskDescription() {
 export function SimResultsRiskPane({ tickers, VaR, cvars }) {
   return (
     <>
-    <SimsResultsRiskDescription></SimsResultsRiskDescription>
-    <div className = "sims_results_risk_container">
-      <SimRiskResultsTable
-        tickers={tickers}
-        VaR={VaR}
-        cvars={cvars}
-      ></SimRiskResultsTable>
-      <SimsResultsPieChart
-        results={{
-          tickers: tickers,
-          VaR: VaR,
-          cvars: cvars,
-        }}
-      ></SimsResultsPieChart>
-    </div>
+      <SimsResultsRiskDescription></SimsResultsRiskDescription>
+      <div className="sims_results_risk_container">
+        <SimRiskResultsTable
+          tickers={tickers}
+          VaR={VaR}
+          cvars={cvars}
+        ></SimRiskResultsTable>
+        <SimsResultsPieChart
+          results={{
+            tickers: tickers,
+            VaR: VaR,
+            cvars: cvars,
+          }}
+        ></SimsResultsPieChart>
+      </div>
     </>
   );
 }

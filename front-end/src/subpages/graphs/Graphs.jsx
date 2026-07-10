@@ -115,7 +115,11 @@ function GraphSelector({ onAdd }) {
       <GraphTickerSelector onChange={setTicker}></GraphTickerSelector>
       <GraphIndicatorField onChange={newSetIndicator}></GraphIndicatorField>
       <button
-        style={{ backgroundColor: "#4a7cff", color: "white", fontWeight: "bold" }}
+        style={{
+          backgroundColor: "#4a7cff",
+          color: "white",
+          fontWeight: "bold",
+        }}
         onClick={() => addLegendEntry()}
       >
         +

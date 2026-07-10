@@ -46,7 +46,7 @@ export default function StockPage() {
   }, []);
 
   /// Load assets map based on assets stored in IndexedDb
-  const dbAssets = useLiveQuery(() => db_instance.getWalletAssets(), []);  
+  const dbAssets = useLiveQuery(() => db_instance.getWalletAssets(), []);
   useEffect(() => {
     if (!dbAssets) return;
     const new_assets = assets.updateFromDB(dbAssets);
