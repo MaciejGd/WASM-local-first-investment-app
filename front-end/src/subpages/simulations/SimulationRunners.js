@@ -8,7 +8,7 @@ import { useEffect, useState, useRef } from "react";
  * @param {Function} onMessage callback to be executed on simulation end
  * @returns
  */
-export function useSequencialWorker(onMessage) {
+export function useSequencialWorker() {
   const [simAPI, setSimAPI] = useState(null);
 
   useEffect(() => {
@@ -42,8 +42,6 @@ export function useSequencialWorker(onMessage) {
  */
 export function useSimulationWorker(onMessage) {
   const workerRef = useRef(null); // worker instance
-  // debug
-  const [simAPI, setSimAPI] = useState(null);
 
   useEffect(() => {
     // initialize worker on mount

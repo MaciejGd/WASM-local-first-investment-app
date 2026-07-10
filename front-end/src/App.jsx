@@ -8,11 +8,8 @@ import {
   WalletIcon,
   LeftArrowIcon,
   RightArrowIcon,
-  CryptoIcon,
   GraphsIcon,
-  ObligationsIcon,
   SimulationsIcon,
-  SettingsIcon,
   LogOutIcon,
 } from "./IconLoader.jsx";
 import { LogInPopUp } from "./subpages/auth/Login.jsx";

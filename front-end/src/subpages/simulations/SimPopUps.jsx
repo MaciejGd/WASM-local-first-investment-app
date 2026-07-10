@@ -1,9 +1,4 @@
-import "../../components/PopUp";
-import {
-  ErrorPopUp,
-  PopUpButtons,
-  PopUpComponent,
-} from "../../components/PopUp";
+import { PopUpButtons, PopUpComponent } from "../../components/PopUp";
 
 export function SimRunningPopUp({ onClose }) {
   return (

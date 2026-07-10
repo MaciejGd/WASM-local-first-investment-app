@@ -82,7 +82,7 @@ export default function ComboBox({
                   : highlightedIndex - 1,
               );
               break;
-            case "Enter":
+            case "Enter": {
               e.preventDefault();
               // set option as input value if it was selected
               console.log("index: ", highlightedIndex);
@@ -94,6 +94,7 @@ export default function ComboBox({
               onChange?.(new_input_val);
               setIsOpen(false);
               break;
+            }
             case "Escape":
               e.preventDefault();
               setIsOpen(false);

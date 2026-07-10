@@ -34,7 +34,7 @@ function AssetTableHeader() {
 function AssetTableBody({ assets }) {
   return (
     <tbody>
-      {assets.map(([_, data], index) => {
+      {assets.map(([, data], index) => {
         return (
           <AssetRow
             key={index}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { SimsAssetsPieChart } from "./SimsAssetsPieChart.jsx";
 
 // Should show table with: Ticker -> Total investment cost -> percent of investment
@@ -35,7 +34,7 @@ function AssetTableHeader() {
 function AssetTableBody({ assets, onSelectCb }) {
   return (
     <tbody>
-      {assets.map(([_, data], index) => {
+      {assets.map(([, data], index) => {
         return (
           <AssetRow
             key={index}

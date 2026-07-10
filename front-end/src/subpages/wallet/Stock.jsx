@@ -1,20 +1,13 @@
 import "../../styling/pop_up.css";
 import "../../styling/wallet.css";
 import "../../styling/simulations.css";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import AddAssetPopUp from "./AddAssetPopUp";
-import { ArrowDownIcon } from "../../IconLoader";
-import { ArrowUpIcon } from "../../IconLoader";
-import { AssetsEntry, AssetsMap } from "./StockAssets.js";
+import { AssetsMap } from "./StockAssets.js";
 import { AssetsTable } from "./AssetsTable.jsx";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
 import { useLiveQuery } from "dexie-react-hooks";
-import {
-  FetchStocksList,
-  FetchStockPrices,
-} from "../finance_api/FinanceApi.jsx";
-// Testing
-import { sync_worker } from "../../sync/syncWorkerWrapper.js";
+import { FetchStocksList } from "../finance_api/FinanceApi.jsx";
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   return (
@@ -32,7 +25,6 @@ export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
 export default function StockPage() {
   const [modal_visible, setModalVisible] = useState(false);
   const [assets, setAssets] = useState(new AssetsMap());
-  const [assets_init, setAssetsInit] = useState([]);
   const [tickers_list, setTickersList] = useState([]);
   const db_instance = IndexedDbHandler.getInstance();
 
@@ -81,14 +73,13 @@ export default function StockPage() {
       return;
     }
     // add new asset to the db
-    var id = -1;
     try {
-      id = await db_instance.addWalletAsset({
+      await db_instance.addWalletAsset({
         ticker: ticker,
         quantity: quantity,
         price: price,
       });
-    } catch (error) {
+    } catch {
       console.log("Failed adding into the db");
       return;
     }

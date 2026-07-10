@@ -85,10 +85,6 @@ export function getPercentiles(data) {
   return Array.from({ length: 9 }, (_, i) => sorted[(i + 1) * percentiles - 1]);
 }
 
-function fast_exp(x) {
-  return 1.0 + x + 0.5 * x * x + 0.16666666 * x * x * x;
-}
-
 export function runSimulation({
   priceSeries,
   weights,
@@ -123,8 +119,6 @@ export function runSimulation({
   const drawdowns = Array(sims).fill(0);
   const upsides = Array(sims).fill(0);
 
-  const cumulativeLogChange = Array(stocks).fill(0);
-  const motion = Array(stocks).fill(0);
   for (let i = 0; i < sims; i++) {
     const cumulativeLogChange = Array(stocks).fill(0);
     for (let t = 0; t < time; t++) {
@@ -318,25 +312,6 @@ export function runSimulations(stocksFlat, weights, time, sims) {
   return buf;
 }
 
-// Example invocation (only run when example variables are present)
-if (
-  typeof prices !== "undefined" &&
-  typeof weights !== "undefined" &&
-  typeof time !== "undefined" &&
-  typeof sims !== "undefined"
-) {
-  try {
-    const result = runSimulation({
-      priceSeries: prices,
-      weights,
-      time,
-      sims,
-    });
-    // if a generator exists and user wants deterministic samples, they can pass it into tests
-  } catch (e) {
-    // swallow errors from example invocation when used as a module
-  }
-}
 export class TestRandomGenerator {
   constructor() {
     this.data = [

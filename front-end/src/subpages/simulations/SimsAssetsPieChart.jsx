@@ -9,13 +9,13 @@ const options = {
 };
 
 function transformAssetsToPieData(assets) {
-  const labels = assets.map(([ticker, data]) => {
+  const labels = assets.map(([ticker]) => {
     return ticker;
   });
-  const prices = assets.map(([ticker, data]) => {
+  const prices = assets.map(([, data]) => {
     return data.price;
   });
-  const offsets = assets.map(([ticker, data]) => {
+  const offsets = assets.map(([, data]) => {
     return 50 - data.percent;
   });
   console.log(offsets);

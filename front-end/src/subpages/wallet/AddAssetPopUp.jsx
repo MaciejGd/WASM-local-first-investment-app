@@ -2,7 +2,7 @@ import { useState } from "react";
 import ComboBox from "../../components/Combobox";
 /** Pop-up component for adding asset to Portfolio */
 
-function InputRow({ title, value, onChange, focus, options }) {
+function InputRow({ title, onChange, focus, options }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>

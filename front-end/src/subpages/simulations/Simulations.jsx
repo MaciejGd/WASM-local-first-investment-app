@@ -1,4 +1,3 @@
-import { AssetButtons } from "../wallet/Stock";
 import "../../styling/simulations.css";
 import { useEffect, useState, useRef } from "react";
 
@@ -6,12 +5,8 @@ import SimulationsOptionsPane from "./SimsOptionsPane";
 import AssetsPane from "./SimsAssetsPane";
 import { SimAssetMap } from "./SimsAssetsData";
 import SimsResults from "./SimsResults.jsx";
-import { RequestGET, RequestPOST } from "../../Requests.js";
 import ComboBox from "../../components/Combobox.jsx";
-import {
-  useSimulationWorker,
-  useSequencialWorker,
-} from "./SimulationRunners.js";
+import { useSimulationWorker } from "./SimulationRunners.js";
 import { SimRunningPopUp } from "./SimPopUps.jsx";
 import { ErrorPopUp } from "../../components/PopUp.jsx";
 import {
@@ -109,7 +104,7 @@ export default function SimulationsPage() {
     simsAmountRef.current = simsAmount;
   }, [simsAmount]);
 
-  function toggleModalVisibility(vis) {
+  function toggleModalVisibility() {
     setModalVisible(!modal_visible);
   }
 

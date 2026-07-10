@@ -1,4 +1,3 @@
-import { useState } from "react";
 /** Pop-up component for adding asset to Portfolio */
 
 /// Module showing pup up with some code content + two buttons, Accept and Close

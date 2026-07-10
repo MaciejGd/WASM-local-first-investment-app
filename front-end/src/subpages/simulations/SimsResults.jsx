@@ -1,14 +1,10 @@
-import { SimsResultsPieChart } from "./SimsResultsPieChart.jsx";
-import "./results/SimsResultsAssetsTable.jsx";
 import SimsResultsAssetsPane from "./results/SimsResultsAssetsTable.jsx";
 import { SimResultsTable } from "./results/SimsReturnsResultsTable.jsx";
 import { SimResultsRiskPane } from "./results/SimsResultsRiskAnalysis.jsx";
 import { useState } from "react";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
-import AddAssetPopUp from "../wallet/AddAssetPopUp.jsx";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SimAssetMap } from "./SimsAssetsData.js";
-import { SimRunningPopUp } from "./SimPopUps.jsx";
 import { ErrorPopUp } from "../../components/PopUp.jsx";
 /// Here should be another table showing the results of run simulations
 const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
@@ -98,7 +94,7 @@ function SimsResultsButtons({ saveSim, showSaved }) {
   );
 }
 
-function SimsResultsDescription({ header }) {
+function SimsResultsDescription() {
   return (
     <div className="sims_results_section_desc">
       <span className="sims_results_desc_span">{"Simulated returns"}</span>
@@ -113,14 +109,6 @@ function SimsResultsAssetsDescription({ sims, timepoints, date }) {
       <span className="sims_results_desc_span">{`Date of simulation: ${date.toDateString()}`}</span>
       <span className="sims_results_desc_span">{`Number of simulations run: ${sims}`}</span>
       <span className="sims_results_desc_span">{`Number of timepoints simulated: ${timepoints}`}</span>
-    </div>
-  );
-}
-
-function SimsResultsRiskDescription() {
-  return (
-    <div className="sims_results_section_desc">
-      <span className="sims_results_desc_span">{"Risk analysis"}</span>
     </div>
   );
 }

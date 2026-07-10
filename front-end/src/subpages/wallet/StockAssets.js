@@ -152,8 +152,6 @@ export class AssetsEntry {
     let id_placeholder = -1;
     let amount = 0.0; // summed amount of owned resource
     let prices_cummulated = 0.0;
-    let selected = true;
-
     this._data.forEach((e) => {
       amount += e.quantity;
       prices_cummulated += e.price * e.quantity;
@@ -354,7 +352,7 @@ export class AssetsMap {
 
     // remove old values that are not in the new assets to be set
     if (!mp.asset_map) {
-      return createFromDB(assets);
+      return AssetsMap.createFromDB(assets);
     }
 
     mp.asset_map.forEach((value, key) => {
@@ -570,7 +568,7 @@ export class AssetsMap {
    */
   getSelectedIds() {
     var selected = [];
-    this.asset_map.forEach((el, idx, assets) => {
+    this.asset_map.forEach((el) => {
       // map all AssetData objects to get only ids
       selected = selected.concat(el.selected.map((item) => item.id));
     });

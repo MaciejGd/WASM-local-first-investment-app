@@ -17,7 +17,6 @@ export class SyncDBUpdater {
    */
   async addRecord(ulid, table_name, hash, payload) {
     try {
-      var table_handle = this.db_handle.table(table_name);
       payload.ulid = ulid; // update payload with ulid
       payload.hash = hash; // update payload with hash
       await putDataToDb(this.db_handle, table_name, payload);

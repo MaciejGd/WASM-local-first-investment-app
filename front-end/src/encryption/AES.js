@@ -1,7 +1,7 @@
 /**
  * Singletor class for handling storing key + salt needed for data encryption
  */
-class AppEncryptor {
+export class AppEncryptor {
   instance = null;
   constructor() {
     if (AppEncryptor.instance !== null) {

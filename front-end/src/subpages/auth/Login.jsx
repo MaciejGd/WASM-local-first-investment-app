@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RequestPOST } from "../../Requests";
 import RegisterPopUp from "./Register";
 import { ErrorPopUp } from "../../components/PopUp";
 
-export function InputRow({ title, value, onChange }) {
+export function InputRow({ title, onChange }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>
@@ -15,7 +15,7 @@ export function InputRow({ title, value, onChange }) {
   );
 }
 
-export function InputRowPassword({ title, value, onChange }) {
+export function InputRowPassword({ title, onChange }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>
@@ -28,13 +28,12 @@ export function InputRowPassword({ title, value, onChange }) {
   );
 }
 
-export function LogInPopUp({ onClose, onAccept, onSuccess }) {
+export function LogInPopUp({ onClose, onSuccess }) {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [register_modal_vis, setRegisterModalVis] = useState(false);
-  const [errorPopUp, setErrorPopUp] = useState(null);
   // try logging in with the credentials passed by user
 
   async function LogInRequest() {

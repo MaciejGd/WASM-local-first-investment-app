@@ -1,5 +1,4 @@
 import { SimulationAPI } from "./SimulationAPI";
-import { runSimulations } from "../../../js_sims/minimal_montecarlo.js";
 
 // simulationAPI instance. Initialized via SimulationWorker request
 let simAPI = null;
@@ -36,19 +35,19 @@ onmessage = async (e) => {
   }
 };
 
-function measureWasm(stockData, weights, times, sims) {
-  console.log("WASM simulation starting");
-  const start = performance.now();
-  const results = simAPI.runSimulationSerialized(
-    stockData,
-    weights,
-    times,
-    sims,
-  );
-  const end = performance.now();
-  console.log(`WASM simulation took ${end - start} milliseconds.`);
-  return results;
-}
+// function measureWasm(stockData, weights, times, sims) {
+//   console.log("WASM simulation starting");
+//   const start = performance.now();
+//   const results = simAPI.runSimulationSerialized(
+//     stockData,
+//     weights,
+//     times,
+//     sims,
+//   );
+//   const end = performance.now();
+//   console.log(`WASM simulation took ${end - start} milliseconds.`);
+//   return results;
+// }
 
 function measureWasmThreading(stockData, weights, times, sims) {
   console.log("WASM simulation starting");
@@ -64,11 +63,11 @@ function measureWasmThreading(stockData, weights, times, sims) {
   return results;
 }
 
-function measureJS(stockData, weights, times, sims) {
-  console.log("Running JS simulation...");
-  const start = performance.now();
-  const results = runSimulations(stockData, weights, times, sims);
-  const end = performance.now();
-  console.log(`JS simulation took ${end - start} milliseconds.`);
-  return results;
-}
+// function measureJS(stockData, weights, times, sims) {
+//   console.log("Running JS simulation...");
+//   const start = performance.now();
+//   const results = runSimulations(stockData, weights, times, sims);
+//   const end = performance.now();
+//   console.log(`JS simulation took ${end - start} milliseconds.`);
+//   return results;
+// }

@@ -78,7 +78,6 @@ export class SimulationAPI {
       console.error("Specify assets, so that application can run simulations!");
       return null;
     }
-    var exit_code = true;
     // init arguments for the WASM module
     const stocks = this.#createStockArray(stock_prices);
     const weights = this.#createWeightsArray(stock_weights);
@@ -120,7 +119,6 @@ export class SimulationAPI {
       ).slice();
     } catch (error) {
       console.error(error);
-      exit_code = false;
     } finally {
       // make sure to clean-up after simulations
       if (res_ptr != null) this.module._free(res_ptr);

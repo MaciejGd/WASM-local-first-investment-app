@@ -17,13 +17,6 @@ export async function FetchStockPrices(tickers) {
   return responseJson;
 }
 
-// Fetch last historical price of the product
-export async function GetRecentPrice(ticker) {
-  const api_url = `http://127.0.0.1:5000/finance/get_recent_price/{ticker}`;
-  let responseJson = await RequestGET(api_url);
-  return responseJson;
-}
-
 export async function GetRecentPrices(tickers) {
   const api_url = `http://127.0.0.1:5000/finance/get_recent_prices`;
   let response = await RequestPOST(api_url, tickers);

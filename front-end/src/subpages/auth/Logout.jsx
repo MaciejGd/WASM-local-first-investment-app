@@ -28,6 +28,7 @@ export function LogOutPopUp({ onClose, onAccept }) {
       <div className="modal_container">
         <div className="modal_title">Are you sure, you wanna logout?</div>
         {loading && <p>Loading...</p>}
+        {error && <p>Failed to logout: {error}</p>}
         <div className="modal_buttons">
           <button className="modal_button" onClick={onClose}>
             {" "}

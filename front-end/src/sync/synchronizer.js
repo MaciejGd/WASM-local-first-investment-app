@@ -238,7 +238,6 @@ export class DBSynchronizer {
       return false;
     }
     // here we should check for the response code
-    var hashes = await getTablesHashes();
     // add all records one by one for now
     for (let [table_name, value] of Object.entries(response)) {
       // if hashes not equal, reset hash for current table as we would recreate it

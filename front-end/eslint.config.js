@@ -6,4 +6,7 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   { files: ["**/*.{js,mjs,cjs,jsx}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
   pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat['jsx-runtime'],
+  { rules: { "react/prop-types": "off" }, settings: { react: { version: "detect" } } },
+  { ignores: ["src/subpages/simulations/wasm/main.js"] },
 ]);
