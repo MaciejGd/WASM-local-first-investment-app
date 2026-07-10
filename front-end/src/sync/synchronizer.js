@@ -233,6 +233,7 @@ export class DBSynchronizer {
     try {
       // post a request but response can either return empty object or db to be updated
       response = await RequestPOST(DBSynchronizer.COMPARE_HASHES, ev);
+      response = await response.json();
     } catch (error) {
       console.error(error);
       return false;
@@ -244,6 +245,7 @@ export class DBSynchronizer {
       if (value.equal == true) {
         continue;
       }
+      console.log("Hashes does not match, refetch the table!");
 
       await clearTable(table_name); // reset hash of particular table to zeros
       if (!value.records) continue; // skip if there are no records to be added
