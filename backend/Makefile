@@ -1,14 +1,14 @@
-make format:
+format:
 	ruff format ./inv_app ./tests
 
-make check:
+check:
 	ruff check ./inv_app ./tests
 
-make test:
+test:
 	pytest ./tests/unit/ ./tests/integration/
 
 
-make all:
+all:
 	ruff check ./inv_app
 	ruff format ./inv_app
 	pytest ./tests

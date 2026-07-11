@@ -3,3 +3,7 @@ format:
 
 lint:
 	npx eslint src
+
+
+test:
+	npm run test

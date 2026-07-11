@@ -2,9 +2,21 @@
  * Wrapper used for communication from main thread with Sync Worker
  */
 export class SyncWorkerWrapper {
+  static #instance = null;
+
   constructor() {
-    // initialize web worker for sync operations
+    if (SyncWorkerWrapper.#instance) {
+      return SyncWorkerWrapper.#instance;
+    }
     this.worker = this.initWorker();
+    SyncWorkerWrapper.#instance = this;
+  }
+
+  static getInstance() {
+    if (!SyncWorkerWrapper.#instance) {
+      return new SyncWorkerWrapper();
+    }
+    return SyncWorkerWrapper.#instance;
   }
 
   /**
@@ -75,6 +87,3 @@ export class SyncWorkerWrapper {
     });
   }
 }
-
-// global sync worker object
-export const sync_worker = new SyncWorkerWrapper();
