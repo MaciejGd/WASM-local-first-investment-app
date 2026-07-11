@@ -1,5 +1,5 @@
 import hash from "object-hash";
-import { sync_worker } from "../sync/syncWorkerWrapper";
+import { SyncWorkerWrapper } from "../sync/syncWorkerWrapper";
 import { getDBInstance, putDataToDb, getTablesHashes } from "./db";
 
 /**
@@ -14,6 +14,7 @@ export class IndexedDbHandler {
     this.db = getDBInstance();
     // assign name to each table object
     this.initializeTableNames();
+    this.sync_worker = SyncWorkerWrapper.getInstance();
 
     this.version_id = 0;
     IndexedDbHandler.instance = this;
@@ -100,7 +101,7 @@ export class IndexedDbHandler {
       return;
     }
     var obj_hash = await this.hashRecord(payload, ulid);
-    sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
+    this.sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
     payload.ulid = ulid;
     payload.hash = obj_hash; // hash the payload and pack along the original payload
     // var id = await table.add(payload); TODO check if that works
@@ -182,7 +183,7 @@ export class IndexedDbHandler {
     const records = await table.bulkGet(selected_ids);
     const table_name = this.table_to_name.get(table);
     records.forEach((e) => {
-      sync_worker.AddRemovalEvent(e.ulid, table_name);
+      this.sync_worker.AddRemovalEvent(e.ulid, table_name);
     });
   }
 }

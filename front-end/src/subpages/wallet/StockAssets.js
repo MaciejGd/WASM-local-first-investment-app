@@ -59,7 +59,7 @@ export class AssetsEntry {
     this.ticker = ticker;
     this._data = [];
     this.folded = false;
-    this.folded_data = [new AssetData()]; // list with one element combining averages for data
+    this.folded_data = [new AssetData(null, 0, 0)]; // list with one element combining averages for data
   }
 
   /**
@@ -102,7 +102,7 @@ export class AssetsEntry {
    */
   get data() {
     if (this.folded) {
-      return this.folded_data; // for now return empty list
+      return this.folded_data;
     } else {
       return this._data;
     }
@@ -133,7 +133,7 @@ export class AssetsEntry {
     if (asset instanceof AssetData) {
       this._data.push(asset);
     } else {
-      console.err("AssetData expected, got ", typeof asset);
+      console.error("AssetData expected, got ", typeof asset);
     }
   }
 
@@ -182,17 +182,20 @@ export class AssetsEntry {
    * @param {nunber} price price of the stock bought
    * @returns
    */
-  update(id, quantity, price) {
+  insertIfNotExists(id, quantity, price) {
+    // TODO - what is that function? XDD it does opossite of what it says
     // if already in the _data, skip further execution
-    if (this._data.includes(id)) {
+    // we just need to check if id was already aded to the _data
+    if (this._data.some((asset) => asset.id === id)) {
       return;
     }
+
     this._data.push(new AssetData(id, Number(quantity), Number(price)));
     this.udpateAverageData();
   }
 
   removeNotMatchingAssets(assets) {
-    const removeIds = new Set(assets.map((a) => a.id));
+    const removeIds = new Set(assets.map((a) => a.ulid));
     this._data = this._data.filter((item) => removeIds.has(item.id));
   }
 
@@ -334,7 +337,7 @@ export class AssetsMap {
     const tickers = Array.from(this.asset_map.keys());
     const prices = await GetRecentPrices(tickers);
     this.asset_map.forEach((el, ticker) => {
-      el.current_price = prices[ticker].price;
+      el.current_price = prices[ticker] ? prices[ticker]?.price : 10;
       this.asset_map.set(ticker, el);
     });
   }
@@ -367,7 +370,7 @@ export class AssetsMap {
       if (mp.get(el.ticker) === undefined) {
         mp.set(el.ticker, new AssetsEntry(el.ticker));
       }
-      mp.get(el.ticker).update(el.ulid, el.price, el.quantity);
+      mp.get(el.ticker).insertIfNotExists(el.ulid, el.price, el.quantity);
     });
 
     mp.countAssetsSummary();

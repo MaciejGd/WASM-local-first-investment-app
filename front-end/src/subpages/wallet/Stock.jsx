@@ -22,6 +22,27 @@ export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   );
 }
 
+export function validateAsset(ticker, quantity, price) {
+  if (ticker === "") {
+    console.error("Ticker should not be empty");
+    return false;
+  }
+
+  // check if quantity and price is correct (number and not empty)
+  const quantityNum = Number(quantity);
+  if (Number.isNaN(quantityNum) || quantity == "") {
+    console.error("Quantity value is not a number!!!");
+    return false;
+  }
+  const priceNum = Number(price);
+  if (Number.isNaN(priceNum) || price === "") {
+    console.error("price value should be a float!");
+    return false;
+  }
+
+  return true;
+}
+
 export default function StockPage() {
   const [modal_visible, setModalVisible] = useState(false);
   const [assets, setAssets] = useState(new AssetsMap());
@@ -56,20 +77,7 @@ export default function StockPage() {
 
   /// add asset to assets list
   async function addAsset(ticker, quantity, price) {
-    if (ticker === "") {
-      console.err("Ticker should not be empty");
-      return;
-    }
-
-    // check if quantity and price is correct (number and not empty)
-    const quantityNum = Number(quantity);
-    if (Number.isNaN(quantityNum) || quantity == "") {
-      console.error("Quantity value is not a number!!!");
-      return;
-    }
-    const priceNum = Number(price);
-    if (Number.isNaN(priceNum) || price === "") {
-      console.error("price value should be a float!");
+    if (!validateAsset(ticker, quantity, price)) {
       return;
     }
     // add new asset to the db
@@ -89,7 +97,7 @@ export default function StockPage() {
   /** Show summary/single of ticker resources */
   function toggleAssetVisibility(ticker) {
     if (!assets.has(ticker)) {
-      console.err(`There is no such ticker as ${ticker} in map.`);
+      console.error(`There is no such ticker as ${ticker} in map.`);
       return;
     }
     // trigger visibility on resource

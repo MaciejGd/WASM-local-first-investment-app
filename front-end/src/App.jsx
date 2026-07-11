@@ -17,7 +17,7 @@ import { LogOutPopUp } from "./subpages/auth/Logout.jsx";
 import { DBEncryptor } from "./db/db_encryptor.js";
 
 // TODO remove after testing
-import { sync_worker } from "./sync/syncWorkerWrapper.js";
+import { SyncWorkerWrapper } from "./sync/syncWorkerWrapper.js";
 
 function NavigationBar({ onLogOut }) {
   const [visible, setVisible] = useState(true);
@@ -80,7 +80,7 @@ export default function App() {
     );
     // generate encryption key, based on password provided
     DBEncryptor.generateKey(passwd, salt_mod);
-    sync_worker.InitCrypto(passwd, salt_mod);
+    SyncWorkerWrapper.getInstance().InitCrypto(passwd, salt_mod);
   }
 
   function acceptLogginOut() {
