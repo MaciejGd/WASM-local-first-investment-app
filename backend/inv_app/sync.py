@@ -32,7 +32,6 @@ def push_changes():
             table_name,
             timestamp,
             type,
-            obj_hash,
             payload,
         )
     ):

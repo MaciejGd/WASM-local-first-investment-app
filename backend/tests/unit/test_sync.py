@@ -134,7 +134,7 @@ def test_push_changes_no_type(_, client, example_json):
 
 
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
-def test_push_changes_no_hash(_, client, example_json):
+def test_push_changes_no_hash_should_pass(_, client, example_json):
     example_json["hash"] = None
 
     with client.session_transaction() as sess:
@@ -146,7 +146,7 @@ def test_push_changes_no_hash(_, client, example_json):
         content_type="application/json",
     )
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.OK
 
 
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
