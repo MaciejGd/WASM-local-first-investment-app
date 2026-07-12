@@ -7,6 +7,23 @@ import {
 import { expect, test, vi } from "vitest";
 import { GetRecentPrices } from "../../src/subpages/finance_api/FinanceApi";
 
+function createDefaultAssetsMap() {
+  const expected_map = new Map([
+    ["LPP.WA", new AssetsEntry("LPP.WA")],
+    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
+    ["TEST.WA", new AssetsEntry("TEST.WA")],
+  ]);
+
+  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
+  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
+  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
+  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
+  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
+  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+
+  return expected_map;
+}
+
 test("AssetData Initialize", () => {
   const asset = new AssetData(1, 10, 4);
   expect(asset.quantity).toBe(10);
@@ -385,22 +402,7 @@ test("AssetsMap createFromDB", () => {
     { ticker: "TEST.WA", ulid: 3, price: 9, quantity: 1 },
   ];
 
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  const data1 = new AssetData(1, 3, 12);
-  const data2 = new AssetData(2, 4, 10);
-  const data3 = new AssetData(3, 1, 9);
-
-  expected_map.get("LPP.WA")._data = [data1];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [data2];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [data3];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const assets1 = AssetsMap.createFromDB(assets_arr);
 
@@ -460,22 +462,7 @@ test("AssetsMap updateFromDB", () => {
     { ticker: "TEST.WA", ulid: 3, price: 9, quantity: 1 },
   ];
 
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  const data1 = new AssetData(1, 3, 12);
-  const data2 = new AssetData(2, 4, 10);
-  const data3 = new AssetData(3, 1, 9);
-
-  expected_map.get("LPP.WA")._data = [data1];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [data2];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [data3];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const assets1 = AssetsMap.createFromDB(assets_arr);
 
@@ -512,18 +499,7 @@ test("AssetsMap updateFromDB, removing unused old entries", () => {
     { ticker: "TEST.WA", ulid: 3, price: 9, quantity: 1 },
   ];
 
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const old_entry = new AssetsEntry("NEW.WA");
   old_entry._data = [new AssetData(4, 4, 4)];
@@ -559,18 +535,7 @@ test("AssetsMap updateFromDB current assets empty", () => {
     { ticker: "TEST.WA", ulid: 3, price: 9, quantity: 1 },
   ];
 
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const assets_og = new AssetsMap();
   const assets1 = assets_og.updateFromDB(assets_arr);
@@ -601,18 +566,7 @@ test("AssetsMap updateFromDB, removing old values, preserving entry", () => {
     { ticker: "TEST.WA", ulid: 3, price: 9, quantity: 1 },
   ];
 
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const old_entry = new AssetsEntry("LPP.WA");
   old_entry._data = [new AssetData(4, 4, 4), new AssetData(1, 3, 12)];
@@ -642,18 +596,7 @@ test("AssetsMap updateFromDB, removing old values, preserving entry", () => {
 });
 
 test("AssetsMap select data, set to true", () => {
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const assets_og = new AssetsMap();
   assets_og.asset_map = expected_map;
@@ -663,19 +606,8 @@ test("AssetsMap select data, set to true", () => {
 });
 
 test("AssetsMap select data, set to false", () => {
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
+  const expected_map = createDefaultAssetsMap();
   expected_map.get("LPP.WA")._data[0].selected = true;
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
 
   const assets_og = new AssetsMap();
   assets_og.asset_map = expected_map;
@@ -685,18 +617,7 @@ test("AssetsMap select data, set to false", () => {
 });
 
 test("AssetsMap produceTableData", () => {
-  const expected_map = new Map([
-    ["LPP.WA", new AssetsEntry("LPP.WA")],
-    ["ZAB.WA", new AssetsEntry("ZAB.WA")],
-    ["TEST.WA", new AssetsEntry("TEST.WA")],
-  ]);
-
-  expected_map.get("LPP.WA")._data = [new AssetData(1, 3, 12)];
-  expected_map.get("LPP.WA").folded_data = [new AssetData(-1, 3, 12)];
-  expected_map.get("ZAB.WA")._data = [new AssetData(2, 4, 10)];
-  expected_map.get("ZAB.WA").folded_data = [new AssetData(-1, 4, 10)];
-  expected_map.get("TEST.WA")._data = [new AssetData(3, 1, 9)];
-  expected_map.get("TEST.WA").folded_data = [new AssetData(-1, 1, 9)];
+  const expected_map = createDefaultAssetsMap();
 
   const assets_og = new AssetsMap();
   assets_og.asset_map = expected_map;
@@ -798,4 +719,256 @@ test("AssetsMap has", () => {
 
   expect(assets_map.has("LPP.WA")).toEqual(true);
   expect(assets_map.has("ZAB.WA")).toEqual(false);
+});
+
+test("AssetsMap countAssetsSummary", () => {
+  const expected_map = createDefaultAssetsMap();
+  expected_map.get("LPP.WA")._data.push(new AssetData(4, 2, 2));
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = expected_map;
+
+  assets_og.countAssetsSummary();
+  expect(assets_og.summary).toEqual(
+    new AssetsTableData(
+      undefined, // selected
+      "Summary", // ticker
+      false, // isFolded
+      false, // isFirst
+      8, // quantity
+      "-", // current_price
+      "80.00", // current_value
+      "-5.00", // profit
+      "-5.88", // profit_percentage
+      "-", // price
+      "85.00", // cost
+      undefined, // idx
+    ),
+  );
+});
+
+test("AssetsMap sort descending, by ticker", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("ticker", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("TEST.WA");
+  expect(sorted_map[2][0]).toEqual("ZAB.WA");
+});
+
+test("AssetsMap sort ascending, by ticker", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("ticker", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("ZAB.WA");
+  expect(sorted_map[1][0]).toEqual("TEST.WA");
+  expect(sorted_map[2][0]).toEqual("LPP.WA");
+});
+
+test("AssetsMap sort descending, by quantity", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("quantity", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("TEST.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("ZAB.WA");
+});
+
+test("AssetsMap sort ascending, by quantity", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("quantity", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("ZAB.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap sort descending, by price", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("price", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("TEST.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("LPP.WA");
+});
+
+test("AssetsMap sort ascending, by price", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("price", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+// TODO modify the current_price value so we indeed test sorting
+test("AssetsMap sort descending, by current_price", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("current_price", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+// TODO modify the current_price value so we indeed test sorting
+test("AssetsMap sort ascending, by current_price", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("current_price", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap sort descending, by current_value", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("current_value", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("TEST.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("ZAB.WA");
+});
+
+test("AssetsMap sort ascending, by current_value", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("current_value", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("ZAB.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap sort descending, by cost", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("cost", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("TEST.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("ZAB.WA");
+});
+
+test("AssetsMap sort ascending, by cost", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("cost", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("ZAB.WA");
+  expect(sorted_map[1][0]).toEqual("LPP.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap sort descending, by profit_percantage", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("profit_percantage", true);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap sort ascending, by profit_percantage", () => {
+  const expected_map = createDefaultAssetsMap();
+
+  const assets_og = new AssetsMap();
+  assets_og.asset_map = new Map(expected_map);
+
+  assets_og.sort("profit_percantage", false);
+  const sorted_map = [...assets_og.asset_map];
+
+  expect(sorted_map[0][0]).toEqual("LPP.WA");
+  expect(sorted_map[1][0]).toEqual("ZAB.WA");
+  expect(sorted_map[2][0]).toEqual("TEST.WA");
+});
+
+test("AssetsMap getSelectedIds", () => {
+  const expected_map = createDefaultAssetsMap();
+  // select two assets from default map
+  expected_map.get("LPP.WA")._data[0].selected = true;
+  expected_map.get("TEST.WA")._data[0].selected = true;
+
+  const assets = new AssetsMap();
+  assets.asset_map = expected_map;
+  const selected = assets.getSelectedIds();
+
+  expect(selected).toEqual([1, 3]);
+});
+
+test("AssetsMap deleteSelected", () => {
+  const expected_map = createDefaultAssetsMap();
+  // select two assets from default map
+  expected_map.get("LPP.WA")._data[0].selected = true;
+  expected_map.get("TEST.WA")._data[0].selected = true;
+
+  const assets = new AssetsMap();
+  assets.asset_map = expected_map;
+  assets.deleteSelected();
+
+  expect(expected_map).toEqual(
+    new Map([["ZAB.WA", expected_map.get("ZAB.WA")]]),
+  );
 });

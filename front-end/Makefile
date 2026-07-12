@@ -4,6 +4,8 @@ format:
 lint:
 	npx eslint src tests
 
-
 test:
 	npm run test
+
+
+all: format lint test
