@@ -176,16 +176,13 @@ export class AssetsEntry {
   }
 
   /**
-   * Update assets entry
+   * Insert asset data if it not already exists in the entry
    * @param {string} id identification of the asset
    * @param {number} quantity amount of stock owned
    * @param {nunber} price price of the stock bought
    * @returns
    */
   insertIfNotExists(id, quantity, price) {
-    // TODO - what is that function? XDD it does opossite of what it says
-    // if already in the _data, skip further execution
-    // we just need to check if id was already aded to the _data
     if (this._data.some((asset) => asset.id === id)) {
       return;
     }
@@ -197,6 +194,7 @@ export class AssetsEntry {
   removeNotMatchingAssets(assets) {
     const removeIds = new Set(assets.map((a) => a.ulid));
     this._data = this._data.filter((item) => removeIds.has(item.id));
+    this.udpateAverageData();
   }
 
   /**
@@ -288,7 +286,8 @@ export class AssetsTableData {
     this.current_value = current_value;
     this.profit = profit;
     this.profit_percentage = profit_percentage;
-    ((this.cost = cost), (this.price = price));
+    this.price = price;
+    this.cost = cost;
     this.idx = idx;
   }
 }
@@ -326,19 +325,20 @@ export class AssetsMap {
         // if map entry does not exist, create brand new
         mp.set(el.ticker, new AssetsEntry(el.ticker));
       }
-      mp.get(el.ticker).insert(el.ulid, el.price, el.quantity);
+      mp.get(el.ticker).insert(el.ulid, el.quantity, el.price);
     });
     mp.countAssetsSummary(); // count assets summary after addition is done
     return mp;
   }
 
+  /**
+   * Fetch current prices of assets from remote source
+   */
   async fetchAssetsPrice() {
-    // ticker -> asset entry
     const tickers = Array.from(this.asset_map.keys());
     const prices = await GetRecentPrices(tickers);
     this.asset_map.forEach((el, ticker) => {
       el.current_price = prices[ticker] ? prices[ticker]?.price : 10;
-      this.asset_map.set(ticker, el);
     });
   }
 
@@ -349,13 +349,14 @@ export class AssetsMap {
    */
   updateFromDB(assets) {
     const mp = new AssetsMap(this);
-    if (!assets) {
-      return mp;
+
+    // if current map is empty, just refetch all
+    if (!mp.asset_map || mp.asset_map.size === 0) {
+      return AssetsMap.createFromDB(assets);
     }
 
-    // remove old values that are not in the new assets to be set
-    if (!mp.asset_map) {
-      return AssetsMap.createFromDB(assets);
+    if (!assets) {
+      return mp;
     }
 
     mp.asset_map.forEach((value, key) => {
@@ -370,7 +371,7 @@ export class AssetsMap {
       if (mp.get(el.ticker) === undefined) {
         mp.set(el.ticker, new AssetsEntry(el.ticker));
       }
-      mp.get(el.ticker).insertIfNotExists(el.ulid, el.price, el.quantity);
+      mp.get(el.ticker).insertIfNotExists(el.ulid, el.quantity, el.price);
     });
 
     mp.countAssetsSummary();
@@ -385,6 +386,9 @@ export class AssetsMap {
    */
   selectData(ticker, idx, select) {
     let entry = this.asset_map.get(ticker);
+    if (!entry) {
+      return;
+    }
     entry.selectData(idx, select);
   }
 
@@ -430,7 +434,7 @@ export class AssetsMap {
   /**
    * Get resource associated to ticker provided
    * @param {string} ticker ticker we want to retrieve data of
-   * @returns resource associated with ticker provided
+   * @returns AssetEntry associated with ticker provided
    */
   get(ticker) {
     return this.asset_map.get(ticker);
