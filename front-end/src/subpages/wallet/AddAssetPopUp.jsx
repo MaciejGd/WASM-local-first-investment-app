@@ -9,16 +9,11 @@ function InputRow({ title, onChange, focus, options }) {
       {
         <ComboBox
           onChange={onChange}
-          placeholder="Ticker"
+          placeholder={title}
           focus={focus}
           options={options}
         />
       }
-      {/* <input
-        className="modal_input"
-        onChange={(e) => onChange(e.target.value)}
-        autoFocus={focus}
-      ></input> */}
     </div>
   );
 }

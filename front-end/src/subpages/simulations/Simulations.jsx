@@ -14,13 +14,10 @@ import {
   FetchStocksList,
 } from "../finance_api/FinanceApi.jsx";
 
-// what do we want in here??? we want some table which we can add tickers + set proportions / amount of
-// we need to add - ticker + amount of money invested (ticker for getting the prices, money invested for weights)
 function InputRow({ title, onChange, focus, options = [] }) {
   return (
     <div className="modal_input_row">
       <span>{title}</span>
-      {/* <input className="modal_input" onChange={(e)=>onChange(e.target.value)} autoFocus={focus}></input> */}
       <ComboBox
         onChange={onChange}
         placeholder="Ticker..."
