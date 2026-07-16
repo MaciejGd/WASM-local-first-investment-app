@@ -6,9 +6,9 @@ import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db insta
 import { useLiveQuery } from "dexie-react-hooks";
 import { SimAssetMap } from "./SimsAssetsData.js";
 import { ErrorPopUp } from "../../components/PopUp.jsx";
-/// Here should be another table showing the results of run simulations
-const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
-const PERCENTILES = 3; // we have three results showing in percentiles
+
+export const PERCENTILE_SIZE = 9; // we wanna show the 9th percentile at most
+export const PERCENTILES = 3; // we have three results showing in percentiles
 
 function ShowSavedSimsModal({ onAccept, onClose }) {
   const db_instance = IndexedDbHandler.getInstance();
@@ -113,6 +113,29 @@ function SimsResultsAssetsDescription({ sims, timepoints, date }) {
   );
 }
 
+export function retrieveVar(results) {
+  // get all values from the specified index. These would be the CVaRs
+  const cvarsArr = results.slice(PERCENTILES * PERCENTILE_SIZE + 1);
+  const VaR = (results[PERCENTILES * PERCENTILE_SIZE] * 100).toFixed(2); // Value at risk in percentages
+
+  // count percentage usage of cvars in overall risk
+  const cvars_sum = cvarsArr.reduce((a, b) => {
+    return a + b;
+  }, 0);
+  // throw divide by zero exception
+  if (cvars_sum === 0) {
+    throw new Error("Sum of the array should not be equal to 0!!!");
+  }
+  const cvars = cvarsArr.map((el) => {
+    return ((el / cvars_sum) * 100).toFixed(2);
+  });
+
+  return {
+    VaR: VaR,
+    cvars: cvars,
+  };
+}
+
 export default function SimsResults({
   restoreSimsResults,
   results,
@@ -157,21 +180,8 @@ export default function SimsResults({
     }
   }
 
-  // get all values from the specified index. These would be the CVaRs
-  const cvarsArr = results.slice(PERCENTILES * PERCENTILE_SIZE + 1);
-  const VaR = (results[PERCENTILES * PERCENTILE_SIZE] * 100).toFixed(2); // Value at risk in percentages
-
-  // count percentage usage of cvars in overall risk
-  const cvars_sum = cvarsArr.reduce((a, b) => {
-    return a + b;
-  }, 0);
-  // throw divide by zero exception
-  if (cvars_sum === 0) {
-    throw new Error("Sum of the array should not be equal to 0!!!");
-  }
-  const cvars = cvarsArr.map((el) => {
-    return ((el / cvars_sum) * 100).toFixed(2);
-  });
+  // get Value at risk data from results
+  const var_obj = retrieveVar(results);
 
   const SaveSimsModal = save_modal_vis ? SaveSimModal : () => <></>;
   const ShowSavedModal = show_saved_modal_vis
@@ -196,8 +206,8 @@ export default function SimsResults({
         <SimResultsTable results={results} />
         <SimResultsRiskPane
           tickers={tickers_state}
-          VaR={VaR}
-          cvars={cvars}
+          VaR={var_obj.VaR}
+          cvars={var_obj.cvars}
         ></SimResultsRiskPane>
       </div>
       <SaveSimsModal

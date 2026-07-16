@@ -13,3 +13,6 @@ all:
 	ruff format ./inv_app
 	pytest ./tests
 	pyright
+
+run:
+	flask --app inv_app run

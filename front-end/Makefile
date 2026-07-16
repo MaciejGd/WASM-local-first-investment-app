@@ -5,7 +5,10 @@ lint:
 	npx eslint src tests
 
 test:
-	npm run test
+	npm run test -- --run
 
 
 all: format lint test
+
+run:
+	npm run dev

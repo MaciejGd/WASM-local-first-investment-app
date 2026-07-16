@@ -167,7 +167,7 @@ export default function SimulationsPage() {
     const responseJson = await FetchStockPrices(SimAssetMap.getTickers(assets));
     // get amount of money invested in each asset
     setSimRunning(true); // set running as simulation status
-    const weights = SimAssetMap.getWeights(assets);
+    const weights = SimAssetMap.getPrices(assets);
     simRun({
       stockData: responseJson,
       weights: weights,

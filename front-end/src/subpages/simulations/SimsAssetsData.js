@@ -6,6 +6,7 @@
 export class SimAssetMap {
   /**
    * Add rectord to underlying map
+   * @param {Object} asset_map JS object of ticker : stock info
    * @param {string} ticker ticker to be added to the list
    * @param {number} price price of ticker to be added as value
    * @returns true on success, false otherwise
@@ -16,6 +17,7 @@ export class SimAssetMap {
       console.log("Price is not a number!!!");
       return false;
     }
+
     // append ticker with price to the map
     asset_map[ticker] = {
       ticker: ticker,
@@ -98,14 +100,14 @@ export class SimAssetMap {
   }
 
   /**
-   * Get money meant for particular asset
+   * Get price for particular assets in form of array
    */
-  static getWeights(asset_map) {
-    const weights = [];
+  static getPrices(asset_map) {
+    const prices = [];
     var assets = Object.values(asset_map);
     assets.forEach((value) => {
-      weights.push(value.price);
+      prices.push(value.price);
     });
-    return weights;
+    return prices;
   }
 }
