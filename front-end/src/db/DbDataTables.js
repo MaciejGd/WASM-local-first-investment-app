@@ -83,6 +83,7 @@ export class IndexedDbHandler {
       return ret;
     } catch (error) {
       console.error(error);
+      return [];
     }
   }
 
@@ -104,10 +105,8 @@ export class IndexedDbHandler {
     this.sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
     payload.ulid = ulid;
     payload.hash = obj_hash; // hash the payload and pack along the original payload
-    // var id = await table.add(payload); TODO check if that works
     var id = await putDataToDb(this.db, table_name, payload);
     var hashes = await getTablesHashes();
-    console.log(hashes);
     // after adding, update hash for the table
     return id;
   }
@@ -136,6 +135,7 @@ export class IndexedDbHandler {
       return arr;
     } catch (error) {
       console.error(error);
+      return [];
     }
   }
 
@@ -146,10 +146,11 @@ export class IndexedDbHandler {
    */
   async getSimResult(index) {
     try {
-      var results = this.db.sim_history.get(index); // get the sim result by the id
+      var results = await this.db.sim_history.get(index);
       return results.data;
     } catch (error) {
       console.error(error);
+      return null;
     }
   }
 
