@@ -1,14 +1,10 @@
-make all:
-	g++ main.cpp -g02 -o unit_tests
+build:
+	g++ --std=c++20 main.cpp ../core/linalg/algorithms.cpp ../core/simulation_results.cpp -o unit_tests.exe
 
-make run:
-	g++ main.cpp -g02 -o unit_tests && ./unit_tests
+run:
+	./unit_tests.exe
 
-make win:
-	g++ main.cpp -g02 -o unit_tests.exe
+buildrun: build run
 
-make winrun:
-	g++ --std=c++20 main.cpp ../core/linalg/algorithms.cpp ../core/simulation_results.cpp -o unit_tests.exe && unit_tests.exe
-
-make windebug:
+debug:
 	g++ --std=c++20 main.cpp ../core/linalg/algorithms.cpp ../core/simulation_results.cpp -g02 -o unit_tests.exe && unit_tests.exe

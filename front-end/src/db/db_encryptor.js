@@ -36,7 +36,7 @@ export class DBEncryptor {
    * @returns True if encryption succeed, False otherwise
    */
   static async encrypt(object) {
-    const iv = DBEncryptor.generateIV();
+    const iv = DBEncryptor._generateIV();
 
     var encrypted_message = await crypto.subtle.encrypt(
       {
@@ -44,7 +44,7 @@ export class DBEncryptor {
         iv: iv,
       },
       DBEncryptor.KEY,
-      this._encodeObject(object),
+      DBEncryptor._encodeObject(object),
     );
 
     const encypted_bytes = new Uint8Array(encrypted_message);
@@ -77,7 +77,7 @@ export class DBEncryptor {
       DBEncryptor.KEY,
       encrypted_msg,
     );
-    return this._decodeObject(decrypted_message);
+    return DBEncryptor._decodeObject(decrypted_message);
   }
 
   /**
@@ -135,7 +135,7 @@ export class DBEncryptor {
    */
   static async generateKey(passwd, salt) {
     // transform salt string into a format that is accepted by subtle.deriveKey
-    const keyMaterial = await this._generateKeyMaterial(passwd);
+    const keyMaterial = await DBEncryptor._generateKeyMaterial(passwd);
     DBEncryptor.KEY = await crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
@@ -150,7 +150,7 @@ export class DBEncryptor {
     );
   }
 
-  static generateIV() {
+  static _generateIV() {
     return crypto.getRandomValues(new Uint8Array(DBEncryptor.IV_LENGTH));
   }
 
