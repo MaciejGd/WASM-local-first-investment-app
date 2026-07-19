@@ -121,10 +121,9 @@ def test_add_event_record_pass(sqlite_db):
     db_handle.execute.assert_has_calls(
         [
             call(SQLite3DB.CREATE_EVENTS_TABLE.format("events_2")),
-            call(SQLite3DB.APPLY_TIMESTAMP_INDEX.format("events_2")),
             call(
                 SQLite3DB.ADD_EVENT_RECORD.format("events_2"),
-                ("test", table_name, type, ulid),
+                (table_name, type, ulid),
             ),
         ]
     )

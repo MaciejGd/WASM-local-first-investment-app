@@ -17,20 +17,13 @@ class SQLite3DB(db_handler.DBHandler):
     # create events table
     CREATE_EVENTS_TABLE = "CREATE TABLE IF NOT EXISTS {} \
                         (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                        timestamp INTEGER NOT NULL, \
                          table_name TEXT NOT NULL, \
                          type TEXT NOT NULL, \
                          ulid TEXT NOT NULL); "
 
-    APPLY_TIMESTAMP_INDEX = "CREATE INDEX IF NOT EXISTS idx_events_timestamp\
-                            ON {}(timestamp);"
+    ADD_EVENT_RECORD = "INSERT INTO {} (table_name, type, ulid)\
+                        VALUES (?, ?, ?);"
 
-    ADD_EVENT_RECORD = "INSERT INTO {} (timestamp, table_name, type, ulid)\
-                        VALUES (?, ?, ?, ?);"
-
-    DELETE_EVENT_RECORD = (
-        "DELETE FROM {} WHERE timestamp=? AND table_name=? AND type=? AND ulid=?;"
-    )
     GET_EVENT_IDS_FROM = "SELECT * FROM {} WHERE id > ? ORDER BY id ASC;"
     GET_EVENT_BY_ID = "SELECT * FROM {} WHERE id = ?;"
 
@@ -133,11 +126,10 @@ class SQLite3DB(db_handler.DBHandler):
         table = SQLite3DB.EVENTS_TABLE + str(user_id)
         try:
             db_handle.execute(SQLite3DB.CREATE_EVENTS_TABLE.format(table))
-            db_handle.execute(SQLite3DB.APPLY_TIMESTAMP_INDEX.format(table))
 
             cursor = db_handle.execute(
                 SQLite3DB.ADD_EVENT_RECORD.format(table),
-                ("test", table_name, type, ulid),
+                (table_name, type, ulid),
             )
 
             # db_handle.commit()
