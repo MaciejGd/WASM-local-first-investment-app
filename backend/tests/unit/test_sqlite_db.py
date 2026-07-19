@@ -105,7 +105,6 @@ def test_reset_collection_throw(sqlite_db):
 
 
 def test_add_event_record_pass(sqlite_db):
-    timestamp = 3
     table_name = "wallet"
     type = "add"
     ulid = "test"
@@ -116,7 +115,7 @@ def test_add_event_record_pass(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.return_value = cursor_mock
 
-    ret = sqlite_db.add_event_record(db_handle, 2, table_name, timestamp, type, ulid)
+    ret = sqlite_db.add_event_record(db_handle, 2, table_name, type, ulid)
     assert ret == 4
 
     db_handle.execute.assert_has_calls(
@@ -125,7 +124,7 @@ def test_add_event_record_pass(sqlite_db):
             call(SQLite3DB.APPLY_TIMESTAMP_INDEX.format("events_2")),
             call(
                 SQLite3DB.ADD_EVENT_RECORD.format("events_2"),
-                (timestamp, table_name, type, ulid),
+                ("test", table_name, type, ulid),
             ),
         ]
     )
@@ -133,7 +132,6 @@ def test_add_event_record_pass(sqlite_db):
 
 
 def test_add_event_record_exception(sqlite_db):
-    timestamp = 3
     table_name = "wallet"
     type = "add"
     ulid = "test"
@@ -141,7 +139,7 @@ def test_add_event_record_exception(sqlite_db):
     db_handle = MagicMock()
     db_handle.execute.side_effect = Exception()
 
-    ret = sqlite_db.add_event_record(db_handle, 2, table_name, timestamp, type, ulid)
+    ret = sqlite_db.add_event_record(db_handle, 2, table_name, type, ulid)
     assert ret == -1
     assert db_handle.rollback.assert_called_once
 

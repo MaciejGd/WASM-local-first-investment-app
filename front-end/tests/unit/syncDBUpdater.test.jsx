@@ -68,7 +68,7 @@ describe("Removing records from db", () => {
     expect(whereMock).toHaveBeenCalledWith("ulid");
     expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
     expect(deleteMock).toHaveBeenCalledOnce();
-  })
+  });
   test("removing records catches error thrown", async () => {
     const error = new Error("testing error");
     const deleteMock = vi.fn().mockRejectedValueOnce(error);
@@ -95,16 +95,16 @@ describe("Removing records from db", () => {
     expect(whereMock).toHaveBeenCalledWith("ulid");
     expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
     expect(deleteMock).toHaveBeenCalledOnce();
-  })
-})
+  });
+});
 
 describe("updateLastEventId", () => {
   test("correctly updated last event id", async () => {
     const put_mock = vi.fn();
     const db_mock = {
-      metadata : {
-        put : put_mock
-      }
+      metadata: {
+        put: put_mock,
+      },
     };
 
     const updater = new SyncDBUpdater(db_mock);
@@ -113,38 +113,34 @@ describe("updateLastEventId", () => {
       key: "lastEvent",
       value: 2,
     });
-  })
-})
+  });
+});
 
 describe("getLastEventId", () => {
   test("correctly updated last event id", async () => {
-    const get_mock = vi.fn().mockResolvedValue({value : "test"});
+    const get_mock = vi.fn().mockResolvedValue({ value: "test" });
     const db_mock = {
-      metadata : {
-        get : get_mock
-      }
+      metadata: {
+        get: get_mock,
+      },
     };
 
     const updater = new SyncDBUpdater(db_mock);
     const record = await updater.getLastEventId(2);
-    expect(get_mock).toHaveBeenCalledWith(
-      "lastEvent"
-    );
+    expect(get_mock).toHaveBeenCalledWith("lastEvent");
     expect(record).toBe("test");
-  })
+  });
   test("last event id empty, returns 0", async () => {
     const get_mock = vi.fn().mockResolvedValue(undefined);
     const db_mock = {
-      metadata : {
-        get : get_mock
-      }
+      metadata: {
+        get: get_mock,
+      },
     };
 
     const updater = new SyncDBUpdater(db_mock);
     const record = await updater.getLastEventId(2);
-    expect(get_mock).toHaveBeenCalledWith(
-      "lastEvent"
-    );
+    expect(get_mock).toHaveBeenCalledWith("lastEvent");
     expect(record).toBe(0);
-  })
-})
+  });
+});

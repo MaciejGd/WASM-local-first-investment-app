@@ -61,9 +61,7 @@ class DBUpdater:
         else:
             table_hash = self.reevaluate_hash(user_id, table_name, obj_hash)
 
-        return db_proxy.remove_data_record(
-            user_id, table_name, type, ulid, table_hash
-        )
+        return db_proxy.remove_data_record(user_id, table_name, type, ulid, table_hash)
 
     def process_event(self, user_id, table_name, type, ulid, hash, payload):
         """

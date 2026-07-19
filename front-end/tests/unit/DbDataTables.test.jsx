@@ -75,7 +75,9 @@ describe("constructor / getInstance", () => {
 describe("initializeTableNames", () => {
   test("maps db tables to their string names", () => {
     const handler = IndexedDbHandler.getInstance();
-    expect(handler.table_to_name.get(mockDb.wallet_assets)).toBe("wallet_assets");
+    expect(handler.table_to_name.get(mockDb.wallet_assets)).toBe(
+      "wallet_assets",
+    );
     expect(handler.table_to_name.get(mockDb.sim_history)).toBe("sim_history");
   });
 });
@@ -150,7 +152,10 @@ describe("_addRecord", () => {
   test("generates ulid, hashes payload, syncs and puts to db", async () => {
     const { putDataToDb, getTablesHashes } = await import("../../src/db/db");
     putDataToDb.mockResolvedValue(10);
-    getTablesHashes.mockResolvedValue({ wallet_assets: "aa", sim_history: "bb" });
+    getTablesHashes.mockResolvedValue({
+      wallet_assets: "aa",
+      sim_history: "bb",
+    });
 
     const handler = IndexedDbHandler.getInstance();
     const payload = { ticker: "AAPL" };
@@ -236,8 +241,14 @@ describe("deleteWalletAssets", () => {
     await handler.deleteWalletAssets([1, 2]);
 
     expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledTimes(2);
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("u1", "wallet_assets");
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("u2", "wallet_assets");
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "u1",
+      "wallet_assets",
+    );
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "u2",
+      "wallet_assets",
+    );
     expect(mockDb.wallet_assets.bulkDelete).toHaveBeenCalledWith([1, 2]);
   });
 });
@@ -249,7 +260,10 @@ describe("deleteSimsResults", () => {
     const handler = IndexedDbHandler.getInstance();
     await handler.deleteSimsResults([5]);
 
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("u3", "sim_history");
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "u3",
+      "sim_history",
+    );
     expect(mockDb.sim_history.bulkDelete).toHaveBeenCalledWith([5]);
   });
 });
@@ -266,27 +280,40 @@ describe("dispatchRemoveEvents", () => {
     await handler.dispatchRemoveEvents(mockDb.wallet_assets, [1, 2, 3]);
 
     expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledTimes(3);
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("a", "wallet_assets");
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("b", "wallet_assets");
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("c", "wallet_assets");
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "a",
+      "wallet_assets",
+    );
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "b",
+      "wallet_assets",
+    );
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "c",
+      "wallet_assets",
+    );
   });
 
   test("calls AddRemovalEvent for selected records", async () => {
-    const allRecords = [
-      { ulid: "a" },
-      { ulid: "b" },
-      { ulid: "c" }
-    ];
+    const allRecords = [{ ulid: "a" }, { ulid: "b" }, { ulid: "c" }];
 
     mockDb.wallet_assets.bulkGet.mockImplementation((arr) => {
-      return Promise.resolve(arr.map((id) => allRecords.find((r) => r.ulid === id)));
+      return Promise.resolve(
+        arr.map((id) => allRecords.find((r) => r.ulid === id)),
+      );
     });
 
     const handler = IndexedDbHandler.getInstance();
     await handler.dispatchRemoveEvents(mockDb.wallet_assets, ["a", "c"]);
 
     expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledTimes(2);
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("a", "wallet_assets");
-    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith("c", "wallet_assets");
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "a",
+      "wallet_assets",
+    );
+    expect(mockSyncWorker.AddRemovalEvent).toHaveBeenCalledWith(
+      "c",
+      "wallet_assets",
+    );
   });
 });

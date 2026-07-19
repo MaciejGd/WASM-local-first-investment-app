@@ -110,7 +110,9 @@ export class DBSynchronizer {
    */
   async _addEventToQueue(object) {
     // encrypt payload if exists, before sending to server
-    object.payload = (object.payload) ? await DBEncryptor.encrypt(object.payload) : null;
+    object.payload = object.payload
+      ? await DBEncryptor.encrypt(object.payload)
+      : null;
     await this.event_queue.push(object);
   }
 

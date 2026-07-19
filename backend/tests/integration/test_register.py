@@ -20,4 +20,4 @@ def test_register_user_username_already_used(app, authentication):
     add_user(app, "test", "pass", "salt")
 
     response = authentication.register("test", "pass")
-    assert  response.status_code == HTTPStatus.CONFLICT
+    assert response.status_code == HTTPStatus.CONFLICT

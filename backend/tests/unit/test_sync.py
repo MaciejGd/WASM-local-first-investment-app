@@ -102,22 +102,6 @@ def test_push_changes_no_table_name(_, client, example_json):
 
 
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
-def test_push_changes_no_timestamp(_, client, example_json):
-    example_json["timestamp"] = None
-
-    with client.session_transaction() as sess:
-        sess["user_id"] = 1
-
-    response = client.post(
-        "/api/sync/push_event",
-        json=example_json,
-        content_type="application/json",
-    )
-
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-
-
-@patch("inv_app.sync.DBUpdater.process_event", return_value=12)
 def test_push_changes_no_type(_, client, example_json):
     example_json["type"] = None
 

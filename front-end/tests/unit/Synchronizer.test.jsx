@@ -81,7 +81,9 @@ vi.mock("../../src/db/db.js", () => ({
 }));
 
 vi.mock("../../src/sync/syncDBUpdater.js", () => ({
-  SyncDBUpdater: vi.fn(function () { return mockDbUpdater; }),
+  SyncDBUpdater: vi.fn(function () {
+    return mockDbUpdater;
+  }),
 }));
 
 vi.mock("../../src/db/db_encryptor.js", () => ({
@@ -112,8 +114,16 @@ beforeEach(async () => {
       count: vi.fn().mockResolvedValue(0),
       add: vi.fn(),
       delete: vi.fn(),
-      orderBy: vi.fn().mockReturnValue({ first: vi.fn().mockResolvedValue(null) }),
-      where: vi.fn().mockReturnValue({ equals: vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }) }),
+      orderBy: vi
+        .fn()
+        .mockReturnValue({ first: vi.fn().mockResolvedValue(null) }),
+      where: vi
+        .fn()
+        .mockReturnValue({
+          equals: vi
+            .fn()
+            .mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }),
+        }),
     };
   });
 
@@ -122,8 +132,14 @@ beforeEach(async () => {
   mockDbUpdater.updateLastEventId.mockReset().mockResolvedValue(undefined);
   mockDbUpdater.getLastEventId.mockReset().mockResolvedValue(0);
 
-  mockEncrypt.mockReset().mockImplementation((p) => Promise.resolve(`encrypted_${JSON.stringify(p)}`));
-  mockDecrypt.mockReset().mockImplementation((p) => Promise.resolve({ decrypted: true }));
+  mockEncrypt
+    .mockReset()
+    .mockImplementation((p) =>
+      Promise.resolve(`encrypted_${JSON.stringify(p)}`),
+    );
+  mockDecrypt
+    .mockReset()
+    .mockImplementation((p) => Promise.resolve({ decrypted: true }));
 
   mockRequestPOST.mockReset();
   mockRequestGET.mockReset();
@@ -219,7 +235,9 @@ describe("PersistentEventQueue", () => {
 describe("addAdditionToEventQueue", () => {
   test("creates add event and pushes to queue", async () => {
     const s = new DBSynchronizer();
-    await s.addAdditionToEventQueue("ulid-1", "wallet_assets", "hash1", { ticker: "AAPL" });
+    await s.addAdditionToEventQueue("ulid-1", "wallet_assets", "hash1", {
+      ticker: "AAPL",
+    });
 
     expect(eventsStore).toHaveLength(1);
     expect(eventsStore[0]).toMatchObject({
@@ -285,10 +303,11 @@ describe("pushToRemote", () => {
     const s = new DBSynchronizer();
     const ret = await s.pushToRemote();
 
-    expect(mockRequestPOST).toHaveBeenCalledWith(
-      "/api/sync/push_event",
-      { id: 1, type: "add", ulid: "u1" },
-    );
+    expect(mockRequestPOST).toHaveBeenCalledWith("/api/sync/push_event", {
+      id: 1,
+      type: "add",
+      ulid: "u1",
+    });
     expect(mockDbUpdater.updateLastEventId).toHaveBeenCalledWith(42);
     expect(eventsStore).toHaveLength(0);
     expect(ret).toBe(true);
@@ -300,7 +319,7 @@ describe("pushToRemote", () => {
 
     const s = new DBSynchronizer();
     const ret = await s.pushToRemote();
-    
+
     expect(ret).toBe(false);
     expect(eventsStore).toHaveLength(2);
   });
@@ -312,7 +331,7 @@ describe("pushToRemote", () => {
     const s = new DBSynchronizer();
     const ret = await s.pushToRemote();
 
-    expect(ret).toBe(false );
+    expect(ret).toBe(false);
     expect(eventsStore).toHaveLength(1);
   });
 });
@@ -326,9 +345,7 @@ describe("pullFromRemote", () => {
     const result = await s.pullFromRemote();
 
     expect(result).toBe(true);
-    expect(mockRequestGET).toHaveBeenCalledWith(
-      "/api/sync/pull_events_ids/5",
-    );
+    expect(mockRequestGET).toHaveBeenCalledWith("/api/sync/pull_events_ids/5");
   });
 
   test("defaults lastId to 0 when undefined", async () => {
@@ -338,9 +355,7 @@ describe("pullFromRemote", () => {
     const s = new DBSynchronizer();
     await s.pullFromRemote();
 
-    expect(mockRequestGET).toHaveBeenCalledWith(
-      "/api/sync/pull_events_ids/0",
-    );
+    expect(mockRequestGET).toHaveBeenCalledWith("/api/sync/pull_events_ids/0");
   });
 
   test("returns true and updates lastEventId when >100 ids", async () => {
@@ -355,24 +370,22 @@ describe("pullFromRemote", () => {
   });
 
   test("fetches events and calls updatePendingEvents", async () => {
-    mockRequestGET
-      .mockResolvedValueOnce([1, 2])
-      .mockResolvedValueOnce([
-        {
-          id: 1,
-          type: "add",
-          ulid: "u1",
-          table_name: "wallet_assets",
-          hash: "h1",
-          payload: "enc1",
-        },
-        {
-          id: 2,
-          type: "remove",
-          ulid: "u2",
-          table_name: "sim_history",
-        },
-      ]);
+    mockRequestGET.mockResolvedValueOnce([1, 2]).mockResolvedValueOnce([
+      {
+        id: 1,
+        type: "add",
+        ulid: "u1",
+        table_name: "wallet_assets",
+        hash: "h1",
+        payload: "enc1",
+      },
+      {
+        id: 2,
+        type: "remove",
+        ulid: "u2",
+        table_name: "sim_history",
+      },
+    ]);
 
     const s = new DBSynchronizer();
     await s.pullFromRemote();
@@ -480,10 +493,10 @@ describe("compareHashes", () => {
     const result = await s.compareHashes();
 
     expect(result).toBe(true);
-    expect(mockRequestPOST).toHaveBeenCalledWith(
-      "/api/sync/hash_compare",
-      { wallet_assets: "aabb", sim_history: "ccdd" },
-    );
+    expect(mockRequestPOST).toHaveBeenCalledWith("/api/sync/hash_compare", {
+      wallet_assets: "aabb",
+      sim_history: "ccdd",
+    });
     expect(mockDbUpdater.addRecord).not.toHaveBeenCalled();
   });
 
@@ -518,8 +531,7 @@ describe("compareHashes", () => {
     const { getTablesHashes, clearTable } = await import("../../src/db/db.js");
     getTablesHashes.mockResolvedValue({ wallet_assets: "hash" });
     mockRequestPOST.mockResolvedValue({
-      json: () =>
-        Promise.resolve({ wallet_assets: { equal: false } }),
+      json: () => Promise.resolve({ wallet_assets: { equal: false } }),
     });
 
     const s = new DBSynchronizer();
@@ -606,10 +618,9 @@ describe("purgeTable", () => {
     const s = new DBSynchronizer();
     await s.purgeTable("wallet_assets");
 
-    expect(mockRequestPOST).toHaveBeenCalledWith(
-      "/api/sync/purge",
-      { table_name: "wallet_assets" },
-    );
+    expect(mockRequestPOST).toHaveBeenCalledWith("/api/sync/purge", {
+      table_name: "wallet_assets",
+    });
   });
 
   test("does not throw on request failure", async () => {

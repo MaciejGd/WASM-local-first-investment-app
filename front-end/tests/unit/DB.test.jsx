@@ -1,7 +1,6 @@
 import { expect, test, vi, describe, beforeEach } from "vitest";
 
-const ZERO_HASH =
-  "0000000000000000000000000000000000000000";
+const ZERO_HASH = "0000000000000000000000000000000000000000";
 
 const mockTable = () => ({
   get: vi.fn(),
