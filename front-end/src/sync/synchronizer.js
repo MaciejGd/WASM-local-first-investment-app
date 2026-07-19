@@ -109,8 +109,8 @@ export class DBSynchronizer {
    * @param {Object} object object to be pushed to the queue
    */
   async _addEventToQueue(object) {
-    object.timestamp = new Date();
-    object.payload = await DBEncryptor.encrypt(object.payload); // encrypt payload before sending to server
+    // encrypt payload if exists, before sending to server
+    object.payload = (object.payload) ? await DBEncryptor.encrypt(object.payload) : null;
     await this.event_queue.push(object);
   }
 
@@ -120,7 +120,7 @@ export class DBSynchronizer {
    */
   async pushToRemote() {
     if (this.event_queue === undefined || (await this.event_queue.empty())) {
-      return;
+      return true;
     }
 
     const push_event = async () => {
@@ -145,10 +145,9 @@ export class DBSynchronizer {
     };
     while ((await this.event_queue.empty()) === false) {
       let ret = await push_event();
-      if (ret == false) break;
+      if (ret == false) return false;
     }
-
-    this.outgoing_events_pending = false;
+    return true;
   }
 
   /**
@@ -167,10 +166,8 @@ export class DBSynchronizer {
       var ids = await RequestGET(
         DBSynchronizer.PULL_EVENTS_IDS + lastId.toString(),
       );
-      console.log(ids);
-      // here we should probably validate the data
+      // means no remote changes, quit immediately
       if (ids.length == 0) {
-        console.log("No remote changes");
         return true;
       }
       // too many events to update, just refetch whole db
@@ -192,7 +189,6 @@ export class DBSynchronizer {
    * @param {Array} events array of pending events updated to remote server, to be added to local db
    */
   async updatePendingEvents(events) {
-    console.log("In updating the events!");
     var biggest_id = -1;
     try {
       for (let i = 0; i < events.length; i++) {
