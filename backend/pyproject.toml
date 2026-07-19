@@ -11,7 +11,8 @@ requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.pytest.ini_options]
-testpaths = ["test"]
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.coverage.run]
 branch = true
