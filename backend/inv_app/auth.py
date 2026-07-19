@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash
 
 from .db import db_proxy
 
-bp = Blueprint("auth", __name__, url_prefix="/auth")
+bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 # endpoint for registering new user account

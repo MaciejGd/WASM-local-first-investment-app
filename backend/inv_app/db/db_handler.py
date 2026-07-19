@@ -47,7 +47,6 @@ class DBHandler(ABC):
         db_handle,
         user_id: int,
         table_name: str,
-        timestamp: int,
         type: str,
         ulid: str,
     ) -> int:

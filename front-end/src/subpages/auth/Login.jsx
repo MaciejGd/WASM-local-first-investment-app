@@ -39,7 +39,7 @@ export function LogInPopUp({ onClose, onSuccess }) {
   async function LogInRequest() {
     setLoading(true); // at first we want to set Loading to true, to render that to a user
     try {
-      let response = await RequestPOST("http://127.0.0.1:5000/auth/login", {
+      let response = await RequestPOST("/api/auth/login", {
         username: username,
         password: password,
       });

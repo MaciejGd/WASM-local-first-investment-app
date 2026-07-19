@@ -3,7 +3,7 @@ import { InputRow, InputRowPassword } from "./Login";
 import { RequestPOST } from "../../Requests";
 import { ErrorPopUp, InfoPopUp } from "../../components/PopUp";
 
-const register_url = "http://127.0.0.1:5000/auth/register";
+const register_url = "/api/auth/register";
 
 export default function RegisterPopUp({ onClose, onRegistered }) {
   const [username, setUsername] = useState("");

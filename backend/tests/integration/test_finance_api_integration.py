@@ -21,7 +21,7 @@ def test_get_tickers(client):
             ]
         )
 
-        response = client.get("/finance/get_stocks_list")
+        response = client.get("/api/finance/get_stocks_list")
         assert response.json == ["LPP.WA", "ZAB.WA"]
         assert response.status_code == HTTPStatus.OK
 
@@ -44,7 +44,7 @@ def test_get_recent_prices(client):
                 "Close": {"2024-01-04": 40, "2024-01-02": 40, "2024-01-05": 40},
             },
         ])
-        response = client.post("/finance/get_recent_prices", json=["BDX.PL", "ZAB.WA"])
+        response = client.post("/api/finance/get_recent_prices", json=["BDX.PL", "ZAB.WA"])
         assert response.status_code == HTTPStatus.OK
         assert response.json == {
             "BDX.PL": {"date": "2024-01-10", "price": 100},
@@ -70,7 +70,7 @@ def test_get_stock_prices(client):
                 "Close": {"2024-01-04": 20, "2024-01-02": 2, "2024-01-05": 23},
             },
         ])
-        response = client.post("/finance/get_stocks_prices", json={"tickers" : ["BDX.PL", "ZAB.WA"]})
+        response = client.post("/api/finance/get_stocks_prices", json={"tickers" : ["BDX.PL", "ZAB.WA"]})
         assert response.status_code == HTTPStatus.OK
         assert response.json == [
             {"prices" : {"2024-01-10": 100, "2024-01-02": 21, "2024-01-03": 5}, "ticker" : "BDX.PL"},

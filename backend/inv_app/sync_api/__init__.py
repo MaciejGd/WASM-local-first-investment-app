@@ -40,12 +40,11 @@ class DBUpdater:
         return db_proxy.get_all_encrypted_records(user_id, table_name)
 
     def process_add_event(
-        self, user_id, timestamp, table_name, type, ulid, hash, payload
+        self, user_id, table_name, type, ulid, hash, payload
     ) -> int | None:
         table_hash = self.reevaluate_hash(user_id, table_name, hash)
         return db_proxy.add_data_record(
             user_id,
-            timestamp,
             table_name,
             type,
             ulid,
@@ -54,7 +53,7 @@ class DBUpdater:
             self._decode_payload(payload),
         )
 
-    def process_remove_event(self, user_id, timestamp, table_name, type, ulid):
+    def process_remove_event(self, user_id, table_name, type, ulid):
         # get hash of removed element
         obj_hash = self.get_record_hash(user_id, table_name, ulid)
         if obj_hash is None:
@@ -63,15 +62,14 @@ class DBUpdater:
             table_hash = self.reevaluate_hash(user_id, table_name, obj_hash)
 
         return db_proxy.remove_data_record(
-            user_id, timestamp, table_name, type, ulid, table_hash
+            user_id, table_name, type, ulid, table_hash
         )
 
-    def process_event(self, user_id, timestamp, table_name, type, ulid, hash, payload):
+    def process_event(self, user_id, table_name, type, ulid, hash, payload):
         """
         Process incoming user's event
 
         :param user_id: id of the user
-        :param timestamp: timestamp of event
         :param table_name: name of the table to be modified
         :param type: type of the event, either "add" or "remove"
         :param ulid: unique record identifier
@@ -84,11 +82,11 @@ class DBUpdater:
 
         if type == "add":
             return self.process_add_event(
-                user_id, timestamp, table_name, type, ulid, hash, payload
+                user_id, table_name, type, ulid, hash, payload
             )
 
         elif type == "remove":
-            return self.process_remove_event(user_id, timestamp, table_name, type, ulid)
+            return self.process_remove_event(user_id, table_name, type, ulid)
 
     def get_pending_events(self, user_id, last_event_id) -> list[int]:
         """

@@ -30,9 +30,9 @@ def create_app(test_config=None, instance_path=None):
     db.init_app(app)
 
     # example, testing endpoint
-    @app.route("/hello")
-    def hello():
-        return jsonify({"first": "hello", "second": "world"})
+    @app.route("/api/health")
+    def health():
+        return jsonify({"health": "ok"})
 
     # init authentication module
     from . import auth

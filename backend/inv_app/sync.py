@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request, abort, session
 
-bp = Blueprint("sync", __name__, url_prefix="/sync")
+bp = Blueprint("sync", __name__, url_prefix="/api/sync")
 
 
 @bp.route("/push_event", methods=("POST",))
@@ -20,7 +20,6 @@ def push_changes():
     # retrieve events data
     ulid = post_json.get("ulid")
     table_name = post_json.get("table_name")
-    timestamp = post_json.get("timestamp")
     type = post_json.get("type")
     obj_hash = post_json.get("hash")
     payload = post_json.get("payload")
@@ -30,7 +29,6 @@ def push_changes():
         for v in (
             ulid,
             table_name,
-            timestamp,
             type,
             payload,
         )
@@ -39,7 +37,7 @@ def push_changes():
 
     updater = DBUpdater()
     event_id = updater.process_event(
-        session["user_id"], timestamp, table_name, type, ulid, obj_hash, payload
+        session["user_id"], table_name, type, ulid, obj_hash, payload
     )
     if event_id is None:
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, "Pushing changes to remote failed")

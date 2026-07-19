@@ -66,11 +66,11 @@ class PersistentEventQueue {
 }
 
 export class DBSynchronizer {
-  static PUSH_ENDPOINT = "http://127.0.0.1:5000/sync/push_event";
-  static PURGE_ENDPOINT = "http://127.0.0.1:5000/sync/purge";
-  static PULL_EVENTS_IDS = "http://127.0.0.1:5000/sync/pull_events_ids/";
-  static PULL_EVENTS = "http://127.0.0.1:5000/sync/pull_events/";
-  static COMPARE_HASHES = "http://127.0.0.1:5000/sync/hash_compare";
+  static PUSH_ENDPOINT = "/api/sync/push_event";
+  static PURGE_ENDPOINT = "/api/sync/purge";
+  static PULL_EVENTS_IDS = "/api/sync/pull_events_ids/";
+  static PULL_EVENTS = "/api/sync/pull_events/";
+  static COMPARE_HASHES = "/api/sync/hash_compare";
   constructor() {
     // we have two basic actions to perform
     this.db_handle = getDBInstance(); // create db handle

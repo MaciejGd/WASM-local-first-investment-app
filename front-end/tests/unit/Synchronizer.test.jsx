@@ -286,7 +286,7 @@ describe("pushToRemote", () => {
     const ret = await s.pushToRemote();
 
     expect(mockRequestPOST).toHaveBeenCalledWith(
-      "http://127.0.0.1:5000/sync/push_event",
+      "/api/sync/push_event",
       { id: 1, type: "add", ulid: "u1" },
     );
     expect(mockDbUpdater.updateLastEventId).toHaveBeenCalledWith(42);
@@ -327,7 +327,7 @@ describe("pullFromRemote", () => {
 
     expect(result).toBe(true);
     expect(mockRequestGET).toHaveBeenCalledWith(
-      "http://127.0.0.1:5000/sync/pull_events_ids/5",
+      "/api/sync/pull_events_ids/5",
     );
   });
 
@@ -339,7 +339,7 @@ describe("pullFromRemote", () => {
     await s.pullFromRemote();
 
     expect(mockRequestGET).toHaveBeenCalledWith(
-      "http://127.0.0.1:5000/sync/pull_events_ids/0",
+      "/api/sync/pull_events_ids/0",
     );
   });
 
@@ -481,7 +481,7 @@ describe("compareHashes", () => {
 
     expect(result).toBe(true);
     expect(mockRequestPOST).toHaveBeenCalledWith(
-      "http://127.0.0.1:5000/sync/hash_compare",
+      "/api/sync/hash_compare",
       { wallet_assets: "aabb", sim_history: "ccdd" },
     );
     expect(mockDbUpdater.addRecord).not.toHaveBeenCalled();
@@ -607,7 +607,7 @@ describe("purgeTable", () => {
     await s.purgeTable("wallet_assets");
 
     expect(mockRequestPOST).toHaveBeenCalledWith(
-      "http://127.0.0.1:5000/sync/purge",
+      "/api/sync/purge",
       { table_name: "wallet_assets" },
     );
   });

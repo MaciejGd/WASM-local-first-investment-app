@@ -127,7 +127,6 @@ class SQLite3DB(db_handler.DBHandler):
         db_handle,
         user_id: int,
         table_name: str,
-        timestamp: int,
         type: str,
         ulid: str,
     ) -> int:
@@ -138,7 +137,7 @@ class SQLite3DB(db_handler.DBHandler):
 
             cursor = db_handle.execute(
                 SQLite3DB.ADD_EVENT_RECORD.format(table),
-                (timestamp, table_name, type, ulid),
+                ("test", table_name, type, ulid),
             )
 
             # db_handle.commit()

@@ -124,7 +124,6 @@ class DBProxy(object):
     def add_data_record(
         self,
         user_id,
-        timestamp,
         table_name,
         type,
         ulid,
@@ -137,7 +136,6 @@ class DBProxy(object):
         After all operations are performed successfully, commits to the db.
 
         :param user_id: id of the user owning the request
-        :param timestamp: timestamp of event
         :param table_name: name of the table which is being modified
         :param type: type of the operetation
         :param ulid: unique identifier of the record
@@ -147,7 +145,7 @@ class DBProxy(object):
 
         db = self.get_db()
         event_id = self.db_handler.add_event_record(
-            db, user_id, table_name, timestamp, type, ulid
+            db, user_id, table_name, type, ulid
         )
         if event_id == -1:
             return None
@@ -170,11 +168,11 @@ class DBProxy(object):
         return self.db_handler.get_all_encrypted_records(db, user_id, table_name)
 
     def remove_data_record(
-        self, user_id, timestamp, table_name, type, ulid, table_hash
+        self, user_id, table_name, type, ulid, table_hash
     ):
         db = self.get_db()
         event_id = self.db_handler.add_event_record(
-            db, user_id, table_name, timestamp, type, ulid
+            db, user_id, table_name, type, ulid
         )
         if event_id == -1:
             return None
