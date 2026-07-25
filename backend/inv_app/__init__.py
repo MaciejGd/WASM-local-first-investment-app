@@ -6,14 +6,15 @@ from flask_cors import CORS
 def create_app(test_config=None, instance_path=None):
     # create and configure app instance
     app = Flask(__name__, instance_relative_config=True, instance_path=instance_path)
+    # get mongo db url, from the environment variables
+    mongo_db = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
 
     app.config.from_mapping(
         SECRET_KEY="dev",
         SESSION_COOKIE_SAMESITE="None",
         SESSION_COOKIE_SECURE=True,
         DATABASE=os.path.join(app.instance_path, "application.sqlite"),
-        # default mongo db database
-        MONGO_URI="mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.0",
+        MONGO_URI=mongo_db
     )
     # load init configuration of the app
     if test_config is None:
