@@ -17,7 +17,7 @@ export default function RegisterPopUp({ onClose, onRegistered }) {
     setError("");
     try {
       if (passwordRepeat !== password) {
-        setError("Passwords does not match.");
+        setError("Passwords do not match.");
         return;
       }
       setLoading(true);
