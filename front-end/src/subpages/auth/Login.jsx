@@ -87,10 +87,6 @@ export function LogInPopUp({ onClose, onSuccess }) {
             >
               Register
             </button>
-            <button className="modal_button" onClick={onClose}>
-              {" "}
-              Close{" "}
-            </button>
             <button
               className="modal_button"
               onClick={async () => await LogInRequest()}
