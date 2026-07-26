@@ -14,7 +14,11 @@ export class SimulationAPI {
     // import and unpack create module function
     // const { default : createModule } = await import("./cpp/core/main.js");
     const { default: createModule } = await import("./main.js");
-    const module = await createModule();
+    // need that so hosting with nginx works. If main.js loaded from the blob,
+    // rest of threads are unable to get the path to main without it
+    const module = await createModule({
+      mainScriptUrlOrBlob: new URL("./main.js", import.meta.url).href,
+    });
     return new SimulationAPI(module);
   }
 
