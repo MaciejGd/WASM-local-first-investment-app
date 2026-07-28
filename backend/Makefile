@@ -17,6 +17,5 @@ all:
 run:
 	flask --app inv_app run
 
-
 req:
 	pip freeze > requirements.txt

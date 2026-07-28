@@ -26,11 +26,13 @@ services:
             - "8080:80"
         depends_on:
             - backend
+                        
     playwright:
         build: ./e2e
         depends_on:
             - frontend
             - backend
         environment:
-            BASE_URL: http://frontend:8080
+            # need to pass port 80 as this is port used for in-cluster frontend
+            BASE_URL: http://frontend:80
             DATABASE_PATH: /data/app.sqlite
