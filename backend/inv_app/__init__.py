@@ -8,13 +8,16 @@ def create_app(test_config=None, instance_path=None):
     app = Flask(__name__, instance_relative_config=True, instance_path=instance_path)
     # get mongo db url, from the environment variables
     mongo_db = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
+    db_path = os.getenv(
+        "DATABASE_PATH", os.path.join(app.instance_path, "application.sqlite")
+    )
 
     app.config.from_mapping(
         SECRET_KEY="dev",
         SESSION_COOKIE_SAMESITE="None",
         SESSION_COOKIE_SECURE=True,
-        DATABASE=os.path.join(app.instance_path, "application.sqlite"),
-        MONGO_URI=mongo_db
+        DATABASE=db_path,
+        MONGO_URI=mongo_db,
     )
     # load init configuration of the app
     if test_config is None:

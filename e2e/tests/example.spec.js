@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { BASE_URL } from './conftest';
 
 test.beforeEach(async ({ page }) => {
   console.log(`Running ${test.info().title}`);
-  await page.goto('http://localhost:8080/');
+  await page.goto(BASE_URL);
 });
 
 

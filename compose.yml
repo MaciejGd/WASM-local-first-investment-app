@@ -1,3 +1,6 @@
+volumes:
+    sqlite-data:
+
 services:
     mongo:
         build: ./backend/mongo
@@ -5,13 +8,17 @@ services:
 
     backend:
         build: ./backend
-        depends_on: 
+        depends_on:
             - mongo
         environment:
             MONGO_URI: mongodb://mongo:27017
+            DATABASE_PATH: /data/app.sqlite
         container_name: backend
         expose:
             - "5000"
+        # mount volume for the sqlite database
+        volumes:
+            - sqlite-data:/data
 
     frontend:
         build: .
@@ -19,3 +26,11 @@ services:
             - "8080:80"
         depends_on:
             - backend
+    playwright:
+        build: ./e2e
+        depends_on:
+            - frontend
+            - backend
+        environment:
+            BASE_URL: http://frontend:8080
+            DATABASE_PATH: /data/app.sqlite
