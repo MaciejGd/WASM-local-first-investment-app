@@ -88,7 +88,7 @@ def test_login_required_throws(app):
             called = True
             return "success"
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             view()
 
 

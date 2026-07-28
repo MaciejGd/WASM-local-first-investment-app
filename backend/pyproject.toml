@@ -20,3 +20,6 @@ source = ["inv_app"]
 
 [tool.ruff]
 exclude = ["./venv", "./inv_app/__pycache__"]
+
+[tool.ruff.lint]
+ignore=["BLE001"]

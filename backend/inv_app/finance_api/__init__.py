@@ -3,6 +3,9 @@ from flask import current_app
 from .mongo_handler import MongoHandler
 
 
+class FinanceAPIException(Exception):
+    pass
+
 class FinanceDataAPI:
     def __init__(self):
         self._db_handler = None
@@ -48,12 +51,12 @@ class FinanceDataAPI:
             )
 
             if doc is None:
-                raise Exception
+                raise FinanceAPIException("Did not found ticker in db")
 
             close_prices = doc.get("Close", {})
 
             if not close_prices:
-                raise Exception
+                raise FinanceAPIException("Ticker does not contain close prices")
 
             last_date = max(close_prices.keys())
             last_price = close_prices[last_date]
@@ -64,7 +67,7 @@ class FinanceDataAPI:
             }
 
         except Exception as e:
-            raise Exception(f"Failed to get {ticker} finance data") from e
+            raise FinanceAPIException(f"Failed to get {ticker} finance data") from e
 
     def get_stock_prices(self, ticker: str) -> dict:
         try:
@@ -76,7 +79,7 @@ class FinanceDataAPI:
             return_dict = {"ticker": doc["ticker"], "prices": doc["Close"]}
             return return_dict
         except Exception as e:
-            raise Exception(f"Failed to get {ticker} finance data") from e
+            raise FinanceAPIException(f"Failed to get {ticker} finance data") from e
 
     def get_tickers_list(self) -> list[str]:
         try:
@@ -86,7 +89,7 @@ class FinanceDataAPI:
                 tickers.append(c["ticker"])
             return tickers
         except Exception as e:
-            raise Exception("Failed to retrieve tickers list") from e
+            raise FinanceAPIException("Failed to retrieve tickers list") from e
 
 
 # finance data api that should be shared across all files
