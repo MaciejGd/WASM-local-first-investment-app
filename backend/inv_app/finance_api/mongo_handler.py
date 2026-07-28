@@ -15,7 +15,7 @@ class MongoHandler:
             db = self.client.get_database(db_name)
             return db
         except Exception as e:
-            raise Exception("Failed to get db: {}".format(db_name)) from e
+            raise Exception(f"Failed to get db: {db_name}") from e
 
     def get_collection(self, db, col_name: str):
         """Try getting collection from db"""
@@ -24,7 +24,7 @@ class MongoHandler:
             collection = db.get_collection(col_name)
             return collection
         except Exception as e:
-            raise Exception("Collection: {}".format(col_name)) from e
+            raise Exception(f"Collection: {col_name}") from e
 
     def find_one(self, db_name, col_name, filter):
         # get element from db and reset id

@@ -1,6 +1,8 @@
-import pytest
-from inv_app.finance_api.mongo_handler import MongoHandler
 from unittest.mock import MagicMock
+
+import pytest
+
+from inv_app.finance_api.mongo_handler import MongoHandler
 
 
 @pytest.fixture

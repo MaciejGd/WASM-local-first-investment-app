@@ -1,5 +1,6 @@
-from ..db import db_proxy
 import base64
+
+from ..db import db_proxy
 
 
 class DBUpdater:

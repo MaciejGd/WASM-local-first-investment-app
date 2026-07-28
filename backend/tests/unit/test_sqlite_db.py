@@ -1,7 +1,9 @@
-import pytest
-from inv_app.db.db_sqlite import SQLite3DB
-from unittest.mock import MagicMock, call
 import sqlite3
+from unittest.mock import MagicMock, call
+
+import pytest
+
+from inv_app.db.db_sqlite import SQLite3DB
 
 
 @pytest.fixture
@@ -18,7 +20,7 @@ def test_close(sqlite_db):
 
 
 def test_setup_connection(app, sqlite_db, monkeypatch):
-    class Recorder(object):
+    class Recorder:
         database = None
         detect_types = None
 
@@ -68,7 +70,7 @@ def test_register_user(sqlite_db):
     sqlite_db.get_user_data(db_handle, example_uid)
 
     db_handle.execute.assert_called_once_with("SELECT * FROM user WHERE id = ?", (12,))
-    db_handle.commit.assert_called_once
+    db_handle.commit.assert_called_once()
 
 
 def test_register_user_throws(sqlite_db):
@@ -91,7 +93,7 @@ def test_reset_collection(sqlite_db):
             call(SQLite3DB.VACUUM),
         ]
     )
-    db_handle.commit.assert_called_once
+    db_handle.commit.assert_called_once()
 
 
 def test_reset_collection_throw(sqlite_db):
@@ -101,7 +103,7 @@ def test_reset_collection_throw(sqlite_db):
 
     ret = sqlite_db.reset_collection(db_handle, 2, "wallet")
     assert not ret
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
 
 
 def test_add_event_record_pass(sqlite_db):
@@ -127,7 +129,7 @@ def test_add_event_record_pass(sqlite_db):
             ),
         ]
     )
-    db_handle.commit.assert_called_once
+    db_handle.commit.assert_called_once()
 
 
 def test_add_event_record_exception(sqlite_db):
@@ -183,7 +185,7 @@ def test_add_encrypted_data_record_exception(sqlite_db):
         db_handle, 2, table_name, ulid, hash, payload
     )
     assert ret == -1
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
 
 
 def test_get_encrypted_record(sqlite_db):
@@ -215,7 +217,7 @@ def test_get_encrypted_data_record_exception(sqlite_db):
 
     ret = sqlite_db.get_encrypted_record(db_handle, 2, table_name, ulid)
     assert ret is None
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
 
 
 def test_remove_encrypted_record(sqlite_db):
@@ -234,7 +236,7 @@ def test_remove_encrypted_record_throws(sqlite_db):
 
     ret = sqlite_db.remove_encrypted_record(db_handle, 4, "wallet", "test")
     assert not ret
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
 
 
 def test_get_events_from_id(sqlite_db):
@@ -257,7 +259,7 @@ def test_get_events_from_id_throws(sqlite_db):
 
     ret = sqlite_db.get_events_from_id(db_handle, 4, 0)
     assert ret == []
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
 
 
 def test_get_event_correct(sqlite_db):
@@ -293,7 +295,7 @@ def test_update_collection_hash_pass(sqlite_db):
             call(SQLite3DB.UPDATE_META.format("meta_4"), ("wallet_4", "test_hash")),
         ]
     )
-    db_handle.commit.assert_called_once
+    db_handle.commit.assert_called_once()
 
 
 def test_udpate_collection_hash_throws(sqlite_db):
@@ -301,7 +303,7 @@ def test_udpate_collection_hash_throws(sqlite_db):
     db_handle.execute.side_effect = Exception()
 
     ret = sqlite_db.update_collection_hash(db_handle, 4, "wallet", "test_hash")
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
     assert not ret
 
 
@@ -321,7 +323,7 @@ def test_get_collection_hash_pass(sqlite_db):
         ]
     )
 
-    db_handle.commit.assert_called_once
+    db_handle.commit.assert_called_once()
 
 
 def test_get_collection_hash_pass_throws(sqlite_db):
@@ -329,7 +331,7 @@ def test_get_collection_hash_pass_throws(sqlite_db):
     db_handle.execute.side_effect = Exception()
 
     ret = sqlite_db.get_collection_hash(db_handle, 4, "wallet")
-    db_handle.rollback.assert_called_once
+    db_handle.rollback.assert_called_once()
     assert ret is None
 
 

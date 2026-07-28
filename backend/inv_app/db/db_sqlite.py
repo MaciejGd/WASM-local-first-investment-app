@@ -1,7 +1,8 @@
 import sqlite3
-from . import db_handler
 
 from flask import current_app
+
+from . import db_handler
 
 
 class SQLite3DB(db_handler.DBHandler):

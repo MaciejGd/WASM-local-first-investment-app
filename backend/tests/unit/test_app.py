@@ -1,6 +1,6 @@
-import pytest
-
 import os
+
+import pytest
 
 from inv_app import create_app
 

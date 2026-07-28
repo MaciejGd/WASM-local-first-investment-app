@@ -1,6 +1,8 @@
-from inv_app.finance_api import FinanceDataAPI
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
+from inv_app.finance_api import FinanceDataAPI
 
 
 @pytest.fixture

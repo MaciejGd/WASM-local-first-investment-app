@@ -2,10 +2,11 @@
 File with enpoints for receiving finance data
 """
 
-from .finance_api import finance_api
-
 from http import HTTPStatus
+
 from flask import Blueprint, jsonify, request
+
+from .finance_api import finance_api
 
 bp = Blueprint("finance", __name__, url_prefix="/api/finance")
 

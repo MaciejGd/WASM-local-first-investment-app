@@ -1,4 +1,5 @@
 from http import HTTPStatus
+
 from tests.integration_conf import add_user
 
 

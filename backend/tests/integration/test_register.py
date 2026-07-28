@@ -1,7 +1,8 @@
-from tests.integration_conf import add_user, get_user_from_db
+from http import HTTPStatus
+
 from werkzeug.security import check_password_hash
 
-from http import HTTPStatus
+from tests.integration_conf import add_user, get_user_from_db
 
 
 def test_register_user(app, authentication):

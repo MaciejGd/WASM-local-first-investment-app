@@ -3,11 +3,11 @@ from http import HTTPStatus
 
 from flask import (
     Blueprint,
+    abort,
     g,
+    jsonify,
     request,
     session,
-    abort,
-    jsonify,
 )
 from werkzeug.security import check_password_hash
 

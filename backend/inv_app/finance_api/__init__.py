@@ -1,5 +1,6 @@
-from .mongo_handler import MongoHandler
 from flask import current_app
+
+from .mongo_handler import MongoHandler
 
 
 class FinanceDataAPI:
@@ -63,7 +64,7 @@ class FinanceDataAPI:
             }
 
         except Exception as e:
-            raise Exception("Failed to get {} finance data".format(ticker)) from e
+            raise Exception(f"Failed to get {ticker} finance data") from e
 
     def get_stock_prices(self, ticker: str) -> dict:
         try:
@@ -75,7 +76,7 @@ class FinanceDataAPI:
             return_dict = {"ticker": doc["ticker"], "prices": doc["Close"]}
             return return_dict
         except Exception as e:
-            raise Exception("Failed to get {} finance data".format(ticker)) from e
+            raise Exception(f"Failed to get {ticker} finance data") from e
 
     def get_tickers_list(self) -> list[str]:
         try:

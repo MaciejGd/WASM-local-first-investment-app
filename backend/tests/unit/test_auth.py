@@ -1,8 +1,10 @@
-import pytest
-from flask import session, g
-from inv_app import auth
-from unittest.mock import patch
 from http import HTTPStatus
+from unittest.mock import patch
+
+import pytest
+from flask import g, session
+
+from inv_app import auth
 
 
 @pytest.mark.parametrize(

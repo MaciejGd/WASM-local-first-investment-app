@@ -1,7 +1,9 @@
 from http import HTTPStatus
 from unittest.mock import patch
-from inv_app.finance_api import finance_api
+
 import mongomock
+
+from inv_app.finance_api import finance_api
 
 
 @patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)

@@ -2,9 +2,9 @@ import os
 import tempfile
 
 import pytest
+
 from inv_app import create_app
 from inv_app.db import db_proxy
-
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf-8")
@@ -43,7 +43,7 @@ def runner(app):
     return app.test_cli_runner()
 
 
-class AuthActions(object):
+class AuthActions:
     def __init__(self, client):
         self._client = client
 

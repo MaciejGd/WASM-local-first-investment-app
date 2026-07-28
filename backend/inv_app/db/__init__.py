@@ -1,13 +1,13 @@
-from . import db_handler, db_sqlite
+import secrets
 
 import click
 from flask import current_app, g
-import secrets
-
 from werkzeug.security import generate_password_hash
 
+from . import db_handler, db_sqlite
 
-class DBProxy(object):
+
+class DBProxy:
     def __init__(self, db_instance: db_handler.DBHandler, schema_path: str):
         self.db_handler = db_instance
         self.schema_path = schema_path
