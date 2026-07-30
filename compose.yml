@@ -36,3 +36,5 @@ services:
             # need to pass port 80 as this is port used for in-cluster frontend
             BASE_URL: http://frontend:80
             DATABASE_PATH: /data/app.sqlite
+        volumes:
+            - sqlite-data:/data

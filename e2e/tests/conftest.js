@@ -1,5 +1,7 @@
+const path = require('path');
+
 const BASE_URL = process.env.BASE_URL || "http://localhost:8080/";
-const DATABASE_PATH = process.env.DATABASE_PATH || "../../backend/instance/application.sqlite";
+const DATABASE_PATH = process.env.DATABASE_PATH || path.join(__dirname, "../../backend/instance/application.sqlite");
 
 module.exports= {
   BASE_URL,

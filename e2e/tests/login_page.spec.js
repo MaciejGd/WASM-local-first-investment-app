@@ -1,5 +1,7 @@
-import { test, expect } from '@playwright/test';
+// import { test, expect } from '@playwright/test';
+const { test, expect } = require('./fixtures/db');
 import { BASE_URL } from './conftest';
+
 
 test.beforeEach(async ({ page }) => {
   console.log(`Running ${test.info().title}`);
@@ -150,5 +152,9 @@ test.describe("Register modal", () => {
 
     await expect(page.getByText('Error')).toBeVisible();
     await expect(page.getByText('Password is required.')).toBeVisible();
+  });
+
+  test('db test', async ({page, db}) => {
+    return;
   });
 })
