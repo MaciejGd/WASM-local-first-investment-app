@@ -154,7 +154,26 @@ test.describe("Register modal", () => {
     await expect(page.getByText('Password is required.')).toBeVisible();
   });
 
-  test('db test', async ({page, db}) => {
-    return;
+  test('Check registering user succeeded', async ({page, db}) => {
+    await page.getByText('Register').click();
+
+    const username = page.locator('input').nth(2);
+    const password = page.locator('input').nth(3);
+    const password_repeat = page.locator('input').nth(4);
+
+    await username.fill("test");
+    await password.fill("pass");
+    await password_repeat.fill("pass");
+
+    await page.getByRole('button', { name: 'Accept' }).nth(1).click();
+
+    await expect(page.getByText('Info')).toBeVisible();
+    await expect(page.getByText('Succeed to register user account')).toBeVisible();
+
+    // check if db has values expected
+    const users = db.prepare("SELECT * FROM user;").all();
+
+    expect(users).toHaveLength(1);
+    expect(users[0].username).toBe('test');
   });
 })

@@ -1,10 +1,5 @@
 import { DATABASE_PATH } from '../conftest';
 
-
-console.log(process.version);
-console.log(process.execPath);
-
-
 const { test : base, expect } = require('@playwright/test');
 const Database = require('better-sqlite3');
 const path = require('path');
@@ -17,7 +12,6 @@ const test = base.extend({
       // remove db if it already exists
       fs.unlinkSync(DATABASE_PATH);
     }    
-    console.log("Database path: ", DATABASE_PATH);
     // create brand new sqlite3 database for the purpose of tests
     const db = new Database(DATABASE_PATH)
     const schema = fs.readFileSync(
