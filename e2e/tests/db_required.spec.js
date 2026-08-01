@@ -143,7 +143,9 @@ test.describe('Stock page', () => {
     await registerAndLogin(page, 'test', 'pass');
 
     await page.getByRole('button', { name: 'Add asset' }).click();
-    const modal = page.locator('.modal_container');
+    const modal = page.locator('.modal_container').filter({
+      hasText: 'Add asset',
+    });
     await expect(modal.getByText('Add asset')).toBeVisible();
 
     const inputs = modal.locator('input');
@@ -153,8 +155,132 @@ test.describe('Stock page', () => {
 
     await modal.getByRole('button', { name: 'Accept' }).click();
 
-    // quantity is not a number, so the modal should remain open
+    // quantity is not a number, so an error pop-up is shown and the modal stays open
+    const errorPopUp = page.locator('.modal_container').filter({
+      hasText: 'Error',
+    });
+    await expect(
+      errorPopUp.getByText('Quantity value should be a number.'),
+    ).toBeVisible();
     await expect(modal.getByText('Add asset')).toBeVisible();
+  });
+
+  test('empty ticker is rejected with an error message', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+
+    await page.getByRole('button', { name: 'Add asset' }).click();
+    const modal = page.locator('.modal_container').filter({
+      hasText: 'Add asset',
+    });
+    const inputs = modal.locator('input');
+    // leave the ticker empty, only provide the numeric fields
+    await inputs.nth(1).fill('10');
+    await inputs.nth(2).fill('150');
+
+    await modal.getByRole('button', { name: 'Accept' }).click();
+
+    const errorPopUp = page.locator('.modal_container').filter({
+      hasText: 'Error',
+    });
+    await expect(
+      errorPopUp.getByText('Ticker should not be empty!'),
+    ).toBeVisible();
+    await expect(modal.getByText('Add asset')).toBeVisible();
+  });
+
+  test('ticker outside of the list is rejected with an error message', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+
+    await page.getByRole('button', { name: 'Add asset' }).click();
+    const modal = page.locator('.modal_container').filter({
+      hasText: 'Add asset',
+    });
+    const inputs = modal.locator('input');
+    await inputs.nth(0).fill('UNKNOWN');
+    await inputs.nth(1).fill('10');
+    await inputs.nth(2).fill('150');
+
+    await modal.getByRole('button', { name: 'Accept' }).click();
+
+    const errorPopUp = page.locator('.modal_container').filter({
+      hasText: 'Error',
+    });
+    await expect(
+      errorPopUp.getByText('Please select ticker from the list.'),
+    ).toBeVisible();
+    await expect(modal.getByText('Add asset')).toBeVisible();
+  });
+
+  test('non-numeric price is rejected with an error message', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+
+    await page.getByRole('button', { name: 'Add asset' }).click();
+    const modal = page.locator('.modal_container').filter({
+      hasText: 'Add asset',
+    });
+    const inputs = modal.locator('input');
+    await inputs.nth(0).fill('AAPL');
+    await inputs.nth(1).fill('10');
+    await inputs.nth(2).fill('not_a_number');
+
+    await modal.getByRole('button', { name: 'Accept' }).click();
+
+    const errorPopUp = page.locator('.modal_container').filter({
+      hasText: 'Error',
+    });
+    await expect(
+      errorPopUp.getByText('Price value should be a number.'),
+    ).toBeVisible();
+    await expect(modal.getByText('Add asset')).toBeVisible();
+  });
+
+  test('dismissing the error lets the user correct the input and add the asset', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+
+    await page.getByRole('button', { name: 'Add asset' }).click();
+    const modal = page.locator('.modal_container').filter({
+      hasText: 'Add asset',
+    });
+    const inputs = modal.locator('input');
+    await inputs.nth(0).fill('UNKNOWN');
+    await inputs.nth(1).fill('10');
+    await inputs.nth(2).fill('150');
+
+    await modal.getByRole('button', { name: 'Accept' }).click();
+
+    // the invalid ticker shows an error pop-up; closing it keeps the modal open
+    const errorPopUp = page.locator('.modal_container').filter({
+      hasText: 'Error',
+    });
+    await expect(
+      errorPopUp.getByText('Please select ticker from the list.'),
+    ).toBeVisible();
+    await errorPopUp.getByRole('button', { name: 'Close' }).click();
+    await expect(errorPopUp).not.toBeVisible();
+    await expect(modal.getByText('Add asset')).toBeVisible();
+
+    // correct the ticker and submit again, the asset should be added
+    await inputs.nth(0).fill('AAPL');
+    await modal.getByRole('button', { name: 'Accept' }).click();
+
+    await expect(modal.getByText('Add asset')).not.toBeVisible();
+    await expect(page.locator('.assets_table').getByText('AAPL')).toBeVisible();
   });
 
   test('adding a valid asset displays it in the holdings table', async ({

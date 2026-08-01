@@ -8,6 +8,7 @@ import { AssetsTable } from "./AssetsTable.jsx";
 import { IndexedDbHandler } from "../../db/DbDataTables.js"; // indexed db instance
 import { useLiveQuery } from "dexie-react-hooks";
 import { FetchStocksList } from "../finance_api/FinanceApi.jsx";
+import { ErrorPopUp } from "../../components/PopUp.jsx";
 
 export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   return (
@@ -22,25 +23,32 @@ export function AssetButtons({ onAddAsset, onDeleteSelectedCb }) {
   );
 }
 
-export function validateAsset(ticker, quantity, price) {
+/**
+ * Function for validating asset to be added to assets list, returns error or empty string
+ * @param {*} tickers_list list of possible tickers
+ * @param {*} ticker ticker to be added to table
+ * @param {*} quantity quantitiy of stock to be added
+ * @param {*} price price of the stock ath the time of buying
+ * @returns string indicate error, empty string in case of no error
+ */
+export function validateAsset(tickers_list, ticker, quantity, price) {
   if (ticker === "") {
-    console.error("Ticker should not be empty");
-    return false;
+    return "Ticker should not be empty!";
   }
-
+  if (!tickers_list.includes(ticker)) {
+    return "Please select ticker from the list.";
+  }
   // check if quantity and price is correct (number and not empty)
   const quantityNum = Number(quantity);
   if (Number.isNaN(quantityNum) || quantity == "") {
-    console.error("Quantity value is not a number!!!");
-    return false;
+    return "Quantity value should be a number.";
   }
   const priceNum = Number(price);
   if (Number.isNaN(priceNum) || price === "") {
-    console.error("price value should be a float!");
-    return false;
+    return "Price value should be a number.";
   }
 
-  return true;
+  return "";
 }
 
 export default function StockPage() {
@@ -48,6 +56,7 @@ export default function StockPage() {
   const [assets, setAssets] = useState(new AssetsMap());
   const [tickers_list, setTickersList] = useState([]);
   const db_instance = IndexedDbHandler.getInstance();
+  const [error, setError] = useState("");
 
   /// Load list of accessible tickers from the remote server
   useEffect(() => {
@@ -77,7 +86,9 @@ export default function StockPage() {
 
   /// add asset to assets list
   async function addAsset(ticker, quantity, price) {
-    if (!validateAsset(ticker, quantity, price)) {
+    var error_str = validateAsset(tickers_list, ticker, quantity, price);
+    if (error_str != "") {
+      setError(error_str);
       return;
     }
     // add new asset to the db
@@ -160,6 +171,15 @@ export default function StockPage() {
         onAccept={addAsset}
         tickersList={tickers_list}
       />
+      {error !== "" && (
+        <ErrorPopUp
+          content={error}
+          onClose={() => setError("")}
+        >
+        </ErrorPopUp>
+      )
+
+      }
     </>
   );
 }
