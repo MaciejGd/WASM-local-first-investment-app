@@ -1,5 +1,7 @@
-// import { test, expect } from '@playwright/test';
-const { test, expect } = require('./fixtures/db');
+// Tests in this file do not need access to the real sqlite3 database file, so
+// they can be run on a regular setup without replacing the application's db.
+// Tests that require the db fixture live in db_required.spec.js.
+const { test, expect } = require('@playwright/test');
 import { BASE_URL } from './conftest';
 
 
@@ -152,28 +154,5 @@ test.describe("Register modal", () => {
 
     await expect(page.getByText('Error')).toBeVisible();
     await expect(page.getByText('Password is required.')).toBeVisible();
-  });
-
-  test('Check registering user succeeded', async ({page, db}) => {
-    await page.getByText('Register').click();
-
-    const username = page.locator('input').nth(2);
-    const password = page.locator('input').nth(3);
-    const password_repeat = page.locator('input').nth(4);
-
-    await username.fill("test");
-    await password.fill("pass");
-    await password_repeat.fill("pass");
-
-    await page.getByRole('button', { name: 'Accept' }).nth(1).click();
-
-    await expect(page.getByText('Info')).toBeVisible();
-    await expect(page.getByText('Succeed to register user account')).toBeVisible();
-
-    // check if db has values expected
-    const users = db.prepare("SELECT * FROM user;").all();
-
-    expect(users).toHaveLength(1);
-    expect(users[0].username).toBe('test');
   });
 })

@@ -32,9 +32,11 @@ services:
         depends_on:
             - frontend
             - backend
+        # # without that, chromium treats frontend url as not-secure 
+        network_mode: "service:frontend"
         environment:
             # need to pass port 80 as this is port used for in-cluster frontend
-            BASE_URL: http://frontend:80
+            BASE_URL: http://localhost:80
             DATABASE_PATH: /data/app.sqlite
         volumes:
             - sqlite-data:/data
