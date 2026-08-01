@@ -328,6 +328,62 @@ test.describe('Stock page', () => {
   });
 });
 
+test.describe('Sync worker', () => {
+  test('pushed asset is stored in the remote database within a few sync cycles', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+
+    // add an asset through the UI, it gets stored locally and queued for sync
+    await page.getByRole('button', { name: 'Add asset' }).click();
+    const modal = page.locator('.modal_container');
+    const inputs = modal.locator('input');
+    await inputs.nth(0).fill('AAPL');
+    await inputs.nth(1).fill('10');
+    await inputs.nth(2).fill('150');
+    await modal.getByRole('button', { name: 'Accept' }).click();
+    await expect(page.locator('.assets_table').getByText('AAPL')).toBeVisible();
+
+    // the sync worker polls the remote server every few seconds, so the asset
+    // should show up in the remote database shortly afterwards
+    const user = db
+      .prepare("SELECT id FROM user WHERE username = 'test'")
+      .get();
+    const walletTable = `wallet_assets_${user.id}`;
+    const eventsTable = `events_${user.id}`;
+
+    await expect
+      .poll(
+        () => {
+          // the server creates the table lazily once the first event arrives
+          const table = db
+            .prepare(
+              "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+            )
+            .get(walletTable);
+          if (!table) {
+            return 0;
+          }
+          return db.prepare(`SELECT COUNT(*) AS count FROM ${walletTable}`).get()
+            .count;
+        },
+        { timeout: 20_000, intervals: [500] },
+      )
+      .toBeGreaterThan(0);
+
+    // the sync event should also be recorded in the remote events table
+    const events = db
+      .prepare(`SELECT table_name, type FROM ${eventsTable}`)
+      .all();
+    expect(events).toContainEqual({
+      table_name: 'wallet_assets',
+      type: 'add',
+    });
+  });
+});
+
 test.describe('Simulations page', () => {
   test('shows the options pane by default', async ({ page, db }) => {
     await mockFinanceApi(page);
