@@ -74,6 +74,59 @@ function mockStockPrices(days) {
   return [{ prices: prices }];
 }
 
+// check whether a table with the given name exists in the sqlite db.
+// the server creates user's tables lazily once the first sync event arrives
+function tableExists(db, tableName) {
+  return (
+    db
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+      )
+      .get(tableName) !== undefined
+  );
+}
+
+// wait until the given user's table on the remote server holds exactly
+// expectedCount records. The sync worker propagates local changes to the
+// remote server every few seconds, so the expected state should be reached
+// shortly after the test modified the local db.
+async function expectSyncedTableCount(db, username, tableName, expectedCount) {
+  const fullName = `${tableName}_${db
+    .prepare('SELECT id FROM user WHERE username = ?')
+    .get(username).id}`;
+  await expect
+    .poll(
+      () =>
+        tableExists(db, fullName)
+          ? db.prepare(`SELECT COUNT(*) AS count FROM ${fullName}`).get().count
+          : 0,
+      { timeout: 20_000, intervals: [500] },
+    )
+    .toBe(expectedCount);
+}
+
+// wait until an event of the given type has been recorded for the given
+// user's table (e.g. an "add" or "remove" sync event), proving that the
+// change was pushed to the remote server.
+async function expectSyncedEvent(db, username, tableName, eventType) {
+  const eventsTable = `events_${db
+    .prepare('SELECT id FROM user WHERE username = ?')
+    .get(username).id}`;
+  await expect
+    .poll(
+      () =>
+        tableExists(db, eventsTable)
+          ? db
+              .prepare(
+                `SELECT table_name, type FROM ${eventsTable} WHERE table_name = ? AND type = ?`,
+              )
+              .all(tableName, eventType).length
+          : 0,
+      { timeout: 20_000, intervals: [500] },
+    )
+    .toBeGreaterThan(0);
+}
+
 test.describe('Register modal', () => {
   test('Check registering user succeeded', async ({ page, db }) => {
     await registerUser(page, 'test', 'pass');
@@ -281,6 +334,9 @@ test.describe('Stock page', () => {
 
     await expect(modal.getByText('Add asset')).not.toBeVisible();
     await expect(page.locator('.assets_table').getByText('AAPL')).toBeVisible();
+
+    // the asset should be synced to the remote database
+    await expectSyncedTableCount(db, 'test', 'wallet_assets', 1);
   });
 
   test('adding a valid asset displays it in the holdings table', async ({
@@ -301,6 +357,9 @@ test.describe('Stock page', () => {
     // the modal closes once the asset has been added
     await expect(modal.getByText('Add asset')).not.toBeVisible();
     await expect(page.locator('.assets_table').getByText('AAPL')).toBeVisible();
+
+    // the asset should be synced to the remote database
+    await expectSyncedTableCount(db, 'test', 'wallet_assets', 1);
   });
 
   test('deleting a selected asset removes it from the table', async ({
@@ -325,6 +384,10 @@ test.describe('Stock page', () => {
     await page.getByRole('button', { name: 'Delete Selected' }).click();
 
     await expect(table.getByText('AAPL')).not.toBeVisible();
+
+    // the removal should be synced to the remote database
+    await expectSyncedEvent(db, 'test', 'wallet_assets', 'remove');
+    await expectSyncedTableCount(db, 'test', 'wallet_assets', 0);
   });
 });
 
@@ -348,39 +411,10 @@ test.describe('Sync worker', () => {
 
     // the sync worker polls the remote server every few seconds, so the asset
     // should show up in the remote database shortly afterwards
-    const user = db
-      .prepare("SELECT id FROM user WHERE username = 'test'")
-      .get();
-    const walletTable = `wallet_assets_${user.id}`;
-    const eventsTable = `events_${user.id}`;
-
-    await expect
-      .poll(
-        () => {
-          // the server creates the table lazily once the first event arrives
-          const table = db
-            .prepare(
-              "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
-            )
-            .get(walletTable);
-          if (!table) {
-            return 0;
-          }
-          return db.prepare(`SELECT COUNT(*) AS count FROM ${walletTable}`).get()
-            .count;
-        },
-        { timeout: 20_000, intervals: [500] },
-      )
-      .toBeGreaterThan(0);
+    await expectSyncedTableCount(db, 'test', 'wallet_assets', 1);
 
     // the sync event should also be recorded in the remote events table
-    const events = db
-      .prepare(`SELECT table_name, type FROM ${eventsTable}`)
-      .all();
-    expect(events).toContainEqual({
-      table_name: 'wallet_assets',
-      type: 'add',
-    });
+    await expectSyncedEvent(db, 'test', 'wallet_assets', 'add');
   });
 });
 
@@ -498,6 +532,18 @@ test.describe('Simulations page', () => {
     await expect(page.getByText('Simulation Results')).toBeVisible({
       timeout: 30000,
     });
+
+    // save the simulation so it is queued for sync to the remote database
+    await page.getByRole('button', { name: 'Save Sim' }).click();
+    const saveModal = page.locator('.modal_container').filter({
+      hasText: 'Input simulation name:',
+    });
+    await saveModal.locator('input').fill('test_sim');
+    await saveModal.getByRole('button', { name: 'Accept' }).click();
+    await expect(saveModal).not.toBeVisible();
+
+    // the saved simulation should be synced to the remote database
+    await expectSyncedTableCount(db, 'test', 'sim_history', 1);
   });
 });
 

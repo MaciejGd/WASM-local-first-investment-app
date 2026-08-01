@@ -31,9 +31,12 @@ def push_changes():
             ulid,
             table_name,
             type,
-            payload,
         )
     ):
+        abort(HTTPStatus.BAD_REQUEST, "Missing required payload fields.")
+
+    # add events carry the encrypted record, while remove events do not
+    if type == "add" and payload is None:
         abort(HTTPStatus.BAD_REQUEST, "Missing required payload fields.")
 
     updater = DBUpdater()

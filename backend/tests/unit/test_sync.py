@@ -135,8 +135,9 @@ def test_push_changes_no_hash_should_pass(_, client, example_json):
 
 
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
-def test_push_changes_no_payload(_, client, example_json):
+def test_push_changes_no_payload_for_add(_, client, example_json):
     example_json["payload"] = None
+    example_json["type"] = "add"
 
     with client.session_transaction() as sess:
         sess["user_id"] = 1
@@ -148,6 +149,23 @@ def test_push_changes_no_payload(_, client, example_json):
     )
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@patch("inv_app.sync.DBUpdater.process_event", return_value=12)
+def test_push_changes_remove_without_payload_should_pass(_, client, example_json):
+    example_json["payload"] = None
+    example_json["type"] = "remove"
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+
+    response = client.post(
+        "/api/sync/push_event",
+        json=example_json,
+        content_type="application/json",
+    )
+
+    assert response.status_code == HTTPStatus.OK
 
 
 @patch("inv_app.sync.DBUpdater.process_event", return_value=12)
