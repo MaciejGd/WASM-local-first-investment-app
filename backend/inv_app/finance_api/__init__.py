@@ -6,6 +6,7 @@ from .mongo_handler import MongoHandler
 class FinanceAPIException(Exception):
     pass
 
+
 class FinanceDataAPI:
     def __init__(self):
         self._db_handler = None
@@ -26,6 +27,7 @@ class FinanceDataAPI:
 
     def get_stocks_prices(self, tickers: list[str]) -> list:
         tickers_data = []
+        # TODO - change that to list comprehension
         for ticker in tickers:
             doc = self.get_stock_prices(ticker)
             tickers_data.append(doc)
@@ -84,12 +86,27 @@ class FinanceDataAPI:
     def get_tickers_list(self) -> list[str]:
         try:
             cursor = self.db_handler.get_all_docs(self.db_name, self.stock_info_col)
-            tickers = []
-            for c in cursor:
-                tickers.append(c["ticker"])
+            tickers = [obj["ticker"] for obj in cursor]
             return tickers
         except Exception as e:
             raise FinanceAPIException("Failed to retrieve tickers list") from e
+
+    def get_indicator(self, ticker, indicator):
+        try:
+            cursor = self.db_handler.find_one(
+                self.db_name, self.stock_markers_col, {"ticker": ticker}
+            )
+            if cursor is None:
+                raise FinanceAPIException(f"No such ticker: {ticker} in the db!")
+            return {
+                date: value.get(indicator)
+                for date, value in cursor.items()
+                if date != "ticker"
+            }
+        except Exception as e:
+            raise FinanceAPIException(
+                f"Failed to retrieve indicator: {indicator} for the stock: {ticker}, exc: {e}"
+            )
 
 
 # finance data api that should be shared across all files

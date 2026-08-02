@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
 
-from .finance_api import finance_api
+from .finance_api import finance_api, indicators
 
 bp = Blueprint("finance", __name__, url_prefix="/api/finance")
 
@@ -42,3 +42,14 @@ def get_recent_prices():
 def get_tickers_list():
     tickers = finance_api.get_tickers_list()
     return jsonify(tickers)
+
+
+@bp.route("/get_indicators_list", methods=("GET",))
+def get_indicators_list():
+    return jsonify(indicators.INDICATORS)
+
+
+@bp.route("/get_indicator/<ticker>/<indicator>", methods=("GET",))
+def get_indicator_values(ticker, indicator):
+    indicator = finance_api.get_indicator(ticker, indicator)
+    return jsonify(indicator)

@@ -8,6 +8,7 @@ from pymongo import MongoClient
 class MongoDBException(Exception):
     pass
 
+
 class MongoHandler:
     def __init__(self, uri: str):
         self.uri = uri

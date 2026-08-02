@@ -64,12 +64,14 @@ def test_get_username_data(sqlite_db):
 
 
 def test_register_user(sqlite_db):
+    username = "test"
+    password = "pass"
+    salt = "salt"
     db_handle = MagicMock()
 
-    example_uid = 12
-    sqlite_db.get_user_data(db_handle, example_uid)
+    sqlite_db.register_user(db_handle, username, password, salt)
 
-    db_handle.execute.assert_called_once_with("SELECT * FROM user WHERE id = ?", (12,))
+    db_handle.execute.assert_called_once_with("INSERT INTO user (username, password, salt) VALUES (?, ?, ?);", (username, password, salt))
     db_handle.commit.assert_called_once()
 
 
@@ -129,7 +131,6 @@ def test_add_event_record_pass(sqlite_db):
             ),
         ]
     )
-    db_handle.commit.assert_called_once()
 
 
 def test_add_event_record_exception(sqlite_db):

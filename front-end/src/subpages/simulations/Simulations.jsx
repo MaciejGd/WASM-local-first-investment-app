@@ -138,7 +138,6 @@ export default function SimulationsPage() {
     }
     setAssets(asset_map);
     toggleModalVisibility();
-    console.log("New assets list: ", asset_map);
   }
 
   function selectAsset(ticker, value) {

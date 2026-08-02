@@ -1,13 +1,18 @@
 import Chart from "chart.js/auto";
 import LineChart from "./LineChart.jsx";
 import { CategoryScale } from "chart.js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styling/graphs.css";
 import ComboBox from "../../components/Combobox.jsx";
+import { ErrorPopUp } from "../../components/PopUp.jsx";
+import {
+  FetchStocksList,
+  FetchIndicatorsList,
+  GetIndicatorValues,
+} from "../finance_api/FinanceApi.jsx";
 
 Chart.register(CategoryScale);
 
-/// class for storing selected graph data
 class GraphAssetData {
   constructor(ticker, indicator, color) {
     this.ticker = ticker; // assets's ticker
@@ -65,33 +70,7 @@ function generateRandomData() {
   return data;
 }
 
-// input field to select stock ticker
-function GraphTickerSelector({ onChange }) {
-  // TODO add valid data for combo box
-  return (
-    <div className="graph_ticker_selector">
-      <ComboBox onChange={onChange} placeholder="Ticker..."></ComboBox>
-    </div>
-  );
-}
-
-/// Input field letting user to choose indicator to display on graph
-function GraphIndicatorField({ onChange }) {
-  const options = ["Revenue", "NetIncome", "EBIDTA", "CFO"];
-
-  return (
-    <div className="graph_indicator_field">
-      <ComboBox
-        options={options}
-        value={""}
-        onChange={onChange}
-        placeholder="Indicator..."
-      ></ComboBox>
-    </div>
-  );
-}
-
-function GraphSelector({ onAdd }) {
+function GraphSelector({ onAdd, tickersList, indicatorsList }) {
   const [ticker, setTicker] = useState("");
   const [indicator, setIndicator] = useState("");
 
@@ -102,18 +81,30 @@ function GraphSelector({ onAdd }) {
   }
 
   function addLegendEntry() {
-    onAdd(new GraphAssetData(ticker, indicator, randomHexColor()));
+    onAdd(ticker, indicator, randomHexColor());
   }
 
   function newSetIndicator(indicator) {
-    console.log("Add indicator ", indicator);
     setIndicator(indicator);
   }
 
   return (
     <div className="graph_selector">
-      <GraphTickerSelector onChange={setTicker}></GraphTickerSelector>
-      <GraphIndicatorField onChange={newSetIndicator}></GraphIndicatorField>
+      <div className="graph_ticker_selector">
+        <ComboBox
+          options={tickersList}
+          onChange={setTicker}
+          placeholder="Ticker..."
+        ></ComboBox>
+      </div>
+      <div className="graph_indicator_field">
+        <ComboBox
+          options={indicatorsList}
+          value={""}
+          onChange={newSetIndicator}
+          placeholder="Indicator..."
+        ></ComboBox>
+      </div>
       <button
         style={{
           backgroundColor: "#4a7cff",
@@ -130,11 +121,19 @@ function GraphSelector({ onAdd }) {
 
 /// Chart we want to print on the page
 function GraphChart({ graphData }) {
+  if (!graphData || graphData.length == 0) {
+    return <></>;
+  }
+  // get all dates and make it a labels
+  const all_dates = [
+    ...new Set(graphData.flatMap((item) => Object.keys(item.data))),
+  ];
+
   const chartData = {
-    labels: Data.map((data) => data.year), // one unified graph label (most probably time)
+    labels: all_dates, // one unified graph label (most probably time)
     datasets: graphData.map((graph) => {
       return {
-        data: graph.data.map((data) => data.userGain),
+        data: Object.values(graph.data),
         backgroundColor: graph.color,
         borderColor: graph.color,
         borderWidth: 2,
@@ -188,16 +187,47 @@ function GraphContainer({ records, onDelete }) {
 
 export default function GraphsPage() {
   const [graphs, setGraphs] = useState(new Map());
+  const [tickers_list, setTickersList] = useState([]);
+  const [indicators_list, setIndicatorsList] = useState([]);
+  const [error, setError] = useState("");
+
+  /// Load list of accessible tickers from the remote server
+  useEffect(() => {
+    const load_tickers = async () => {
+      var tickers_list = await FetchStocksList();
+      setTickersList(tickers_list);
+    };
+    const load_indicators = async () => {
+      var indicator_list = await FetchIndicatorsList();
+      setIndicatorsList(indicator_list);
+    };
+    load_tickers();
+    load_indicators();
+  }, []);
 
   // we should add record to graph map
-  function AddRecord(graphRecord) {
-    const indicator = graphRecord.indicator;
+  async function AddRecord(ticker, indicator, color) {
+    if (!tickers_list.includes(ticker)) {
+      setError("Please choose ticker from list of available tickers.");
+      return;
+    }
+
+    if (!indicators_list.includes(indicator)) {
+      setError(
+        "Please choose indicator from the list of available indicators.",
+      );
+      return;
+    }
+
     const graph_data = new Map(graphs);
     if (!graph_data.has(indicator)) {
       // create entry of graph if does not exist
       graph_data.set(indicator, []);
     }
-    graphRecord.data = generateRandomData();
+
+    var graphRecord = new GraphAssetData(ticker, indicator, color);
+    // fetch values of indicator for the ticker specified
+    graphRecord.data = await GetIndicatorValues(ticker, indicator);
     // exit if ticker + indicator combination already on graph
     const rec = graph_data.get(indicator);
     if (rec.find((e) => e.ticker === graphRecord.ticker)) {
@@ -245,7 +275,11 @@ export default function GraphsPage() {
   return (
     <div className="graph_page">
       <h1>Graphs!!!</h1>
-      <GraphSelector onAdd={AddRecord}></GraphSelector>
+      <GraphSelector
+        onAdd={AddRecord}
+        tickersList={tickers_list}
+        indicatorsList={indicators_list}
+      ></GraphSelector>
       <div>
         {graphs.size == 0 && <GraphContainer records={[]}></GraphContainer>}
         {graphs.size !== 0 &&
@@ -257,6 +291,10 @@ export default function GraphsPage() {
             ></GraphContainer>
           ))}
       </div>
+      {error !== "" && (
+            <ErrorPopUp content={error} onClose={() => setError("")}></ErrorPopUp>
+      )}
     </div>
+    
   );
 }

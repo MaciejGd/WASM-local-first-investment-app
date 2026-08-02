@@ -133,7 +133,6 @@ class SQLite3DB(db_handler.DBHandler):
                 (table_name, type, ulid),
             )
 
-            # db_handle.commit()
             return cursor.lastrowid
         except Exception:
             db_handle.rollback()
@@ -179,7 +178,6 @@ class SQLite3DB(db_handler.DBHandler):
 
         try:
             db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
-            # db_handle.commit()
             return True
         except Exception:
             db_handle.rollback()

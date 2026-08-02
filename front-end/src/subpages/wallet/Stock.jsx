@@ -172,14 +172,8 @@ export default function StockPage() {
         tickersList={tickers_list}
       />
       {error !== "" && (
-        <ErrorPopUp
-          content={error}
-          onClose={() => setError("")}
-        >
-        </ErrorPopUp>
-      )
-
-      }
+        <ErrorPopUp content={error} onClose={() => setError("")}></ErrorPopUp>
+      )}
     </>
   );
 }

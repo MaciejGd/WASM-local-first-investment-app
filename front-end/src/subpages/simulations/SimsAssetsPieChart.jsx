@@ -18,7 +18,7 @@ function transformAssetsToPieData(assets) {
   const offsets = assets.map(([, data]) => {
     return 50 - data.percent;
   });
-  console.log(offsets);
+
   if (labels.length == 0) {
     return {
       labels: ["No data"],
