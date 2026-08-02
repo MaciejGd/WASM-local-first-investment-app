@@ -292,9 +292,8 @@ export default function GraphsPage() {
           ))}
       </div>
       {error !== "" && (
-            <ErrorPopUp content={error} onClose={() => setError("")}></ErrorPopUp>
+        <ErrorPopUp content={error} onClose={() => setError("")}></ErrorPopUp>
       )}
     </div>
-    
   );
 }

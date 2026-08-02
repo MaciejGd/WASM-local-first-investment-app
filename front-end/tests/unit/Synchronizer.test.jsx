@@ -117,13 +117,11 @@ beforeEach(async () => {
       orderBy: vi
         .fn()
         .mockReturnValue({ first: vi.fn().mockResolvedValue(null) }),
-      where: vi
-        .fn()
-        .mockReturnValue({
-          equals: vi
-            .fn()
-            .mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }),
-        }),
+      where: vi.fn().mockReturnValue({
+        equals: vi
+          .fn()
+          .mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }),
+      }),
     };
   });
 
