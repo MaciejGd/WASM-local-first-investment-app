@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import mongomock
 
-from inv_app.finance_api import finance_api
+from inv_app.finance_api import finance_api, indicators
 
 
 @patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
@@ -92,3 +92,45 @@ def test_get_stock_prices(client):
                 "ticker": "ZAB.WA",
             },
         ]
+
+@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
+def test_get_indicators(client):
+    with client.application.app_context():
+        handler = finance_api.db_handler
+        handler.client["StockData"]["StockMarkers"].insert_many(
+            [
+                {
+                    "ticker": "EUP.WA",
+                    "2024-01-10": {"close": 40, "open": 40, "test": 40},
+                    "2024-01-20": {"close": 39, "open": 41, "test": 10},
+                },
+                {
+                    "ticker": "BDX.PL",
+                    "2024-01-10": {"close": 100, "open": 21, "test": 5},
+                    "2024-01-20": {"close": 101, "open": 22, "test": 6},
+                },
+                {
+                    "ticker": "ZAB.WA",
+                    "2024-01-10": {"close": 20, "open": 2, "test": 23},
+                    "2024-01-20": {"close": 26, "open": 4, "test": 13},
+                },
+            ]
+        )
+        response = client.get(
+            "/api/finance/get_indicator/ZAB.WA/open"
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == {
+            "2024-01-10" : 2,
+            "2024-01-20" : 4,
+        }
+
+
+@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
+def test_get_indicators_list(client):
+    with client.application.app_context():
+        response = client.get(
+            "/api/finance/get_indicators_list"
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == indicators.INDICATORS

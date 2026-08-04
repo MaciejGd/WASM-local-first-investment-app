@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from inv_app.finance_api import FinanceDataAPI
+from inv_app.finance_api import FinanceAPIException, FinanceDataAPI
 
 
 @pytest.fixture
@@ -59,3 +59,28 @@ def test_get_stocks_prices(finance_api):
     finance_api.get_stock_prices = MagicMock(side_effect=my_get_stock)
     results = finance_api.get_stocks_prices(["LPP.WA", "BDX.WA", "CDR.WA"])
     assert results == [ticker_lpp, ticker_bdx, ticker_cdr]
+
+
+def test_get_indicators_values(finance_api, mongo_handler):
+    mongo_handler.find_one.return_value = {
+        "ticker": "test_ticker",
+        "10": {"start": 21, "end": 31, "test": 11},
+        "11": {"start": 22, "end": 32, "test": 12},
+        "12": {"start": 23, "end": 33, "test": 13},
+    }    
+    ret = finance_api.get_indicator("test_ticker", "test")
+    mongo_handler.find_one.assert_called_once_with(
+        "StockData", "StockMarkers", {"ticker": "test_ticker"}
+    )
+    assert ret == {
+        "10": 11,
+        "11": 12,
+        "12": 13,
+    }
+
+def test_get_indicators_ticker_not_found(finance_api, mongo_handler):
+    mongo_handler.find_one.return_value = None
+    
+    with pytest.raises(FinanceAPIException):
+        finance_api.get_indicator("test_ticker", "test")        
+    assert mongo_handler.find_one.called

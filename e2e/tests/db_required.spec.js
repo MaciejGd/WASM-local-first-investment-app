@@ -56,12 +56,33 @@ async function mockFinanceApi(page) {
   await page.route('**/api/finance/get_stocks_list', (route) =>
     route.fulfill({ json: ['AAPL', 'MSFT', 'GOOGL'] }),
   );
+  await page.route('**/api/finance/get_indicators_list', (route) =>
+    route.fulfill({ json: mockIndicatorList() }),
+  );
+  await page.route('**/api/finance/get_indicator/**', (route) =>
+    route.fulfill({ json: mockIndicatorValues() }),
+  );
   await page.route('**/api/finance/get_recent_prices', (route) =>
     route.fulfill({ json: { AAPL: { price: 150 }, MSFT: { price: 400 } } }),
   );
   await page.route('**/api/finance/get_stocks_prices', (route) =>
     route.fulfill({ json: mockStockPrices(300) }),
   );
+}
+
+function mockIndicatorList() {
+  return [
+    'Revenue', 'NetIncome', 'EBITDA'
+  ]
+}
+
+// indicator values over a few dates, as returned by the get_indicator endpoint
+function mockIndicatorValues() {
+  return {
+    '2020-01-01': 100,
+    '2020-02-01': 150,
+    '2020-03-01': 200,
+  };
 }
 
 // create 300 days of monotonically increasing prices for a single stock
@@ -548,16 +569,31 @@ test.describe('Simulations page', () => {
 });
 
 test.describe('Graphs page', () => {
-  test('shows the graph selector by default', async ({ page, db }) => {
+  test('shows the graph selector with tickers and indicators fetched from the remote', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
     await registerAndLogin(page, 'test', 'pass');
     await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
 
     await expect(page.getByText('Graphs!!!')).toBeVisible();
     await expect(page.getByPlaceholder('Ticker...')).toBeVisible();
     await expect(page.getByPlaceholder('Indicator...')).toBeVisible();
+
+    // the selector is populated from the remote finance service
+    await page.getByPlaceholder('Ticker...').click();
+    await expect(
+      page.locator('.combo-options').getByText('AAPL'),
+    ).toBeVisible();
+    await page.getByPlaceholder('Indicator...').click();
+    await expect(
+      page.locator('.combo-options').getByText('Revenue'),
+    ).toBeVisible();
   });
 
   test('adding a graph record displays it in the legend', async ({ page, db }) => {
+    await mockFinanceApi(page);
     await registerAndLogin(page, 'test', 'pass');
     await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
 
@@ -569,10 +605,84 @@ test.describe('Graphs page', () => {
     await expect(page.getByText('Indicator: Revenue')).toBeVisible();
   });
 
+  test('adding a graph record renders a chart with the fetched indicator values', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+    await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
+
+    await page.getByPlaceholder('Ticker...').fill('AAPL');
+    await page.getByPlaceholder('Indicator...').fill('Revenue');
+    await page.getByRole('button', { name: '+' }).click();
+
+    // the chart canvas is drawn once the indicator values arrive
+    await expect(page.locator('.graph_chart canvas')).toBeVisible();
+  });
+
+  test('ticker outside of the remote list is rejected with an error message', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+    await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
+
+    await page.getByPlaceholder('Ticker...').fill('UNKNOWN');
+    await page.getByPlaceholder('Indicator...').fill('Revenue');
+    await page.getByRole('button', { name: '+' }).click();
+
+    await expect(
+      page.getByText('Please choose ticker from list of available tickers.'),
+    ).toBeVisible();
+  });
+
+  test('indicator outside of the remote list is rejected with an error message', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+    await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
+
+    await page.getByPlaceholder('Ticker...').fill('AAPL');
+    await page.getByPlaceholder('Indicator...').fill('UnknownIndicator');
+    await page.getByRole('button', { name: '+' }).click();
+
+    await expect(
+      page.getByText(
+        'Please choose indicator from the list of available indicators.',
+      ),
+    ).toBeVisible();
+  });
+
+  test('adding the same ticker and indicator twice keeps a single legend entry', async ({
+    page,
+    db,
+  }) => {
+    await mockFinanceApi(page);
+    await registerAndLogin(page, 'test', 'pass');
+    await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
+
+    await page.getByPlaceholder('Ticker...').fill('AAPL');
+    await page.getByPlaceholder('Indicator...').fill('Revenue');
+    await page.getByRole('button', { name: '+' }).click();
+    await expect(page.getByText('Ticker: AAPL')).toHaveCount(1);
+
+    // the same ticker + indicator combination is silently ignored
+    await page.getByPlaceholder('Ticker...').fill('AAPL');
+    await page.getByPlaceholder('Indicator...').fill('Revenue');
+    await page.getByRole('button', { name: '+' }).click();
+
+    await expect(page.getByText('Ticker: AAPL')).toHaveCount(1);
+  });
+
   test('deleting a graph record removes it from the legend', async ({
     page,
     db,
   }) => {
+    await mockFinanceApi(page);
     await registerAndLogin(page, 'test', 'pass');
     await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
 
