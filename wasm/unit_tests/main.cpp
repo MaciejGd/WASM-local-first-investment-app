@@ -28,7 +28,6 @@ void generate_randoms() {
 
 int main() {
     utests::UnitTestRunner::RunTests();
-    // generate_randoms();
     return 0;
 }
 

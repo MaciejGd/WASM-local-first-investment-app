@@ -42,7 +42,6 @@ bool EqualOperator(const T& A, const T& B) {
     return A == B;
 }
 
-// TODO - add checking for 0+- corner case
 template<>
 inline bool EqualOperator(const float& A, const float& B) {
     if (sizeof(float) != sizeof(int32_t)) {
