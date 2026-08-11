@@ -11,7 +11,7 @@
 
 namespace finance_api {
 
-inline size_t s_threads = 10;
+inline constexpr size_t s_threads = 10;
 
 using namespace linalg::algorithms;
 using namespace linalg::primitives;
@@ -26,8 +26,6 @@ private:
     size_t m_stock_size;
     size_t m_stocks;
     CMatrix<double> m_weights; // we need weights
-
-    CMatrixLowerTriangular<double> m_cholesky_decomposition;
 
     std::unique_ptr<IRandomGenerator> m_rand_gen;
     std::unique_ptr<ISimsResults> m_results;
@@ -82,7 +80,7 @@ public:
         auto output = Simulate(time, sims, max_drawdowns, max_upsides);
 
         // update the output buffer with results
-        m_results = std::make_unique<SimsResults>(buff);
+        m_results = std::make_unique<CSimsResults>(buff);
         if (m_results) {
             m_results->SetSimOutput(output, m_weights);
             m_results->SetDrawdowns(max_drawdowns);
@@ -115,8 +113,6 @@ public:
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
-        auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
-        // run simulation TODO - introduce multithreading in here so Simulation is sped u        
         std::vector<double> cumLogReturns(m_stocks, 0.0);
         std::vector<double> randNormals(m_stocks, 0.0);
         // we will use pointers to data so that vectorization can happen
@@ -179,7 +175,6 @@ public:
         // count Cholesky decomposition for returns data
         auto covariance = GetCovarianceMatrix(returns.data(), returns.rows(), returns.cols());
         auto cholesky = CholeskyFactorization(covariance);
-        auto ones = CMatrix<double>(m_weights.cols(), 1, 1.0); // ones vector needed for computations
 
         // divide the whole task to the threads
         size_t threads = s_threads;
@@ -224,7 +219,7 @@ public:
             th.join();
         }
         // update the output buffer with results
-        m_results = std::make_unique<SimsResults>(buff);
+        m_results = std::make_unique<CSimsResults>(buff);
         if (m_results) {
             m_results->SetSimOutput(sim_out, m_weights);
             m_results->SetDrawdowns(drawdowns);
@@ -337,15 +332,15 @@ protected:
     // static inline size_t s_threads = 10;
 private:
     inline double fast_exp(double x)
-{
-    const double a = 1.0;
-    const double b = 1.0;
-    const double c = 0.5;
-    const double d = 0.1666666667;
-    const double e = 0.0416666667;
+    {
+        const double a = 1.0;
+        const double b = 1.0;
+        const double c = 0.5;
+        const double d = 0.1666666667;
+        const double e = 0.0416666667;
 
-    return a + x*(b + x*(c + x*(d + x*e)));
-}
+        return a + x*(b + x*(c + x*(d + x*e)));
+    }
 };
 
 } // end of finance_api namespace

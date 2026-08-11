@@ -39,7 +39,7 @@ public:
 };
 
 /// @brief Class for filling results buffer with simulation's data
-class SimsResults : public ISimsResults {
+class CSimsResults : public ISimsResults {
 private:
     // underlying type should be double, so f64
     // percentyle 10, 20, 30, 40, 50, 60, 70, 80, 90
@@ -54,8 +54,8 @@ private:
     int m_var_ptr =         s_MEASURES * 3;     // insert var value at the end of percentiles data
     int m_cvar_ptr =        s_MEASURES * 3 + 1; // CVAR would occupy all up to last buff element
 public:
-    SimsResults() = default;
-    SimsResults(double* buff): ISimsResults(buff) {};
+    CSimsResults() = default;
+    CSimsResults(double* buff): ISimsResults(buff) {};
 
     void SetSimOutput(SimulationOutput& sims_output, const CMatrix<double>& weights) override;
     void SetDrawdowns(std::vector<double>& _drawdowns) override;

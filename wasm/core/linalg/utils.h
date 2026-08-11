@@ -68,10 +68,6 @@ inline bool EqualOperator(const double& A, const double& B) {
     if (A == B) return true;
     int64_t A_int = std::bit_cast<int64_t>(A);
     int64_t B_int = std::bit_cast<int64_t>(B);
-    // int64_t A_int;
-    // int64_t B_int;
-    // std::memcpy(&A_int, &A, sizeof(A));
-    // std::memcpy(&B_int, &B, sizeof(B));
     int64_t int_diff = std::abs(A_int - B_int);
     if (int_diff <= MAX_ULPS) {
         return true;

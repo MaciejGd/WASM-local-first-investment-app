@@ -6,14 +6,6 @@ typedef long long i64;
 typedef double f64;
 
 extern "C" {
-    f64* alloc_f64(i32 size) {
-        return new f64[size];
-    }
-
-    void dealloc_f64(f64* ptr) {
-        delete[] ptr;
-    }
-
     void runSimulations(f64* stocks, f64* weights, i32 stocks_amount, i32 stock_size, 
                         i32 time, i32 sims, f64* results) {
         using namespace finance_api;

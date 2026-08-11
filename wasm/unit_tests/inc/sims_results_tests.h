@@ -3,24 +3,24 @@
 #include "../test_source/tests_runner.h"
 #include "../../core/inc/simulation_results.h"
 
-class SimsResultsTest: public SimsResults {
+class SimsResultsTest: public CSimsResults {
 public:
-    SimsResultsTest(double* buff) : SimsResults(buff) {};
+    SimsResultsTest(double* buff) : CSimsResults(buff) {};
     // simulate protected method of SimsResults
     std::vector<double> t_CountPercentile(std::vector<double>& data) {
-        return SimsResults::t_CountPercentile(data);
+        return CSimsResults::t_CountPercentile(data);
     }
 
     void t_InsertToBuff(std::vector<double>& data, int start_ptr) {
-        SimsResults::t_InsertToBuff(data, start_ptr);
+        CSimsResults::t_InsertToBuff(data, start_ptr);
     }
 
     inline void t_SetVAR(SimulationOutput& sims_output, const CMatrix<double>& weights) {
-        SimsResults::t_SetVAR(sims_output, weights);
+        CSimsResults::t_SetVAR(sims_output, weights);
     }
 
     inline void t_SetReturns(std::vector<double>& sims_output) {
-        SimsResults::t_SetReturns(sims_output);
+        CSimsResults::t_SetReturns(sims_output);
     }
 
     inline double t_GetES() const {
@@ -100,7 +100,7 @@ UNIT_TEST(SimsResultsTests, SetDrawdowns) {
         0 // CVAR
     };
 
-    SimsResults res(buff_data);
+    CSimsResults res(buff_data);
     res.SetDrawdowns(rets);
 
     for (int i = 0; i < 29; i++) {
@@ -130,7 +130,7 @@ UNIT_TEST(SimsResultsTests, SetUpsides) {
 
     std::array<double, 29> buff{}; // default initialize buffor
     double* buff_data = buff.data();
-    SimsResults res(buff_data);
+    CSimsResults res(buff_data);
     res.SetUpsides(rets);
     for (int i = 0; i < 29; i++) {
         CHECK_EQUAL(buff[i], expected_results[i]);
