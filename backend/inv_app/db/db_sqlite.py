@@ -244,7 +244,8 @@ class SQLite3DB(db_handler.DBHandler):
             return cursor.fetchone()[2]
         except Exception:
             db_handle.rollback()
-            return None
+            # if hash is not in the db, then we should just return the zeros
+            return "0" * 40 # simulate empty hash
 
     def get_all_encrypted_records(self, db_handle, user_id, table_name):
         table = table_name + "_" + str(user_id)

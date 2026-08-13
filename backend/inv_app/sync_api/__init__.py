@@ -15,7 +15,9 @@ class DBUpdater:
                 continue
 
             res[table] = {}
-            match = db_proxy.get_collection_hash(user_id, table) == hash
+            current_hash = db_proxy.get_collection_hash(user_id, table)
+            
+            match = (hash == current_hash)
             res[table]["equal"] = match
             if match:
                 continue

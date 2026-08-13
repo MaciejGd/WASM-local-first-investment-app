@@ -80,7 +80,10 @@ export default function App() {
     );
     // generate encryption key, based on password provided
     DBEncryptor.generateKey(passwd, salt_mod);
-    SyncWorkerWrapper.getInstance().InitCrypto(passwd, salt_mod);
+
+    const sync_wrapper = SyncWorkerWrapper.getInstance();
+    await sync_wrapper.InitCrypto(passwd, salt_mod);
+    await sync_wrapper.syncTables();
   }
 
   function acceptLogginOut() {

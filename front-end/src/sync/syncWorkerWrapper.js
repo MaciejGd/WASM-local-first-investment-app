@@ -81,6 +81,9 @@ export class SyncWorkerWrapper {
     });
   }
 
+  /**
+   * Request to sync tables with remote source of truth 
+  */
   async syncTables() {
     this.worker.postMessage({
       type: "sync",
