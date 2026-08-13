@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from flask import g, session
 
-from inv_app import auth
+from inv_app.endpoints import auth
 
 
 @pytest.mark.parametrize(
@@ -16,9 +16,9 @@ def test_login_invalid_input(authentication, username, password):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.auth.check_password_hash", return_value=False)
+@patch("inv_app.endpoints.auth.check_password_hash", return_value=False)
 @patch(
-    "inv_app.auth.db_proxy.get_username_data",
+    "inv_app.endpoints.auth.db_proxy.get_username_data",
     return_value={"id": 2, "password": "test", "salt": "test"},
 )
 def test_password_hash_fail(_user, _hash, authentication):
@@ -26,7 +26,7 @@ def test_password_hash_fail(_user, _hash, authentication):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-@patch("inv_app.auth.check_password_hash", return_value=True)
+@patch("inv_app.endpoints.auth.check_password_hash", return_value=True)
 def test_properly_logged_in(_, authentication, monkeypatch):
     monkeypatch.setattr(
         auth.db_proxy,
@@ -52,7 +52,7 @@ def test_load_logged_in_user_none(app):
         assert g.user is None
 
 
-@patch("inv_app.auth.db_proxy.get_user_data", return_value=2)
+@patch("inv_app.endpoints.auth.db_proxy.get_user_data", return_value=2)
 def test_load_logged_in_user(_, app):
     with app.test_request_context():
         session["user_id"] = 2
@@ -104,13 +104,13 @@ def test_register_missing_params(authentication, username, password):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.auth.db_proxy.register_user", return_value=None)
+@patch("inv_app.endpoints.auth.db_proxy.register_user", return_value=None)
 def test_register_used_username(_, authentication):
     response = authentication.register("test", "test")
     assert response.status_code == HTTPStatus.CONFLICT
 
 
-@patch("inv_app.auth.db_proxy.register_user", return_value=True)
+@patch("inv_app.endpoints.auth.db_proxy.register_user", return_value=True)
 def test_register_set_correct(_, authentication):
     response = authentication.register(username="test", password="test")
     assert response.status_code == HTTPStatus.OK

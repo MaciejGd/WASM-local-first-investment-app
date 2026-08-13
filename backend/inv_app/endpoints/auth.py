@@ -11,7 +11,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash
 
-from .db import db_proxy
+from ..db import db_proxy
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 

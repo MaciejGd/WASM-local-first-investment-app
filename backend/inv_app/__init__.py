@@ -40,17 +40,17 @@ def create_app(test_config=None, instance_path=None):
         return jsonify({"health": "ok"})
 
     # init authentication module
-    from . import auth
+    from .endpoints import auth
 
     app.register_blueprint(auth.bp)
 
     # init finance api
-    from . import finance
+    from .endpoints import finance
 
     app.register_blueprint(finance.bp)
 
     # register sync endpoints
-    from . import sync
+    from .endpoints import sync
 
     app.register_blueprint(sync.bp)
 

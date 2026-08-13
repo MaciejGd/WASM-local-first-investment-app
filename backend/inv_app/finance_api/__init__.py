@@ -26,12 +26,9 @@ class FinanceDataAPI:
         self._db_handler = value
 
     def get_stocks_prices(self, tickers: list[str]) -> list:
-        tickers_data = []
-        # TODO - change that to list comprehension
-        for ticker in tickers:
-            doc = self.get_stock_prices(ticker)
-            tickers_data.append(doc)
-        return tickers_data
+        """Get stocks prices for tickers specified as input argument"""
+        
+        return [self.get_stock_prices(ticker) for ticker in tickers]
 
     def get_recent_prices(self, tickers: list[str]) -> dict:
         """Get most recent prices of stocks specified in the list passed as argument"""

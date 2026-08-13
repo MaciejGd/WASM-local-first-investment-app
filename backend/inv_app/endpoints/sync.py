@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, jsonify, request, session
 
+from ..sync_api import DBUpdater
 from . import auth
-from .sync_api import DBUpdater
 
 bp = Blueprint("sync", __name__, url_prefix="/api/sync")
 

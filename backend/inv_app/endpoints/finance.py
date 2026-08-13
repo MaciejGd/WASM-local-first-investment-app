@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
 
-from .finance_api import finance_api, indicators
+from ..finance_api import finance_api, indicators
 
 bp = Blueprint("finance", __name__, url_prefix="/api/finance")
 
@@ -20,7 +20,7 @@ def get_stocks_prices():
 
     if tickers is None or not isinstance(tickers, list):
         return jsonify({"return": "Bad post JSON"}), HTTPStatus.BAD_REQUEST
-    # TODO, check that and refactor so that it answers as get_recent_prices
+    
     data = finance_api.get_stocks_prices(tickers)
     return jsonify(data)
 
