@@ -128,11 +128,10 @@ class DBUpdater:
         for id in ids:
             event_obj = self.get_event(user_id, id)
             event_dir = {
-                "id": event_obj[0],
-                "timestamp": event_obj[1],
-                "table_name": event_obj[2],
-                "type": event_obj[3],
-                "ulid": event_obj[4],
+                "id": event_obj["id"],
+                "table_name": event_obj["table_name"],
+                "type": event_obj["type"],
+                "ulid": event_obj["ulid"],
                 "payload": None,
             }
 

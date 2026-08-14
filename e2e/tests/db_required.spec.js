@@ -107,19 +107,21 @@ function tableExists(db, tableName) {
   );
 }
 
+
+function getUserId(db, username) {
+  return db.prepare("SELECT id FROM user WHERE username = ?").get(username).id;
+}
 // wait until the given user's table on the remote server holds exactly
 // expectedCount records. The sync worker propagates local changes to the
 // remote server every few seconds, so the expected state should be reached
 // shortly after the test modified the local db.
 async function expectSyncedTableCount(db, username, tableName, expectedCount) {
-  const fullName = `${tableName}_${db
-    .prepare('SELECT id FROM user WHERE username = ?')
-    .get(username).id}`;
+  const user_id = getUserId(db, username);
   await expect
     .poll(
       () =>
-        tableExists(db, fullName)
-          ? db.prepare(`SELECT COUNT(*) AS count FROM ${fullName}`).get().count
+        tableExists(db, tableName)
+          ? db.prepare(`SELECT COUNT(*) AS count FROM ${tableName} WHERE user_id = ?`).get(user_id).count
           : 0,
       { timeout: 20_000, intervals: [500] },
     )
@@ -130,18 +132,17 @@ async function expectSyncedTableCount(db, username, tableName, expectedCount) {
 // user's table (e.g. an "add" or "remove" sync event), proving that the
 // change was pushed to the remote server.
 async function expectSyncedEvent(db, username, tableName, eventType) {
-  const eventsTable = `events_${db
-    .prepare('SELECT id FROM user WHERE username = ?')
-    .get(username).id}`;
+  const eventsTable = 'events'
+  const user_id = getUserId(db, username);
   await expect
     .poll(
       () =>
         tableExists(db, eventsTable)
           ? db
               .prepare(
-                `SELECT table_name, type FROM ${eventsTable} WHERE table_name = ? AND type = ?`,
+                `SELECT table_name, type FROM ${eventsTable} WHERE table_name = ? AND type = ? AND user_id = ?`,
               )
-              .all(tableName, eventType).length
+              .all(tableName, eventType, user_id).length
           : 0,
       { timeout: 20_000, intervals: [500] },
     )

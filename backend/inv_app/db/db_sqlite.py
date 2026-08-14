@@ -7,53 +7,36 @@ from . import db_handler
 
 class SQLite3DB(db_handler.DBHandler):
     WALLET_TABLE = "wallet_assets_"
-    EVENTS_TABLE = "events_"
+    EVENTS_TABLE = "events"
     META_TABLE = "meta_"
-    # delet from table name ... WHERE name='table name'
+
     RESET_TABLE = "DELETE FROM {};"
     RESET_AUTOINCREMENT = "DELETE FROM SQLITE_SEQUENCE \
                             WHERE name=?; "
     VACUUM = "VACUUM;"
 
-    # create events table
-    CREATE_EVENTS_TABLE = "CREATE TABLE IF NOT EXISTS {} \
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                         table_name TEXT NOT NULL, \
-                         type TEXT NOT NULL, \
-                         ulid TEXT NOT NULL); "
+    ADD_EVENT_RECORD = "INSERT INTO events (table_name, type, ulid, user_id)\
+                        VALUES (?, ?, ?, ?);"
 
-    ADD_EVENT_RECORD = "INSERT INTO {} (table_name, type, ulid)\
-                        VALUES (?, ?, ?);"
+    GET_EVENT_IDS_FROM = "SELECT * FROM events WHERE user_id = ? and id > ? ORDER BY id ASC;"
+    GET_EVENT_BY_ID = "SELECT * FROM events WHERE  user_id = ? and id = ?;"
 
-    GET_EVENT_IDS_FROM = "SELECT * FROM {} WHERE id > ? ORDER BY id ASC;"
-    GET_EVENT_BY_ID = "SELECT * FROM {} WHERE id = ?;"
+    # encrypted data 
+    ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, hash, payload, user_id) VALUES (?, ?, ?, ?);"
+    REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=? and user_id=?;"
+    GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=? and user_id=?;"
+    GET_ALL_ENCRYPTED_RECORDS = "SELECT * FROM {} WHERE user_id=?;"
 
-    # encrypted data
-    CREATE_ENCRYPTED_TABLE = "CREATE TABLE IF NOT EXISTS {} \
-                                (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                                    ulid TEXT UNIQUE NOT NULL, \
-                                    hash TEXT NOT NULL, \
-                                    payload BLOB NOT NULL); "
-
-    ADD_ENCRYPTED_RECORD = "INSERT INTO {} (ulid, hash, payload) VALUES (?, ?, ?);"
-    REMOVE_ENCRYPTED_RECORD = "DELETE FROM {} WHERE ulid=?;"
-    GET_ENCRYPTED_RECORD = "SELECT * FROM {} WHERE ulid=?;"
-    GET_ALL_ENCRYPTED_RECORDS = "SELECT * FROM {} WHERE 1=1;"
-
-    # update meta table
-    CREATE_META_TABLE = "CREATE TABLE IF NOT EXISTS {} \
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                            table_name TEXT UNIQUE NOT NULL,\
-                            hash TEXT NOT NULL);"
-
-    UPDATE_META = "INSERT INTO {} (table_name, hash)\
-                    VALUES (?, ?)\
-                    ON CONFLICT(table_name)\
+    UPDATE_META = "INSERT INTO meta (table_name, hash, user_id)\
+                    VALUES (?, ?, ?)\
+                    ON CONFLICT(user_id, table_name)\
                     DO UPDATE SET\
                         table_name=excluded.table_name,\
-                        hash=excluded.hash;"
+                        hash=excluded.hash,\
+                        user_id=excluded.user_id"
 
-    GET_META = "SELECT * FROM {} WHERE table_name = ?;"
+
+    GET_META = "SELECT * FROM meta WHERE table_name=? and user_id=?;"
 
     REGISTER_USER = "INSERT INTO user (username, password, salt) VALUES (?, ?, ?);"
 
@@ -124,13 +107,10 @@ class SQLite3DB(db_handler.DBHandler):
         type: str,
         ulid: str,
     ) -> int:
-        table = SQLite3DB.EVENTS_TABLE + str(user_id)
         try:
-            db_handle.execute(SQLite3DB.CREATE_EVENTS_TABLE.format(table))
-
             cursor = db_handle.execute(
-                SQLite3DB.ADD_EVENT_RECORD.format(table),
-                (table_name, type, ulid),
+                SQLite3DB.ADD_EVENT_RECORD,
+                (table_name, type, ulid, user_id),
             )
 
             return cursor.lastrowid
@@ -141,16 +121,16 @@ class SQLite3DB(db_handler.DBHandler):
     def add_encrypted_data_record(
         self, db_handle, user_id: int, table_name: str, ulid: int, hash: str, payload
     ) -> int:
-        table = table_name + "_" + str(user_id)
+        table = table_name
         # try creating table if not exists already and add record
         try:
-            db_handle.execute(SQLite3DB.CREATE_ENCRYPTED_TABLE.format(table))
             cursor = db_handle.execute(
                 SQLite3DB.ADD_ENCRYPTED_RECORD.format(table),
                 (
                     ulid,
                     hash,
                     payload,
+                    user_id,
                 ),
             )
             return cursor.lastrowid
@@ -159,12 +139,12 @@ class SQLite3DB(db_handler.DBHandler):
             return -1
 
     def get_encrypted_record(self, db_handle, user_id: int, table_name: str, ulid: str):
-        table = table_name + "_" + str(user_id)
+        table = table_name
 
         try:
             val = db_handle.execute(
                 SQLite3DB.GET_ENCRYPTED_RECORD.format(table),
-                (ulid,),
+                (ulid, user_id),
             ).fetchone()
             return val
         except Exception:
@@ -174,21 +154,18 @@ class SQLite3DB(db_handler.DBHandler):
     def remove_encrypted_record(
         self, db_handle, user_id: int, table_name: str, ulid: str
     ):
-        table = table_name + "_" + str(user_id)
-
         try:
-            db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table), (ulid,))
+            db_handle.execute(SQLite3DB.REMOVE_ENCRYPTED_RECORD.format(table_name), (ulid, user_id,))
             return True
         except Exception:
             db_handle.rollback()
             return False
 
     def get_events_from_id(self, db_handle, user_id, last_event_id) -> list[int]:
-        table = SQLite3DB.EVENTS_TABLE + str(user_id)
         try:
             records = db_handle.execute(
-                self.GET_EVENT_IDS_FROM.format(table),
-                (last_event_id,),
+                self.GET_EVENT_IDS_FROM,
+                (user_id, last_event_id,),
             ).fetchall()
             ids = [row[0] for row in records]
             return ids
@@ -197,11 +174,10 @@ class SQLite3DB(db_handler.DBHandler):
             return []
 
     def get_event(self, db_handle, user_id, event_id):
-        table = SQLite3DB.EVENTS_TABLE + str(user_id)
         try:
             record = db_handle.execute(
-                self.GET_EVENT_BY_ID.format(table),
-                (event_id,),
+                self.GET_EVENT_BY_ID,
+                (user_id, event_id,),
             ).fetchone()
 
             return record
@@ -211,17 +187,13 @@ class SQLite3DB(db_handler.DBHandler):
     def update_collection_hash(
         self, db_handle, user_id: int, collection_name: str, hash: str
     ):
-        table = SQLite3DB.META_TABLE + str(user_id)
-        table_record = (
-            collection_name + "_" + str(user_id)
-        )  # table which record should be updated
         try:
-            db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
             db_handle.execute(
-                SQLite3DB.UPDATE_META.format(table),
+                SQLite3DB.UPDATE_META,
                 (
-                    table_record,
+                    collection_name,
                     hash,
+                    user_id,
                 ),
             )
             db_handle.commit()
@@ -233,25 +205,19 @@ class SQLite3DB(db_handler.DBHandler):
     def get_collection_hash(
         self, db_handle, user_id: int, collection_name: str
     ) -> str | None:
-        table = SQLite3DB.META_TABLE + str(user_id)
-        table_record = collection_name + "_" + str(user_id)
         try:
-            db_handle.execute(SQLite3DB.CREATE_META_TABLE.format(table))
-            db_handle.commit()
             cursor = db_handle.execute(
-                SQLite3DB.GET_META.format(table), (table_record,)
+                SQLite3DB.GET_META, (collection_name, user_id,)
             )
             return cursor.fetchone()[2]
         except Exception:
-            db_handle.rollback()
             # if hash is not in the db, then we should just return the zeros
             return "0" * 40 # simulate empty hash
 
     def get_all_encrypted_records(self, db_handle, user_id, table_name):
-        table = table_name + "_" + str(user_id)
         try:
             cursor = db_handle.execute(
-                SQLite3DB.GET_ALL_ENCRYPTED_RECORDS.format(table)
+                SQLite3DB.GET_ALL_ENCRYPTED_RECORDS.format(table_name), (user_id,)
             )
             return cursor.fetchall()
         except Exception:

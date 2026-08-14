@@ -11,16 +11,20 @@ const test = base.extend({
     // wipe dbs content
     const db = new Database(DATABASE_PATH);
     // this query would return all user defined tables
-    const tables = db
-      .prepare(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
-      )
-      .all()
-      .map((row) => row.name);
-    // in here, drop all tables
-    if (tables.length > 0) {
-      db.exec(tables.map((name) => `DROP TABLE IF EXISTS "${name}"`).join(';\n'));
-    }
+    // const tables = db
+    //   .prepare(
+    //     "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+    //   )
+    //   .all()
+    //   .map((row) => row.name);
+    // // in here, drop all tables
+    // if (tables.length > 0) {
+    //   db.exec(tables.map((name) => `DROP TABLE IF EXISTS "${name}"`).join(';\n'));
+    // }
+    // db.prepare("DROP TABLE IF EXISTS wallet_assets;");
+    // db.prepare("DROP TABLE IF EXISTS sim_history;");
+    // db.prepare("DROP TABLE IF EXISTS events;");
+    // db.prepare("DROP TABLE IF EXISTS users;")
     // recreate the base schema
     const schema = fs.readFileSync(
       path.join(__dirname, '../schema.sql'),
