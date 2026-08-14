@@ -1,4 +1,4 @@
-import { putDataToDb } from "../db/db";
+import { putDataToDb, deleteDataFromDb } from "../db/db";
 
 /**
  * Minimal IndexedDb updater for Synchronizer Worker
@@ -32,8 +32,7 @@ export class SyncDBUpdater {
    */
   async removeRecord(ulid, table_name) {
     try {
-      var table_handle = this.db_handle.table(table_name);
-      await table_handle.where("ulid").equals(ulid).delete();
+      await deleteDataFromDb(this.db_handle, table_name, ulid);
     } catch (error) {
       console.log(error);
     }

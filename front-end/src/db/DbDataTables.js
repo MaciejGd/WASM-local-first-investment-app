@@ -1,6 +1,6 @@
 import hash from "object-hash";
 import { SyncWorkerWrapper } from "../sync/syncWorkerWrapper";
-import { getDBInstance, putDataToDb, getTablesHashes } from "./db";
+import { getDBInstance, putDataToDb, bulkDeleteFromDb, getTablesHashes } from "./db";
 
 /**
  * Singleton handler for DB interacations with tables holding user's data.
@@ -161,7 +161,7 @@ export class IndexedDbHandler {
   async deleteWalletAssets(selected_ids) {
     try {
       await this.dispatchRemoveEvents(this.db.wallet_assets, selected_ids);
-      await this.db.wallet_assets.bulkDelete(selected_ids);
+      await bulkDeleteFromDb(this.db, "wallet_assets", selected_ids);
     } catch (error) {
       console.error(error);
     }
@@ -174,7 +174,7 @@ export class IndexedDbHandler {
   async deleteSimsResults(selected_ids) {
     try {
       await this.dispatchRemoveEvents(this.db.sim_history, selected_ids);
-      await this.db.sim_history.bulkDelete(selected_ids);
+      await bulkDeleteFromDb(this.db, "sim_history", selected_ids);
     } catch (error) {
       console.error(error);
     }

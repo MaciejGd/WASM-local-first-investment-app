@@ -89,6 +89,52 @@ export async function putDataToDb(db, table_name, asset) {
 }
 
 /**
+ * Delelet data from the db and update the hash of the table
+ * @param {*} db handle to the db from which we wanna remove asset
+ * @param {*} table_name name of the table we wanna remove asset from
+ * @param {*} ulid ulid of the asset to be removed from table
+ */
+export async function deleteDataFromDb(db, table_name, ulid) {
+  // get the hash of the object
+  const table = db.table(table_name);
+  // get hash of removed element
+  const result = await db.table(table_name).get(ulid);
+  if (!result) {
+    console.error(`Ulid ${ulid} not found in the table ${table_name} of the IndexedDB.`);
+    return;
+  };
+
+  const object_hash = result.hash;
+
+  await db.transaction("rw", table, db.metadata, async() => {
+    await table.where("ulid").equals(ulid).delete();
+    await updateHash(db, table_name, object_hash);
+  })
+}
+
+/**
+ * Delete the list of assets from the table, using optimized bulkDelete
+ * @param {*} db db handle to delete assets from
+ * @param {*} table_name name of the table to be cleared
+ * @param {*} ids ids to be cleared from the table
+ * @returns void
+ */
+export async function bulkDeleteFromDb(db, table_name, ids) {
+  if (ids.length === 0) return;
+
+  const table = db.table(table_name);
+  const hashes = (await table.bulkGet(ids)).map(result => result?.hash);
+  const ret_hash = combineHashList(hashes);
+
+  await db.transaction("rw", table, db.metadata, async() => {
+    await table.bulkDelete(ids);
+    await updateHash(db, table_name, ret_hash);
+  })
+
+}
+
+
+/**
  * After appending record to db, we should also update table's hash
  * @param {*} table_name name of the table that hash should be updated
  * @param {*} xor_hash new hash to be xored with actual table's hash
@@ -130,4 +176,15 @@ function bytesToHex(bytes) {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+/**
+ * Perform XOR operation over list of hashes
+ * @param {Array} hashes list of hashes to be xored
+ * @returns efect of xoring all hashes from the list passed as argument
+ */
+function combineHashList(hashes) {
+  var ret_hash = undefined;
+  hashes.forEach((el) => { ret_hash = xorHashes(ret_hash, el); });
+  return ret_hash;
 }
