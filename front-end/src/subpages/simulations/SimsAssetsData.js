@@ -96,7 +96,7 @@ export class SimAssetMap {
     const tickers = [];
     var assets = Object.values(asset_map);
     assets.forEach((value) => tickers.push(value.ticker));
-    return { tickers: tickers };
+    return tickers;
   }
 
   /**

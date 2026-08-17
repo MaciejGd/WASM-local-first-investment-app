@@ -79,7 +79,7 @@ def test_get_stock_prices(client):
             ]
         )
         response = client.post(
-            "/api/finance/get_stocks_prices", json={"tickers": ["BDX.PL", "ZAB.WA"]}
+            "/api/finance/get_stocks_prices", json=["BDX.PL", "ZAB.WA"]
         )
         assert response.status_code == HTTPStatus.OK
         assert response.json == [

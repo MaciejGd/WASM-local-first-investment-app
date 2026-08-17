@@ -5,7 +5,7 @@ from unittest.mock import patch
 @patch("inv_app.endpoints.finance.finance_api.get_stocks_prices", return_value=True)
 def test_get_stocks_prices_correct(_, client):
     response = client.post(
-        "/api/finance/get_stocks_prices", json={"tickers": ["LPP.WA", "BDX.WA"]}
+        "/api/finance/get_stocks_prices", json=["LPP.WA", "BDX.WA"]
     )
     assert response.status_code == HTTPStatus.OK
 
@@ -18,7 +18,7 @@ def test_get_stocks_prices_no_tickers(client):
 
 
 def test_get_stocks_prices_no_tickers_no_list(client):
-    response = client.post("/api/finance/get_stocks_prices", json={"tickers": "BDX.WA"})
+    response = client.post("/api/finance/get_stocks_prices", json={"tickers" : ["BDX.WA"]})
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 

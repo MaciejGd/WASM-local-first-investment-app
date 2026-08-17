@@ -14,9 +14,7 @@ bp = Blueprint("finance", __name__, url_prefix="/api/finance")
 # post request for getting data of multiple tickers at once
 @bp.route("/get_stocks_prices", methods=("POST",))
 def get_stocks_prices():
-    post_json = request.get_json()
-
-    tickers = post_json.get("tickers")
+    tickers = request.get_json()
 
     if tickers is None or not isinstance(tickers, list):
         return jsonify({"return": "Bad post JSON"}), HTTPStatus.BAD_REQUEST
