@@ -29,7 +29,7 @@ def test_get_tickers_list(finance_api, mongo_handler):
         {"ticker": "BDX.WA"},
     ]
     db_name = finance_api.db_name
-    col_name = finance_api.stock_info_col
+    col_name = finance_api.stock_markers_col
     result = finance_api.get_tickers_list()
 
     mongo_handler.get_all_docs.assert_called_once_with(db_name, col_name)

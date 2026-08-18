@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, jsonify, request, session
 
-from ..sync_api import DBUpdater
+from ..sync_api import DBSynchronizer
 from . import auth
 
 bp = Blueprint("sync", __name__, url_prefix="/api/sync")
@@ -39,7 +39,7 @@ def push_changes():
     if type == "add" and payload is None:
         abort(HTTPStatus.BAD_REQUEST, "Missing required payload fields.")
 
-    updater = DBUpdater()
+    updater = DBSynchronizer()
     event_id = updater.process_event(
         session["user_id"], table_name, type, ulid, obj_hash, payload
     )
@@ -54,7 +54,7 @@ def push_changes():
 def pull_changes_amount(event_id):
     user_id = session["user_id"]
 
-    updater = DBUpdater()
+    updater = DBSynchronizer()
     ids = updater.get_pending_events(user_id, event_id)
     return jsonify(ids)
 
@@ -63,7 +63,7 @@ def pull_changes_amount(event_id):
 @auth.login_required
 def pull_changes(event_id):
     user_id = session["user_id"]
-    updater = DBUpdater()
+    updater = DBSynchronizer()
 
     records = updater.get_events(user_id, event_id)
     return jsonify(records)
@@ -77,6 +77,6 @@ def compare_hashes():
         return abort(HTTPStatus.BAD_REQUEST, "Invalid request JSON.")
 
     user_id = session["user_id"]
-    updater = DBUpdater()
+    updater = DBSynchronizer()
     response = updater.compare_hashes(user_id, hashes_json)
     return jsonify(response)

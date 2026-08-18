@@ -57,7 +57,7 @@ def login():
     else:
         session.clear()
         session["user_id"] = user["id"]
-        return {"data": "Properly logged in", "salt": user["salt"]}, HTTPStatus.OK
+        return {"salt": user["salt"]}, HTTPStatus.OK
 
     return error
 

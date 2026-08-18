@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.get_pending_events", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.get_pending_events", return_value=12)
 def test_pull_changes_amount(_, client):
     with client.session_transaction() as sess:
         sess["user_id"] = 1
@@ -13,7 +13,7 @@ def test_pull_changes_amount(_, client):
     assert response.status_code == HTTPStatus.OK
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.get_events", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.get_events", return_value=12)
 def test_pull_changes(_, client):
     with client.session_transaction() as sess:
         sess["user_id"] = 1
@@ -56,7 +56,7 @@ def example_json():
     }
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_pass(_, client, example_json):
     with client.session_transaction() as sess:
         sess["user_id"] = 1
@@ -70,7 +70,7 @@ def test_push_changes_pass(_, client, example_json):
     assert response.status_code == HTTPStatus.OK
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_no_ulid(_, client, example_json):
     example_json["ulid"] = None
 
@@ -86,7 +86,7 @@ def test_push_changes_no_ulid(_, client, example_json):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_no_table_name(_, client, example_json):
     example_json["table_name"] = None
 
@@ -102,7 +102,7 @@ def test_push_changes_no_table_name(_, client, example_json):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_no_type(_, client, example_json):
     example_json["type"] = None
 
@@ -118,7 +118,7 @@ def test_push_changes_no_type(_, client, example_json):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_no_hash_should_pass(_, client, example_json):
     example_json["hash"] = None
 
@@ -134,7 +134,7 @@ def test_push_changes_no_hash_should_pass(_, client, example_json):
     assert response.status_code == HTTPStatus.OK
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_no_payload_for_add(_, client, example_json):
     example_json["payload"] = None
     example_json["type"] = "add"
@@ -151,7 +151,7 @@ def test_push_changes_no_payload_for_add(_, client, example_json):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_remove_without_payload_should_pass(_, client, example_json):
     example_json["payload"] = None
     example_json["type"] = "remove"
@@ -168,7 +168,7 @@ def test_push_changes_remove_without_payload_should_pass(_, client, example_json
     assert response.status_code == HTTPStatus.OK
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=12)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=12)
 def test_push_changes_invalid_payload(_, client):
 
     with client.session_transaction() as sess:
@@ -183,7 +183,7 @@ def test_push_changes_invalid_payload(_, client):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@patch("inv_app.endpoints.sync.DBUpdater.process_event", return_value=None)
+@patch("inv_app.endpoints.sync.DBSynchronizer.process_event", return_value=None)
 def test_push_changes_process_event_fail(_, client, example_json):
 
     with client.session_transaction() as sess:

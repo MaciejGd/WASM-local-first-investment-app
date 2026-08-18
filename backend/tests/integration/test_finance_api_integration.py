@@ -1,16 +1,29 @@
 from http import HTTPStatus
-from unittest.mock import patch
 
 import mongomock
+import pytest
 
 from inv_app.finance_api import finance_api, indicators
 
 
-@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
-def test_get_tickers(client):
+@pytest.fixture
+def mongo_client(monkeypatch):
+    client = mongomock.MongoClient()
+
+    monkeypatch.setattr(
+        "inv_app.finance_api.mongo_handler.MongoClient",
+        lambda *args, **kwargs : client,
+    )
+
+    yield client
+
+    client.drop_database("StockData")
+
+
+def test_get_tickers(client, mongo_client):
     with client.application.app_context():
         handler = finance_api.db_handler
-        handler.client["StockData"]["StockInfo"].insert_many(
+        handler.client["StockData"]["StockMarkers"].insert_many(
             [
                 {
                     "ticker": "LPP.WA",
@@ -28,8 +41,7 @@ def test_get_tickers(client):
         assert response.status_code == HTTPStatus.OK
 
 
-@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
-def test_get_recent_prices(client):
+def test_get_recent_prices(client, mongo_client):
     with client.application.app_context():
         handler = finance_api.db_handler
         handler.client["StockData"]["StockPrices"].insert_many(
@@ -58,8 +70,7 @@ def test_get_recent_prices(client):
         }
 
 
-@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
-def test_get_stock_prices(client):
+def test_get_stock_prices(client, mongo_client):
     with client.application.app_context():
         handler = finance_api.db_handler
         handler.client["StockData"]["StockPrices"].insert_many(
@@ -93,8 +104,7 @@ def test_get_stock_prices(client):
             },
         ]
 
-@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
-def test_get_indicators(client):
+def test_get_indicators(client, mongo_client):
     with client.application.app_context():
         handler = finance_api.db_handler
         handler.client["StockData"]["StockMarkers"].insert_many(
@@ -126,8 +136,7 @@ def test_get_indicators(client):
         }
 
 
-@patch("inv_app.finance_api.mongo_handler.MongoClient", new=mongomock.MongoClient)
-def test_get_indicators_list(client):
+def test_get_indicators_list(client, mongo_client):
     with client.application.app_context():
         response = client.get(
             "/api/finance/get_indicators_list"
