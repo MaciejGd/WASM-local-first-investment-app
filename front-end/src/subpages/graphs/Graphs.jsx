@@ -274,7 +274,7 @@ export default function GraphsPage() {
 
   return (
     <div className="graph_page">
-      <h1>Graphs!!!</h1>
+      <h1>Graphs</h1>
       <GraphSelector
         onAdd={AddRecord}
         tickersList={tickers_list}
