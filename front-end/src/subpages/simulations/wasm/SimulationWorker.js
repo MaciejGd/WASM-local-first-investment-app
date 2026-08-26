@@ -25,15 +25,13 @@ onmessage = async (e) => {
     const times = payload.times;
     const sims = payload.sims;
 
-    // const results = simAPI.runSimulation(stockData, weights, times, sims);
-
     const results = measureWasmThreading(stockData, weights, times, sims);
-    // const results = measureWasm(stockData, weights, times, sims);
-    // const results = measureJS(stockData, weights, times, sims);
-
     postMessage(results);
   }
 };
+
+// const results = measureWasm(stockData, weights, times, sims);
+// const results = measureJS(stockData, weights, times, sims);
 
 // function measureWasm(stockData, weights, times, sims) {
 //   console.log("WASM simulation starting");

@@ -16,6 +16,10 @@ const mockSyncWorker = {
 const mockDb = {
   wallet_assets: mockTable(),
   sim_history: mockTable(),
+  table : vi.fn((table_name)=> {
+    if (table_name === "wallet_assets") return mockDb.wallet_assets;
+    return mockDb.sim_history;
+  }),
 };
 
 vi.mock("../../src/db/db", () => ({
@@ -25,6 +29,7 @@ vi.mock("../../src/db/db", () => ({
     wallet_assets: "aabb",
     sim_history: "ccdd",
   }),
+  bulkDeleteFromDb: vi.fn()
 }));
 
 vi.mock("../../src/sync/syncWorkerWrapper", () => ({
@@ -255,6 +260,9 @@ describe("deleteWalletAssets", () => {
 
 describe("deleteSimsResults", () => {
   test("dispatches remove events and bulk deletes", async () => {
+    const { bulkDeleteFromDb } = await import("../../src/db/db");
+    bulkDeleteFromDb.mockResolvedValue(1);
+
     mockDb.sim_history.bulkGet.mockResolvedValue([{ ulid: "u3" }]);
 
     const handler = IndexedDbHandler.getInstance();
@@ -264,7 +272,7 @@ describe("deleteSimsResults", () => {
       "u3",
       "sim_history",
     );
-    expect(mockDb.sim_history.bulkDelete).toHaveBeenCalledWith([5]);
+    expect(bulkDeleteFromDb).toHaveBeenCalledWith(mockDb, "sim_history", [5]);
   });
 });
 

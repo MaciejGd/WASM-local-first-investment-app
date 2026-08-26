@@ -578,7 +578,7 @@ test.describe('Graphs page', () => {
     await registerAndLogin(page, 'test', 'pass');
     await page.locator('.sidebar a', { hasText: 'Graphs' }).click();
 
-    await expect(page.getByText('Graphs!!!')).toBeVisible();
+    await expect(page.getByText('Graphs')).toBeVisible();
     await expect(page.getByPlaceholder('Ticker...')).toBeVisible();
     await expect(page.getByPlaceholder('Indicator...')).toBeVisible();
 

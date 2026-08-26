@@ -14,7 +14,7 @@ export function getDBInstance() {
 
   db.version(2).stores({
     wallet_assets: "&ulid",
-    sim_history: "++id",
+    sim_history: "&ulid",
     out_events: "++id",
     metadata: "&key",
   });

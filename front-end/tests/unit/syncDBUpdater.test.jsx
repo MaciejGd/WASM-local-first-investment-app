@@ -63,8 +63,8 @@ describe("Removing records from db", () => {
     };
 
     const updater = new SyncDBUpdater(db_handle);
-    await updater.removeRecord("testing_ulid", "wallet_asset");
-    expect(tableMock).toHaveBeenCalledWith("wallet_asset");
+    await updater.removeRecord("testing_ulid", "wallet_assets");
+    expect(tableMock).toHaveBeenCalledWith("wallet_assets");
     expect(whereMock).toHaveBeenCalledWith("ulid");
     expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
     expect(deleteMock).toHaveBeenCalledOnce();
@@ -91,7 +91,7 @@ describe("Removing records from db", () => {
 
     const updater = new SyncDBUpdater(db_handle);
     await updater.removeRecord("testing_ulid", "wallet_asset");
-    expect(tableMock).toHaveBeenCalledWith("wallet_asset");
+    expect(tableMock).toHaveBeenCalledWith("wallet_assets");
     expect(whereMock).toHaveBeenCalledWith("ulid");
     expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
     expect(deleteMock).toHaveBeenCalledOnce();

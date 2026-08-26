@@ -97,7 +97,7 @@ describe("SimAssetsMap", () => {
     describe("getTickers", () => {
       test("proper object of form 'tickers' : [tickers list] is returned", () => {
         const arr = SimAssetMap.getTickers(createDefaultMap());
-        expect(arr).toEqual({ tickers: ["LPP.WA", "ZAB.WA", "TEST.WA"] });
+        expect(arr).toEqual(["LPP.WA", "ZAB.WA", "TEST.WA"]);
       });
     });
 

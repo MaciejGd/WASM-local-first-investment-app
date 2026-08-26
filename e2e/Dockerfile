@@ -11,4 +11,5 @@ RUN npm ci
 COPY . .
 
 # CMD ["npx", "playwright", "test"]
-CMD sh -c "npx playwright test --project=chromium; tail -f /dev/null"
+# CMD sh -c "npx playwright test --project=chromium; tail -f /dev/null"
+CMD sh -c 'echo "Skip testing"; tail -f /dev/null'

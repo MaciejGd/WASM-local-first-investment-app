@@ -1,6 +1,6 @@
 import hash from "object-hash";
 import { SyncWorkerWrapper } from "../sync/syncWorkerWrapper";
-import { getDBInstance, putDataToDb, bulkDeleteFromDb, getTablesHashes } from "./db";
+import { getDBInstance, putDataToDb, bulkDeleteFromDb } from "./db";
 
 /**
  * Singleton handler for DB interacations with tables holding user's data.
@@ -102,11 +102,10 @@ export class IndexedDbHandler {
       return;
     }
     var obj_hash = await this.hashRecord(payload, ulid);
-    this.sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload); // TODO, should we somehow secure that???
+    this.sync_worker.AddAdditionEvent(ulid, table_name, obj_hash, payload);
     payload.ulid = ulid;
     payload.hash = obj_hash; // hash the payload and pack along the original payload
     var id = await putDataToDb(this.db, table_name, payload);
-    var hashes = await getTablesHashes();
     // after adding, update hash for the table
     return id;
   }
@@ -160,8 +159,7 @@ export class IndexedDbHandler {
    */
   async deleteWalletAssets(selected_ids) {
     try {
-      await this.dispatchRemoveEvents(this.db.wallet_assets, selected_ids);
-      await bulkDeleteFromDb(this.db, "wallet_assets", selected_ids);
+      this.removeRecords(selected_ids, "wallet_assets");
     } catch (error) {
       console.error(error);
     }
@@ -173,11 +171,20 @@ export class IndexedDbHandler {
    */
   async deleteSimsResults(selected_ids) {
     try {
-      await this.dispatchRemoveEvents(this.db.sim_history, selected_ids);
-      await bulkDeleteFromDb(this.db, "sim_history", selected_ids);
+      this.removeRecords(selected_ids, "sim_history");
     } catch (error) {
       console.error(error);
     }
+  }
+
+  /**
+   * Dispatch remove events to the sync queue and bulk delete records from IndexedDB
+   * @param {*} selected_ids ids to be deleted from the db
+   * @param {*} table_name name of the table from which we delete
+   */
+  async removeRecords(selected_ids, table_name) {
+    await this.dispatchRemoveEvents(this.db.table(table_name), selected_ids);
+    await bulkDeleteFromDb(this.db, table_name, selected_ids);
   }
 
   async dispatchRemoveEvents(table, selected_ids) {

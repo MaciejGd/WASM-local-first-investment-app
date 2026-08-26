@@ -82,7 +82,7 @@ export default function SimulationsPage() {
 
   const { simRun, simTerminate } = useSimulationWorker((e) => {
     setSimRunning(false);
-    setSimsResults(e);
+    if (e !== null) { setSimsResults(e); }
     setResultsAssets({ ...assetsRef.current });
     setSimsTimepointsResults(simsTimepointsRef.current);
     setSimsAmountResults(simsAmountRef.current);

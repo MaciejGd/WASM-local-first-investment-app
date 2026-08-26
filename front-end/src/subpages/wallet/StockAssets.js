@@ -5,7 +5,7 @@ import { GetRecentPrices } from "../finance_api/FinanceApi";
  */
 export class AssetData {
   /**
-   * @param {number} id number identifying the data entry
+   * @param {string} id string identifying the data entry
    * @param {number} quantity amount of stocks bought
    * @param {number} price money worth of one stock at the time of buy
    */
@@ -14,7 +14,7 @@ export class AssetData {
     this.price = price;
     this.cost = this.price * this.quantity;
     this.selected = false;
-    this.id = id; // number which lets us identify the asset
+    this.id = id; // string which lets us identify the asset
   }
 
   /**
@@ -191,6 +191,10 @@ export class AssetsEntry {
     this.udpateAverageData();
   }
 
+  /**
+   * Remove assets that are not present in input assets
+   * @param {*} assets 
+   */
   removeNotMatchingAssets(assets) {
     const removeIds = new Set(assets.map((a) => a.ulid));
     this._data = this._data.filter((item) => removeIds.has(item.id));
