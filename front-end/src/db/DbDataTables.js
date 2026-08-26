@@ -12,8 +12,7 @@ export class IndexedDbHandler {
       return IndexedDbHandler.instance; // if already initialized
     }
     this.db = getDBInstance();
-    // assign name to each table object
-    this.initializeTableNames();
+    // obtain sync worker instance ref
     this.sync_worker = SyncWorkerWrapper.getInstance();
 
     this.version_id = 0;
@@ -25,12 +24,6 @@ export class IndexedDbHandler {
       return new IndexedDbHandler();
     }
     return IndexedDbHandler.instance;
-  }
-
-  initializeTableNames() {
-    this.table_to_name = new Map();
-    this.table_to_name.set(this.db.wallet_assets, "wallet_assets");
-    this.table_to_name.set(this.db.sim_history, "sim_history");
   }
 
   /**
@@ -97,7 +90,7 @@ export class IndexedDbHandler {
   async _addRecord(table, payload) {
     const ulid = crypto.randomUUID();
     // create final object that should be added to the Dexie.js db
-    const table_name = this.table_to_name.get(table);
+    const table_name = table.name;
     if (table_name == undefined) {
       return;
     }
@@ -189,9 +182,8 @@ export class IndexedDbHandler {
 
   async dispatchRemoveEvents(table, selected_ids) {
     const records = await table.bulkGet(selected_ids);
-    const table_name = this.table_to_name.get(table);
     records.forEach((e) => {
-      this.sync_worker.AddRemovalEvent(e.ulid, table_name);
+      this.sync_worker.AddRemovalEvent(e.ulid, table.name);
     });
   }
 }

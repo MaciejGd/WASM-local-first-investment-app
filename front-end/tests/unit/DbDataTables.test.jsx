@@ -1,11 +1,12 @@
 import { test, expect, vi, describe, beforeEach, afterEach } from "vitest";
 
-const mockTable = () => ({
+const mockTable = (table_name) => ({
   toArray: vi.fn().mockResolvedValue([]),
   bulkDelete: vi.fn().mockResolvedValue(undefined),
   bulkGet: vi.fn().mockResolvedValue([]),
   get: vi.fn().mockResolvedValue(undefined),
   put: vi.fn().mockResolvedValue(1),
+  name : table_name,
 });
 
 const mockSyncWorker = {
@@ -14,8 +15,8 @@ const mockSyncWorker = {
 };
 
 const mockDb = {
-  wallet_assets: mockTable(),
-  sim_history: mockTable(),
+  wallet_assets: mockTable("wallet_assets"),
+  sim_history: mockTable("sim_history"),
   table : vi.fn((table_name)=> {
     if (table_name === "wallet_assets") return mockDb.wallet_assets;
     return mockDb.sim_history;
@@ -48,8 +49,8 @@ beforeEach(async () => {
   vi.resetModules();
   vi.spyOn(crypto, "randomUUID").mockReturnValue("test-ulid-001");
 
-  mockDb.wallet_assets = mockTable();
-  mockDb.sim_history = mockTable();
+  mockDb.wallet_assets = mockTable("wallet_assets");
+  mockDb.sim_history = mockTable("sim_history");
   mockSyncWorker.AddAdditionEvent.mockClear();
   mockSyncWorker.AddRemovalEvent.mockClear();
 
@@ -74,16 +75,6 @@ describe("constructor / getInstance", () => {
     const first = IndexedDbHandler.getInstance();
     const second = IndexedDbHandler.getInstance();
     expect(first).toBe(second);
-  });
-});
-
-describe("initializeTableNames", () => {
-  test("maps db tables to their string names", () => {
-    const handler = IndexedDbHandler.getInstance();
-    expect(handler.table_to_name.get(mockDb.wallet_assets)).toBe(
-      "wallet_assets",
-    );
-    expect(handler.table_to_name.get(mockDb.sim_history)).toBe("sim_history");
   });
 });
 
