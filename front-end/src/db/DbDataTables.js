@@ -159,7 +159,7 @@ export class IndexedDbHandler {
    */
   async deleteWalletAssets(selected_ids) {
     try {
-      this.removeRecords(selected_ids, "wallet_assets");
+      await this.removeRecords(selected_ids, "wallet_assets");
     } catch (error) {
       console.error(error);
     }
@@ -171,7 +171,7 @@ export class IndexedDbHandler {
    */
   async deleteSimsResults(selected_ids) {
     try {
-      this.removeRecords(selected_ids, "sim_history");
+      await this.removeRecords(selected_ids, "sim_history");
     } catch (error) {
       console.error(error);
     }

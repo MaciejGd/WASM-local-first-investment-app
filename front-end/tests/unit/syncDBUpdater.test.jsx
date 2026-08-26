@@ -2,9 +2,10 @@ import { test, vi, expect, describe } from "vitest";
 
 vi.mock("../../src/db/db", () => ({
   putDataToDb: vi.fn(),
+  deleteDataFromDb: vi.fn(),
 }));
 
-import { putDataToDb } from "../../src/db/db";
+import { putDataToDb, deleteDataFromDb } from "../../src/db/db";
 import { SyncDBUpdater } from "../../src/sync/syncDBUpdater";
 
 describe("addRecord", () => {
@@ -44,57 +45,25 @@ describe("addRecord", () => {
 
 describe("Removing records from db", () => {
   test("removing records works without issues", async () => {
-    const deleteMock = vi.fn().mockResolvedValue(undefined);
-
-    const equalsMock = vi.fn(() => ({
-      delete: deleteMock,
-    }));
-
-    const whereMock = vi.fn(() => ({
-      equals: equalsMock,
-    }));
-
-    const tableMock = vi.fn(() => ({
-      where: whereMock,
-    }));
-
-    const db_handle = {
-      table: tableMock,
-    };
+    deleteDataFromDb.mockResolvedValue(undefined);
+    const db_handle = {};
 
     const updater = new SyncDBUpdater(db_handle);
     await updater.removeRecord("testing_ulid", "wallet_assets");
-    expect(tableMock).toHaveBeenCalledWith("wallet_assets");
-    expect(whereMock).toHaveBeenCalledWith("ulid");
-    expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
-    expect(deleteMock).toHaveBeenCalledOnce();
+    expect(deleteDataFromDb).toHaveBeenCalledWith(db_handle, "wallet_assets", "testing_ulid");
   });
   test("removing records catches error thrown", async () => {
     const error = new Error("testing error");
-    const deleteMock = vi.fn().mockRejectedValueOnce(error);
+    deleteDataFromDb.mockRejectedValueOnce(error);
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    const equalsMock = vi.fn(() => ({
-      delete: deleteMock,
-    }));
-
-    const whereMock = vi.fn(() => ({
-      equals: equalsMock,
-    }));
-
-    const tableMock = vi.fn(() => ({
-      where: whereMock,
-    }));
-
-    const db_handle = {
-      table: tableMock,
-    };
+    const db_handle = {};
 
     const updater = new SyncDBUpdater(db_handle);
-    await updater.removeRecord("testing_ulid", "wallet_asset");
-    expect(tableMock).toHaveBeenCalledWith("wallet_assets");
-    expect(whereMock).toHaveBeenCalledWith("ulid");
-    expect(equalsMock).toHaveBeenCalledWith("testing_ulid");
-    expect(deleteMock).toHaveBeenCalledOnce();
+    await updater.removeRecord("testing_ulid", "wallet_assets");
+    expect(deleteDataFromDb).toHaveBeenCalledWith(db_handle, "wallet_assets", "testing_ulid");
+    expect(consoleSpy).toHaveBeenCalledWith(error);
+    consoleSpy.mockRestore();
   });
 });
 

@@ -237,6 +237,9 @@ describe("getSimResult", () => {
 
 describe("deleteWalletAssets", () => {
   test("dispatches remove events and bulk deletes", async () => {
+    const { bulkDeleteFromDb } = await import("../../src/db/db");
+    bulkDeleteFromDb.mockClear();
+
     mockDb.wallet_assets.bulkGet.mockResolvedValue([
       { ulid: "u1" },
       { ulid: "u2" },
@@ -254,13 +257,14 @@ describe("deleteWalletAssets", () => {
       "u2",
       "wallet_assets",
     );
-    expect(mockDb.wallet_assets.bulkDelete).toHaveBeenCalledWith([1, 2]);
+    expect(bulkDeleteFromDb).toHaveBeenCalledWith(mockDb, "wallet_assets", [1, 2]);
   });
 });
 
 describe("deleteSimsResults", () => {
   test("dispatches remove events and bulk deletes", async () => {
     const { bulkDeleteFromDb } = await import("../../src/db/db");
+    bulkDeleteFromDb.mockClear();
     bulkDeleteFromDb.mockResolvedValue(1);
 
     mockDb.sim_history.bulkGet.mockResolvedValue([{ ulid: "u3" }]);
