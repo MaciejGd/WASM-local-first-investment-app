@@ -47,7 +47,6 @@ end-to-end Playwright test suite.
 -   Portfolio optimization and analysis, including:
     -   Value at Risk (VaR).
     -   Upside and downside analysis.
-    -   Portfolio optimization calculations.
 -   C++ financial computation compiled to WebAssembly.
 -   React frontend.
 -   Web Workers for running synchronization and WASM simulations without
@@ -288,7 +287,6 @@ characteristics and potential risks of an investment portfolio.
 
 The application uses these calculations for purposes such as:
 
--   portfolio optimization,
 -   Value at Risk (VaR) analysis,
 -   evaluation of potential upside,
 -   evaluation of potential downside,
@@ -333,27 +331,28 @@ process, including:
 5.  Starting the Nginx reverse proxy.
 6.  Making the frontend and backend available through the unified Nginx
     entry point.
-7.  Running the Playwright end-to-end test suite against the running
-    application.
+7.  Starting the Playwright container which lets running end-to-end tests.
 
 After the services have started, the application can be accessed through
 the configured Nginx endpoint.
 
 ## Technology Stack
 
-  Area                       Technology
-  -------------------------- -------------------------
-  Frontend                   React
-  Client-side storage        IndexedDB
-  IndexedDB abstraction      Dexie.js
-  Financial computation      C++
-  Browser execution of C++   WebAssembly
-  Backend                    Flask
-  Main database              SQLite
-  Financial data             MongoDB
-  Reverse proxy              Nginx
-  End-to-end testing         Playwright
-  Containerization           Docker / Docker Compose
+
+| Area                     | Technology              |
+| ------------------------ | ----------------------- |
+| Frontend                 | React                   |
+| Client-side storage      | IndexedDB               |
+| IndexedDB abstraction    | Dexie.js                |
+| Financial computation    | C++                     |
+| Browser execution of C++ | WebAssembly (Wasm)      |
+| Backend                  | Flask                   |
+| Main database            | SQLite                  |
+| Financial data           | MongoDB                 |
+| Reverse proxy            | Nginx                   |
+| End-to-end testing       | Playwright              |
+| Containerization         | Docker / Docker Compose |
+
 
 ## Design Goals
 
