@@ -1,4 +1,4 @@
-FROM mongo:8
+FROM mongo:7
 
 
 # official mongo image already knows that it will execute everything on first init
