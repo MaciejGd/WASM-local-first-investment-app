@@ -21,8 +21,8 @@ bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 def register():
     # get both username and password from request
     req_json = request.get_json()
-    username = req_json.get("username", None)
-    password = req_json.get("password", None)
+    username = req_json.get("username")
+    password = req_json.get("password")
     # check invalid cases
     if not username:
         return jsonify({"error": "Username is required."}), HTTPStatus.BAD_REQUEST
@@ -51,7 +51,6 @@ def login():
         error = ({"error": "Username is required"}, HTTPStatus.BAD_REQUEST)
     elif not password:
         error = ({"error": "Password is required"}, HTTPStatus.BAD_REQUEST)
-    # TODO - currently password stored without hashing for simplicity
     elif user is None or not check_password_hash(user["password"], password):
         error = ({"error": "Invalid username or password"}, HTTPStatus.UNAUTHORIZED)
     else:

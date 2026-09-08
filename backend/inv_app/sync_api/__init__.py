@@ -192,4 +192,4 @@ class DBSynchronizer:
         row = db_proxy.get_encrypted_record(user_id, table_name, ulid)
         if not row:
             return None
-        return row["hash"]  # hash is stored at second position
+        return row["hash"]
